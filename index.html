@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>COMERD — Restaurantes cerca de ti</title>
+<title>ComeRD — Restaurantes cerca de ti</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -319,16 +319,34 @@
 const RADIUS_M = 5000; // Search radius in metres
 
 const CATEGORIES = {
- 'Todos' : [],
- 'Criolla' : ['dominican','caribbean','comida_criolla'],
+ 'Todos'    : [],
+ 'Criolla'  : ['dominican','caribbean','comida_criolla','local'],
  'Mariscos' : ['seafood','fish','mariscos'],
- 'Parrilla' : ['bbq','grill','steak_house','churrascaria'],
- 'Pizza' : ['pizza','italian'],
- 'Asiatica' : ['chinese','japanese','sushi','asian','thai'],
- 'Cafe' : ['coffee_shop','cafe','breakfast','sandwich'],
- 'Fast Food' : ['fast_food','burger','chicken'],
- 'Bares' : ['bar','pub','lounge'],
+ 'Parrilla' : ['bbq','grill','steak_house','churrascaria','steak'],
+ 'Pizza'    : ['pizza','italian'],
+ 'Asiatica' : ['chinese','japanese','sushi','asian','thai','korean'],
+ 'Cafe'     : ['coffee_shop','specialty_coffee','coffeehouse'],
+ 'Fast Food': ['fast_food','burger','chicken','sandwich'],
+ 'Bares'    : ['bar','pub','lounge','cocktail'],
 };
+
+// ─── CAFETERIAS FIJAS (siempre aparecen en la categoria Cafe) ───
+const CAFES_FIJOS = [
+ { id: 'cf-001', name: 'Flor de Cafe - Piantini',       category: 'Cafe', addr: 'Av. Abraham Lincoln, Piantini, Santo Domingo',             phone: '', lat: 18.4749, lng: -69.9413 },
+ { id: 'cf-002', name: 'Flor de Cafe - Renacimiento',   category: 'Cafe', addr: 'Roberto Pastoriza #401 esq. Av. Abraham Lincoln',          phone: '', lat: 18.4731, lng: -69.9380 },
+ { id: 'cf-003', name: 'Flor de Cafe - Rafael Sancio',  category: 'Cafe', addr: 'Calle Rafael Sancio #5 esq. Leonardo Da Vinci',            phone: '', lat: 18.4703, lng: -69.9300 },
+ { id: 'cf-004', name: 'Casa Barista & Co. - Piantini', category: 'Cafe', addr: 'C. Victor Garrido Puello #16, Plaza LMP, Piantini',        phone: '809-692-4995', lat: 18.4756, lng: -69.9396 },
+ { id: 'cf-005', name: 'Casa Barista & Co. - Zona Colonial', category: 'Cafe', addr: 'C. Arzobispo Merino 268, Zona Colonial',             phone: '829-247-0142', lat: 18.4739, lng: -69.8835 },
+ { id: 'cf-006', name: 'Affogato Cafe - Zona Colonial', category: 'Cafe', addr: 'Calle Arzobispo Nouel #251 esq. Sanchez, Zona Colonial',   phone: '809-688-7676', lat: 18.4734, lng: -69.8845 },
+ { id: 'cf-007', name: 'Santo Domingo Cafe - Agora Mall', category: 'Cafe', addr: 'Agora Mall, 3er Nivel, Av. Abraham Lincoln',            phone: '', lat: 18.4824, lng: -69.9380 },
+ { id: 'cf-008', name: 'Santo Domingo Cafe - Acropolis', category: 'Cafe', addr: 'Acrópolis Center, Av. Winston Churchill',                phone: '', lat: 18.4617, lng: -69.9451 },
+ { id: 'cf-009', name: 'Santo Domingo Cafe - Sambil',   category: 'Cafe', addr: 'Av. John F. Kennedy, Plaza Sambil, 2do Nivel Galeria',    phone: '', lat: 18.4769, lng: -69.9618 },
+ { id: 'cf-010', name: 'Santo Domingo Cafe - Patio Chiquito', category: 'Cafe', addr: 'Av. Sarasota, Patio Chiquito',                     phone: '', lat: 18.4570, lng: -69.9420 },
+ { id: 'cf-011', name: 'Corner Cafe',                   category: 'Cafe', addr: 'Zona Colonial, Santo Domingo',                           phone: '', lat: 18.4742, lng: -69.8855 },
+ { id: 'cf-012', name: 'CAFFETAL La Bottega Del Caffe', category: 'Cafe', addr: 'C. Armando Rodriguez, Villa Consuelo, Santo Domingo',     phone: '809-692-6830', lat: 18.4762, lng: -69.9011 },
+ { id: 'cf-013', name: 'Storia Caffe',                  category: 'Cafe', addr: 'Plaza Galerias del Paseo, C. Paseo de los Locutores 1',   phone: '', lat: 18.4815, lng: -69.9350 },
+ { id: 'cf-014', name: 'Mr & Mrs Coffee',               category: 'Cafe', addr: 'Av. Gustavo Mejia Ricart 133, Piantini',                  phone: '829-630-8467', lat: 18.4744, lng: -69.9397 },
+];
 
 /* ═══════════════════════════════════════════════
  STATE
@@ -420,7 +438,21 @@ async function fetchRestaurants(lat, lng) {
  method: 'POST', body: 'data=' + encodeURIComponent(q)
  });
  const data = await res.json();
- allRestaurants = data.elements.map(parseRestaurant).filter(Boolean);
+ // Parse OSM results (exclude generic cafes/bars — only keep places with explicit cuisine tags)
+ const osmResults = data.elements.map(parseRestaurant).filter(Boolean);
+
+ // Inject hardcoded cafes (with distance calculated from user location)
+ const cafesConDist = CAFES_FIJOS.map(c => ({
+ ...c,
+ dist: haversine(userLat, userLng, c.lat, c.lng),
+ hours: '', website: '', cuisine: 'Cafeteria'
+ }));
+
+ // Merge: avoid duplicates by name
+ const osmNames = new Set(osmResults.map(r => r.name.toLowerCase()));
+ const cafesNuevos = cafesConDist.filter(c => !osmNames.has(c.name.toLowerCase()));
+
+ allRestaurants = [...osmResults, ...cafesNuevos];
  allRestaurants.sort((a,b) => a.dist - b.dist);
 
  hideLoading();
@@ -453,14 +485,21 @@ function parseRestaurant(el) {
 
 function detectCategory(cuisine, amenity) {
  const c = (cuisine + ' ' + amenity).toLowerCase();
- for (const [cat, keys] of Object.entries(CATEGORIES)) {
- if (cat === 'Todos') continue;
- if (keys.some(k => c.includes(k))) return cat;
- }
- if (amenity === 'fast_food') return 'Fast Food ';
- if (amenity === 'cafe') return 'Café ';
- if (amenity === 'bar' || amenity === 'pub') return 'Bares ';
- return 'Otros ️';
+
+ // Strict checks — only map to a category if the cuisine tag is explicit
+ if (['dominican','caribbean','comida_criolla','local'].some(k => c.includes(k))) return 'Criolla';
+ if (['seafood','fish','mariscos'].some(k => c.includes(k))) return 'Mariscos';
+ if (['bbq','grill','steak_house','churrascaria','steak'].some(k => c.includes(k))) return 'Parrilla';
+ if (['pizza','italian'].some(k => c.includes(k))) return 'Pizza';
+ if (['chinese','japanese','sushi','asian','thai','korean'].some(k => c.includes(k))) return 'Asiatica';
+ // Only mark as Cafe if explicitly tagged as coffee_shop — NOT generic cafe amenity
+ if (['coffee_shop','specialty_coffee','coffeehouse'].some(k => c.includes(k))) return 'Cafe';
+ if (['fast_food','burger','chicken'].some(k => c.includes(k))) return 'Fast Food';
+ if (['bar','pub','lounge','cocktail'].some(k => c.includes(k))) return 'Bares';
+
+ // Fallback by amenity — generic cafe/bar go to Otros
+ if (amenity === 'fast_food') return 'Fast Food';
+ return 'Otros';
 }
 
 /* ═══════════════════════════════════════════════
