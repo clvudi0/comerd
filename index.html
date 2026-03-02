@@ -330,23 +330,72 @@ const CATEGORIES = {
  'Bares'    : ['bar','pub','lounge','cocktail'],
 };
 
-// ─── CAFETERIAS FIJAS (siempre aparecen en la categoria Cafe) ───
-const CAFES_FIJOS = [
- { id: 'cf-001', name: 'Flor de Cafe - Piantini',       category: 'Cafe', addr: 'Av. Abraham Lincoln, Piantini, Santo Domingo',             phone: '', lat: 18.4749, lng: -69.9413 },
- { id: 'cf-002', name: 'Flor de Cafe - Renacimiento',   category: 'Cafe', addr: 'Roberto Pastoriza #401 esq. Av. Abraham Lincoln',          phone: '', lat: 18.4731, lng: -69.9380 },
- { id: 'cf-003', name: 'Flor de Cafe - Rafael Sancio',  category: 'Cafe', addr: 'Calle Rafael Sancio #5 esq. Leonardo Da Vinci',            phone: '', lat: 18.4703, lng: -69.9300 },
- { id: 'cf-004', name: 'Casa Barista & Co. - Piantini', category: 'Cafe', addr: 'C. Victor Garrido Puello #16, Plaza LMP, Piantini',        phone: '809-692-4995', lat: 18.4756, lng: -69.9396 },
- { id: 'cf-005', name: 'Casa Barista & Co. - Zona Colonial', category: 'Cafe', addr: 'C. Arzobispo Merino 268, Zona Colonial',             phone: '829-247-0142', lat: 18.4739, lng: -69.8835 },
- { id: 'cf-006', name: 'Affogato Cafe - Zona Colonial', category: 'Cafe', addr: 'Calle Arzobispo Nouel #251 esq. Sanchez, Zona Colonial',   phone: '809-688-7676', lat: 18.4734, lng: -69.8845 },
- { id: 'cf-007', name: 'Santo Domingo Cafe - Agora Mall', category: 'Cafe', addr: 'Agora Mall, 3er Nivel, Av. Abraham Lincoln',            phone: '', lat: 18.4824, lng: -69.9380 },
- { id: 'cf-008', name: 'Santo Domingo Cafe - Acropolis', category: 'Cafe', addr: 'Acrópolis Center, Av. Winston Churchill',                phone: '', lat: 18.4617, lng: -69.9451 },
- { id: 'cf-009', name: 'Santo Domingo Cafe - Sambil',   category: 'Cafe', addr: 'Av. John F. Kennedy, Plaza Sambil, 2do Nivel Galeria',    phone: '', lat: 18.4769, lng: -69.9618 },
- { id: 'cf-010', name: 'Santo Domingo Cafe - Patio Chiquito', category: 'Cafe', addr: 'Av. Sarasota, Patio Chiquito',                     phone: '', lat: 18.4570, lng: -69.9420 },
- { id: 'cf-011', name: 'Corner Cafe',                   category: 'Cafe', addr: 'Zona Colonial, Santo Domingo',                           phone: '', lat: 18.4742, lng: -69.8855 },
- { id: 'cf-012', name: 'CAFFETAL La Bottega Del Caffe', category: 'Cafe', addr: 'C. Armando Rodriguez, Villa Consuelo, Santo Domingo',     phone: '809-692-6830', lat: 18.4762, lng: -69.9011 },
- { id: 'cf-013', name: 'Storia Caffe',                  category: 'Cafe', addr: 'Plaza Galerias del Paseo, C. Paseo de los Locutores 1',   phone: '', lat: 18.4815, lng: -69.9350 },
- { id: 'cf-014', name: 'Mr & Mrs Coffee',               category: 'Cafe', addr: 'Av. Gustavo Mejia Ricart 133, Piantini',                  phone: '829-630-8467', lat: 18.4744, lng: -69.9397 },
+// ─── GAMA LEVELS: Alta / Media / Accesible ───
+// Sorted within each category: Alta first, then Media, then Accesible
+
+const RESTAURANTES_FIJOS = [
+
+ // ── CRIOLLA ──
+ { id: 'cr-001', name: 'Casa Gastronomica SVII',   category: 'Criolla', gama: 'Alta',      addr: 'Av. Roberto Pastoriza 504, Piantini',            phone: '',             lat: 18.4760, lng: -69.9380, cuisine: 'Criolla de autor' },
+ { id: 'cr-002', name: 'Okra Restaurant',          category: 'Criolla', gama: 'Alta',      addr: 'C. Cesar Nicolas Penson, Zona Universitaria',    phone: '',             lat: 18.4710, lng: -69.9270, cuisine: 'Criolla contemporanea' },
+ { id: 'cr-003', name: 'Buche Perico',             category: 'Criolla', gama: 'Alta',      addr: 'C. El Conde #53, Zona Colonial',                 phone: '809-221-0506', lat: 18.4740, lng: -69.8872, cuisine: 'Criolla contemporanea' },
+ { id: 'cr-004', name: 'Meson de Bari',            category: 'Criolla', gama: 'Media',     addr: 'C. Hostos #302, Zona Colonial',                  phone: '809-687-4091', lat: 18.4738, lng: -69.8858, cuisine: 'Criolla tradicional' },
+ { id: 'cr-005', name: 'Maraca',                   category: 'Criolla', gama: 'Media',     addr: 'C. Arzobispo Nouel #202, Zona Colonial',         phone: '',             lat: 18.4741, lng: -69.8851, cuisine: 'Criolla moderna' },
+ { id: 'cr-006', name: 'Adrian Tropical - George Washington', category: 'Criolla', gama: 'Accesible', addr: 'Av. George Washington (Malecon)',     phone: '809-221-1764', lat: 18.4651, lng: -69.9120, cuisine: 'Criolla popular' },
+ { id: 'cr-007', name: 'Adrian Tropical - 27 de Febrero',    category: 'Criolla', gama: 'Accesible', addr: 'Av. 27 de Febrero esq. Nunez de Caceres', phone: '',          lat: 18.4795, lng: -69.9350, cuisine: 'Criolla popular' },
+ { id: 'cr-008', name: 'D Luis Parrillada',        category: 'Criolla', gama: 'Accesible', addr: 'Av. George Washington, Malecon',                 phone: '809-687-8696', lat: 18.4638, lng: -69.9050, cuisine: 'Mofongo y parrilla criolla' },
+
+ // ── MARISCOS ──
+ { id: 'ma-001', name: 'La Cassina',               category: 'Mariscos', gama: 'Alta',     addr: 'Av. Abraham Lincoln 1001, Piantini',             phone: '809-563-2400', lat: 18.4841, lng: -69.9395, cuisine: 'Mediterraneo / Mariscos' },
+ { id: 'ma-002', name: 'Nipau',                    category: 'Mariscos', gama: 'Alta',     addr: 'C. Gustavo Mejia Ricart, Piantini',              phone: '',             lat: 18.4748, lng: -69.9390, cuisine: 'Fusion mediterranea' },
+ { id: 'ma-003', name: 'Muelle 47 - Galeria 360',  category: 'Mariscos', gama: 'Media',    addr: 'Galeria 360, Av. Winston Churchill',             phone: '809-562-4747', lat: 18.4780, lng: -69.9480, cuisine: 'Mariscos frescos' },
+ { id: 'ma-004', name: 'Muelle 47 - Jardin Embajador', category: 'Mariscos', gama: 'Media', addr: 'Plaza Jardines del Embajador',                 phone: '',             lat: 18.4598, lng: -69.9410, cuisine: 'Mariscos frescos' },
+ { id: 'ma-005', name: 'Sully\'s Seafood',         category: 'Mariscos', gama: 'Media',    addr: 'Santo Domingo',                                 phone: '',             lat: 18.4720, lng: -69.9200, cuisine: 'Mariscos dominicanos' },
+ { id: 'ma-006', name: 'Boca Marina',              category: 'Mariscos', gama: 'Media',    addr: 'C. Prolongacion Duarte 12-A, Boca Chica',        phone: '',             lat: 18.4502, lng: -69.6060, cuisine: 'Mariscos a orillas del mar' },
+ { id: 'ma-007', name: 'La Casita de Papi',        category: 'Mariscos', gama: 'Accesible', addr: 'Av. Charles Sumner #19, Gazcue',               phone: '809-682-2194', lat: 18.4695, lng: -69.9035, cuisine: 'Mariscos criollos' },
+
+ // ── PARRILLA ──
+ { id: 'pa-001', name: 'Victoria by Porterhouse',  category: 'Parrilla', gama: 'Alta',     addr: 'Av. Abraham Lincoln, Piantini',                  phone: '',             lat: 18.4838, lng: -69.9392, cuisine: 'Cortes premium' },
+ { id: 'pa-002', name: 'Sophia\'s Bar Grill (SBG)', category: 'Parrilla', gama: 'Alta',    addr: 'Paseo de los Locutores #9, Piantini',            phone: '809-732-1511', lat: 18.4812, lng: -69.9348, cuisine: 'Internacional / Parrilla' },
+ { id: 'pa-003', name: 'Patagonia Steakhouse',     category: 'Parrilla', gama: 'Alta',     addr: 'Av. Winston Churchill, Piantini',                phone: '',             lat: 18.4773, lng: -69.9464, cuisine: 'Cortes argentinos' },
+ { id: 'pa-004', name: 'Casa Vera',                category: 'Parrilla', gama: 'Media',    addr: 'Piantini, Santo Domingo',                       phone: '',             lat: 18.4754, lng: -69.9400, cuisine: 'Parrilla y cocina criolla' },
+ { id: 'pa-005', name: 'Roust Churrasqueria',      category: 'Parrilla', gama: 'Media',    addr: 'Santo Domingo',                                 phone: '',             lat: 18.4730, lng: -69.9310, cuisine: 'Churrasco y mariscos' },
+ { id: 'pa-006', name: 'Elizondo',                 category: 'Parrilla', gama: 'Accesible', addr: 'Santo Domingo',                                phone: '',             lat: 18.4698, lng: -69.9250, cuisine: 'Parrilla accesible' },
+
+ // ── PIZZA / ITALIANA ──
+ { id: 'pi-001', name: 'Bottega Fratelli',         category: 'Pizza',   gama: 'Alta',      addr: 'Av. Simon Bolivar 219, Gazcue',                  phone: '809-682-9951', lat: 18.4698, lng: -69.9008, cuisine: 'Italiana moderna' },
+ { id: 'pi-002', name: 'San Marzano',              category: 'Pizza',   gama: 'Alta',      addr: 'C. Pablo Casals, Piantini',                     phone: '',             lat: 18.4762, lng: -69.9402, cuisine: 'Mediterranea / Italiana' },
+ { id: 'pi-003', name: 'Il Bacaretto',             category: 'Pizza',   gama: 'Media',     addr: 'Plaza Juan Dauhajre, Av. Simon Bolivar 219',    phone: '809-682-9951', lat: 18.4699, lng: -69.9010, cuisine: 'Italiana tradicional' },
+ { id: 'pi-004', name: 'Trattoria Angiolino',      category: 'Pizza',   gama: 'Media',     addr: 'Santo Domingo',                                 phone: '',             lat: 18.4750, lng: -69.9350, cuisine: 'Italiana artesanal' },
+ { id: 'pi-005', name: 'Laurel Restaurante',       category: 'Pizza',   gama: 'Media',     addr: 'C. Pablo Casals #35, Piantini',                 phone: '809-732-6058', lat: 18.4759, lng: -69.9398, cuisine: 'Internacional / Pizza' },
+
+ // ── ASIATICA ──
+ { id: 'as-001', name: 'Lila Modern Cuisine',      category: 'Asiatica', gama: 'Alta',     addr: 'Santo Domingo Norte',                           phone: '',             lat: 18.5050, lng: -69.9200, cuisine: 'Asiatica-Dominicana fusion' },
+ { id: 'as-002', name: 'El Samurai',               category: 'Asiatica', gama: 'Alta',     addr: 'C. del Seminario #57, Gazcue',                  phone: '809-682-6640', lat: 18.4693, lng: -69.8985, cuisine: 'Japones autentico' },
+ { id: 'as-003', name: 'Yokomo',                   category: 'Asiatica', gama: 'Media',    addr: 'Santo Domingo',                                 phone: '',             lat: 18.4760, lng: -69.9300, cuisine: 'Sushi-Dominicano fusion' },
+
+ // ── CAFE ──
+ { id: 'cf-001', name: 'Flor de Cafe - Piantini',        category: 'Cafe', gama: 'Media',     addr: 'Av. Abraham Lincoln, Piantini',                  phone: '',             lat: 18.4749, lng: -69.9413, cuisine: 'Cafeteria especialidad' },
+ { id: 'cf-002', name: 'Flor de Cafe - Renacimiento',    category: 'Cafe', gama: 'Media',     addr: 'Roberto Pastoriza #401 esq. Av. Abraham Lincoln', phone: '',             lat: 18.4731, lng: -69.9380, cuisine: 'Cafeteria especialidad' },
+ { id: 'cf-003', name: 'Flor de Cafe - Rafael Sancio',   category: 'Cafe', gama: 'Media',     addr: 'Calle Rafael Sancio #5 esq. Leonardo Da Vinci',  phone: '',             lat: 18.4703, lng: -69.9300, cuisine: 'Cafeteria especialidad' },
+ { id: 'cf-004', name: 'Casa Barista & Co. - Piantini',  category: 'Cafe', gama: 'Media',     addr: 'C. Victor Garrido Puello #16, Plaza LMP',        phone: '809-692-4995', lat: 18.4756, lng: -69.9396, cuisine: 'Specialty coffee' },
+ { id: 'cf-005', name: 'Casa Barista & Co. - Zona Colonial', category: 'Cafe', gama: 'Media', addr: 'C. Arzobispo Merino 268, Zona Colonial',         phone: '829-247-0142', lat: 18.4739, lng: -69.8835, cuisine: 'Specialty coffee' },
+ { id: 'cf-006', name: 'Affogato Cafe',                  category: 'Cafe', gama: 'Media',     addr: 'C. Arzobispo Nouel #251, Zona Colonial',         phone: '809-688-7676', lat: 18.4734, lng: -69.8845, cuisine: 'Cafeteria / Postres' },
+ { id: 'cf-007', name: 'CAFFETAL La Bottega Del Caffe',  category: 'Cafe', gama: 'Media',     addr: 'C. Armando Rodriguez, Villa Consuelo',           phone: '809-692-6830', lat: 18.4762, lng: -69.9011, cuisine: 'Cafeteria italiana' },
+ { id: 'cf-008', name: 'Storia Caffe',                   category: 'Cafe', gama: 'Media',     addr: 'Plaza Galerias del Paseo, Paseo de los Locutores 1', phone: '',          lat: 18.4815, lng: -69.9350, cuisine: 'Cafeteria / Postres' },
+ { id: 'cf-009', name: 'Mr & Mrs Coffee',                category: 'Cafe', gama: 'Media',     addr: 'Av. Gustavo Mejia Ricart 133, Piantini',         phone: '829-630-8467', lat: 18.4744, lng: -69.9397, cuisine: 'Specialty coffee' },
+ { id: 'cf-010', name: 'Santo Domingo Cafe - Agora Mall', category: 'Cafe', gama: 'Accesible', addr: 'Agora Mall, 3er Nivel, Av. Abraham Lincoln',    phone: '',             lat: 18.4824, lng: -69.9380, cuisine: 'Cafeteria' },
+ { id: 'cf-011', name: 'Santo Domingo Cafe - Acropolis', category: 'Cafe', gama: 'Accesible', addr: 'Acropolis Center, Av. Winston Churchill',        phone: '',             lat: 18.4617, lng: -69.9451, cuisine: 'Cafeteria' },
+ { id: 'cf-012', name: 'Santo Domingo Cafe - Sambil',    category: 'Cafe', gama: 'Accesible', addr: 'Plaza Sambil, 2do Nivel Galeria',               phone: '',             lat: 18.4769, lng: -69.9618, cuisine: 'Cafeteria' },
+ { id: 'cf-013', name: 'Santo Domingo Cafe - Patio Chiquito', category: 'Cafe', gama: 'Accesible', addr: 'Av. Sarasota, Patio Chiquito',             phone: '',             lat: 18.4570, lng: -69.9420, cuisine: 'Cafeteria' },
+ { id: 'cf-014', name: 'Corner Cafe',                    category: 'Cafe', gama: 'Accesible', addr: 'Zona Colonial, Santo Domingo',                  phone: '',             lat: 18.4742, lng: -69.8855, cuisine: 'Cafeteria' },
+
 ];
+
+// Sort order for gama
+const GAMA_ORDER = { 'Alta': 0, 'Media': 1, 'Accesible': 2 };
+const GAMA_LABEL = { 'Alta': 'Gama Alta', 'Media': 'Gama Media', 'Accesible': 'Accesible' };
+const GAMA_COLOR = { 'Alta': '#b8860b', 'Media': '#c0392b', 'Accesible': '#5c554a' };
 
 /* ═══════════════════════════════════════════════
  STATE
@@ -441,19 +490,25 @@ async function fetchRestaurants(lat, lng) {
  // Parse OSM results (exclude generic cafes/bars — only keep places with explicit cuisine tags)
  const osmResults = data.elements.map(parseRestaurant).filter(Boolean);
 
- // Inject hardcoded cafes (with distance calculated from user location)
- const cafesConDist = CAFES_FIJOS.map(c => ({
+ // Inject curated restaurants (with distance calculated from user location)
+ const curadosConDist = RESTAURANTES_FIJOS.map(c => ({
  ...c,
  dist: haversine(userLat, userLng, c.lat, c.lng),
- hours: '', website: '', cuisine: 'Cafeteria'
+ hours: '', website: '',
  }));
 
  // Merge: avoid duplicates by name
  const osmNames = new Set(osmResults.map(r => r.name.toLowerCase()));
- const cafesNuevos = cafesConDist.filter(c => !osmNames.has(c.name.toLowerCase()));
+ const curadosNuevos = curadosConDist.filter(c => !osmNames.has(c.name.toLowerCase()));
 
- allRestaurants = [...osmResults, ...cafesNuevos];
- allRestaurants.sort((a,b) => a.dist - b.dist);
+ allRestaurants = [...osmResults, ...curadosNuevos];
+ // Sort: first by gama (Alta > Media > Accesible), then by distance
+ allRestaurants.sort((a, b) => {
+ const ga = GAMA_ORDER[a.gama] ?? 3;
+ const gb = GAMA_ORDER[b.gama] ?? 3;
+ if (ga !== gb) return ga - gb;
+ return a.dist - b.dist;
+ });
 
  hideLoading();
  if (allRestaurants.length === 0) {
@@ -538,6 +593,7 @@ function renderList() {
  <div class="card-name">${r.name}</div>
  <div class="card-meta">
  <span class="badge type">${r.category}</span>
+ ${r.gama ? `<span class="badge" style="border-color:${GAMA_COLOR[r.gama]||'#888'};color:${GAMA_COLOR[r.gama]||'#888'}">${GAMA_LABEL[r.gama]||r.gama}</span>` : ''}
  ${r.cuisine ? `<span class="badge">${r.cuisine}</span>` : ''}
  <span class="dist"> ${formatDist(r.dist)}</span>
  </div>
