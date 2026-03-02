@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ComeRD — Restaurantes cerca de ti</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root {
+    --bg:       #f5f0e8;
+    --surface:  #fffdf8;
+    --surface2: #ede8de;
+    --ink:      #1a1612;
+    --ink2:     #5c554a;
+    --accent:   #c0392b;
+    --gold:     #b8860b;
+    --border:   #d8d0c0;
+    --radius:   12px;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body { height: 100%; overflow: hidden; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  /* ─── LOADING ─── */
+  #loading {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 1.2rem; z-index: 9999;
+    transition: opacity .5s, visibility .5s;
+  }
+  #loading.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+  #loading .brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3rem; color: var(--accent); line-height: 1;
+  }
+  #loading p { color: var(--ink2); font-size: .9rem; }
+  .ring {
+    width: 44px; height: 44px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ─── HEADER ─── */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .9rem 1.4rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0; gap: 1rem; flex-wrap: wrap;
+    box-shadow: 0 1px 6px rgba(0,0,0,.06);
+    z-index: 100;
+  }
+
+  .brand-h {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem; font-weight: 700; line-height: 1;
+    color: var(--ink);
+  }
+  .brand-h em { color: var(--accent); font-style: normal; }
+  .brand-sub {
+    font-size: .72rem; color: var(--ink2);
+    text-transform: uppercase; letter-spacing: .1em;
+    margin-top: 2px;
+  }
+
+  .loc-pill {
+    display: flex; align-items: center; gap: .5rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 100px; padding: .45rem 1rem;
+    font-size: .82rem; color: var(--gold); font-weight: 500;
+  }
+  .loc-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--gold);
+    animation: blink 2s ease infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  /* ─── BODY LAYOUT ─── */
+  .layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    display: flex; flex-direction: column;
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+    overflow: hidden;
+  }
+
+  .search-wrap {
+    padding: .9rem 1rem;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .search-wrap input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: .55rem 1rem .55rem 2.2rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: .88rem; color: var(--ink);
+    outline: none; transition: border-color .2s;
+  }
+  .search-wrap input:focus { border-color: var(--accent); }
+  .search-wrap::before {
+    content: '🔍';
+    position: absolute; left: 1.7rem; top: 50%;
+    transform: translateY(-50%); font-size: .8rem;
+    pointer-events: none;
+  }
+
+  /* CATEGORIES */
+  .cats {
+    padding: .8rem 1rem;
+    display: flex; gap: .4rem; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+  }
+  .cat {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: .28rem .8rem;
+    font-size: .75rem; color: var(--ink2);
+    cursor: pointer; transition: all .2s;
+    font-family: 'Outfit', sans-serif;
+  }
+  .cat:hover { border-color: var(--accent); color: var(--accent); }
+  .cat.active {
+    background: var(--accent); border-color: var(--accent);
+    color: #fff; font-weight: 500;
+  }
+
+  /* RESULTS */
+  .results-bar {
+    padding: .6rem 1rem;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .results-bar span { font-size: .72rem; color: var(--ink2); text-transform: uppercase; letter-spacing: .08em; }
+  #resultsCount { color: var(--accent); font-weight: 600; font-size: .82rem; }
+
+  .list {
+    flex: 1; overflow-y: auto;
+    padding: .8rem;
+    display: flex; flex-direction: column; gap: .6rem;
+    scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: .9rem 1rem;
+    cursor: pointer;
+    transition: all .2s;
+    animation: fadeUp .35s ease both;
+    position: relative;
+  }
+  .card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 3px 14px rgba(192,57,43,.12);
+    transform: translateY(-1px);
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-name {
+    font-weight: 600; font-size: .93rem;
+    margin-bottom: .35rem; line-height: 1.3;
+  }
+  .card-meta {
+    display: flex; align-items: center; gap: .4rem; flex-wrap: wrap;
+  }
+  .badge {
+    font-size: .68rem; padding: .18rem .55rem;
+    border-radius: 100px; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--ink2);
+  }
+  .badge.type { border-color: var(--gold); color: var(--gold); }
+  .dist { margin-left: auto; font-size: .72rem; color: var(--ink2); }
+  .card-addr {
+    margin-top: .4rem; font-size: .76rem; color: var(--ink2); line-height: 1.5;
+  }
+
+  .open-badge {
+    position: absolute; top: .8rem; right: .8rem;
+    font-size: .65rem; padding: .15rem .5rem;
+    border-radius: 100px;
+  }
+  .open-badge.open { background: #d4edda; color: #155724; }
+  .open-badge.closed { background: #f8d7da; color: #721c24; }
+
+  /* EMPTY / MSG */
+  .msg {
+    padding: 2rem 1rem; text-align: center; color: var(--ink2);
+  }
+  .msg .ico { font-size: 2.2rem; margin-bottom: .7rem; }
+  .msg h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem; color: var(--ink); margin-bottom: .4rem;
+  }
+  .msg p { font-size: .83rem; line-height: 1.6; }
+  .btn {
+    margin-top: 1rem; display: inline-block;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: 8px;
+    padding: .65rem 1.3rem;
+    font-family: 'Outfit', sans-serif; font-size: .88rem;
+    cursor: pointer; transition: opacity .2s;
+  }
+  .btn:hover { opacity: .85; }
+
+  /* ─── MAP ─── */
+  #map { flex: 1; z-index: 1; }
+
+  /* leaflet dark-ish tiles tint */
+  .leaflet-tile { filter: saturate(.85) brightness(.97); }
+
+  /* user marker */
+  .you-marker {
+    width: 16px; height: 16px;
+    background: var(--accent);
+    border: 3px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,.3);
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 700px) {
+    html, body { overflow: auto; }
+    .layout { grid-template-columns: 1fr; overflow: visible; }
+    #map { height: 300px; }
+    .sidebar { max-height: 460px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading">
+  <div class="brand">ComeRD</div>
+  <div class="ring"></div>
+  <p id="loadMsg">Obteniendo tu ubicación…</p>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div>
+    <div class="brand-h">Come<em>RD</em></div>
+    <div class="brand-sub">Restaurantes cerca de ti · República Dominicana</div>
+  </div>
+  <div class="loc-pill">
+    <div class="loc-dot"></div>
+    <span id="cityName">Detectando…</span>
+  </div>
+</header>
+
+<!-- MAIN -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="search-wrap">
+      <input id="searchInput" type="text" placeholder="Buscar restaurante…" oninput="applyFilters()"/>
+    </div>
+
+    <div class="cats" id="catsEl"></div>
+
+    <div class="results-bar">
+      <span>Resultados</span>
+      <span id="resultsCount">—</span>
+    </div>
+
+    <div class="list" id="listEl">
+      <div class="msg">
+        <div class="ico">📍</div>
+        <h3>Sin ubicación aún</h3>
+        <p>Acepta el permiso de geolocalización para ver restaurantes cerca de ti.</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAP -->
+  <div id="map"></div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   CONFIGURATION
+═══════════════════════════════════════════════ */
+const RADIUS_M = 2000; // Search radius in metres
+
+const CATEGORIES = {
+  'Todos'          : [],
+  'Criolla 🇩🇴'    : ['dominican','caribbean','comida_criolla'],
+  'Mariscos 🦞'    : ['seafood','fish','mariscos'],
+  'Parrilla 🥩'    : ['bbq','grill','steak_house','churrascaria'],
+  'Pizza 🍕'       : ['pizza','italian'],
+  'Asiática 🍜'    : ['chinese','japanese','sushi','asian','thai'],
+  'Café ☕'        : ['coffee_shop','cafe','breakfast','sandwich'],
+  'Fast Food 🍟'   : ['fast_food','burger','chicken'],
+  'Bares 🍻'       : ['bar','pub','lounge'],
+};
+
+/* ═══════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════ */
+let map, allRestaurants = [], filteredRestaurants = [];
+let markers = [], activeCategory = 'Todos';
+let userLat, userLng;
+
+/* ═══════════════════════════════════════════════
+   BOOT
+═══════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  buildCategories();
+  if (!navigator.geolocation) {
+    showError('Tu navegador no soporta geolocalización.');
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(onPosition, onGeoError, {
+    enableHighAccuracy: true, timeout: 15000, maximumAge: 0
+  });
+});
+
+function onPosition(pos) {
+  userLat = pos.coords.latitude;
+  userLng = pos.coords.longitude;
+  initMap(userLat, userLng);
+  reverseGeocode(userLat, userLng);
+  fetchRestaurants(userLat, userLng);
+}
+
+function onGeoError(err) {
+  hideLoading();
+  const msgs = {1:'Permiso denegado.',2:'Posición no disponible.',3:'Tiempo agotado.'};
+  showSidebarMsg('📡', 'Sin acceso a ubicación', msgs[err.code] || 'Error desconocido.');
+}
+
+/* ═══════════════════════════════════════════════
+   MAP
+═══════════════════════════════════════════════ */
+function initMap(lat, lng) {
+  map = L.map('map').setView([lat, lng], 15);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://osm.org/copyright">OpenStreetMap</a>',
+    maxZoom: 19,
+  }).addTo(map);
+
+  // User location marker
+  const youIcon = L.divIcon({ className: 'you-marker', iconSize:[16,16], iconAnchor:[8,8] });
+  L.marker([lat, lng], { icon: youIcon })
+    .addTo(map)
+    .bindPopup('<b>📍 Tú estás aquí</b>');
+
+  // Accuracy circle
+  L.circle([lat, lng], { radius: RADIUS_M, color: '#c0392b', fillColor: '#c0392b', fillOpacity: .05, weight: 1, dashArray:'6' }).addTo(map);
+}
+
+/* ═══════════════════════════════════════════════
+   GEOCODING
+═══════════════════════════════════════════════ */
+async function reverseGeocode(lat, lng) {
+  try {
+    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`);
+    const d = await r.json();
+    const city = d.address.city || d.address.town || d.address.village || d.address.municipality || 'RD';
+    document.getElementById('cityName').textContent = city;
+  } catch { document.getElementById('cityName').textContent = 'RD'; }
+}
+
+/* ═══════════════════════════════════════════════
+   OVERPASS FETCH
+═══════════════════════════════════════════════ */
+async function fetchRestaurants(lat, lng) {
+  setLoadMsg('Buscando restaurantes cercanos…');
+  const q = `
+    [out:json][timeout:30];
+    (
+      node["amenity"="restaurant"](around:${RADIUS_M},${lat},${lng});
+      node["amenity"="fast_food"](around:${RADIUS_M},${lat},${lng});
+      node["amenity"="cafe"](around:${RADIUS_M},${lat},${lng});
+      node["amenity"="bar"](around:${RADIUS_M},${lat},${lng});
+      node["amenity"="pub"](around:${RADIUS_M},${lat},${lng});
+    );
+    out body;
+  `;
+
+  try {
+    const res = await fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST', body: 'data=' + encodeURIComponent(q)
+    });
+    const data = await res.json();
+    allRestaurants = data.elements.map(parseRestaurant).filter(Boolean);
+    allRestaurants.sort((a,b) => a.dist - b.dist);
+
+    hideLoading();
+    if (allRestaurants.length === 0) {
+      showSidebarMsg('🍽️','Sin resultados','No encontramos restaurantes en un radio de 2 km. Intenta ampliar la búsqueda.');
+      return;
+    }
+    filteredRestaurants = [...allRestaurants];
+    renderList();
+    renderMarkers();
+  } catch (e) {
+    hideLoading();
+    showSidebarMsg('⚠️','Error de conexión','No se pudo consultar la base de datos. Revisa tu conexión e intenta de nuevo.');
+  }
+}
+
+function parseRestaurant(el) {
+  if (!el.lat || !el.lon) return null;
+  const t = el.tags || {};
+  const name = t.name || t['name:es'] || 'Sin nombre';
+  const cuisine = t.cuisine || t.amenity || '';
+  const category = detectCategory(cuisine, t.amenity);
+  const dist = haversine(userLat, userLng, el.lat, el.lon);
+  const addr = [t['addr:street'], t['addr:housenumber']].filter(Boolean).join(' ') || t['addr:full'] || '';
+  const phone = t.phone || t['contact:phone'] || '';
+  const website = t.website || t['contact:website'] || '';
+  const hours = t.opening_hours || '';
+  return { id: el.id, name, cuisine, category, dist, addr, phone, website, hours, lat: el.lat, lng: el.lon };
+}
+
+function detectCategory(cuisine, amenity) {
+  const c = (cuisine + ' ' + amenity).toLowerCase();
+  for (const [cat, keys] of Object.entries(CATEGORIES)) {
+    if (cat === 'Todos') continue;
+    if (keys.some(k => c.includes(k))) return cat;
+  }
+  if (amenity === 'fast_food') return 'Fast Food 🍟';
+  if (amenity === 'cafe') return 'Café ☕';
+  if (amenity === 'bar' || amenity === 'pub') return 'Bares 🍻';
+  return 'Otros 🍽️';
+}
+
+/* ═══════════════════════════════════════════════
+   RENDER LIST
+═══════════════════════════════════════════════ */
+function renderList() {
+  const list = document.getElementById('listEl');
+  const count = document.getElementById('resultsCount');
+  const query = document.getElementById('searchInput').value.trim().toLowerCase();
+
+  let items = filteredRestaurants.filter(r => {
+    const matchCat = activeCategory === 'Todos' || r.category === activeCategory;
+    const matchQ = !query || r.name.toLowerCase().includes(query) || (r.cuisine||'').toLowerCase().includes(query);
+    return matchCat && matchQ;
+  });
+
+  count.textContent = `${items.length} lugar${items.length !== 1 ? 'es' : ''}`;
+
+  if (items.length === 0) {
+    list.innerHTML = `<div class="msg"><div class="ico">🔍</div><h3>Sin resultados</h3><p>Prueba con otra categoría o búsqueda.</p></div>`;
+    return;
+  }
+
+  list.innerHTML = '';
+  items.forEach((r, i) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.animationDelay = `${i * 35}ms`;
+
+    const openTag = r.hours
+      ? `<span class="open-badge ${isOpenNow(r.hours) ? 'open' : 'closed'}">${isOpenNow(r.hours) ? 'Abierto' : 'Cerrado'}</span>`
+      : '';
+
+    card.innerHTML = `
+      ${openTag}
+      <div class="card-name">${r.name}</div>
+      <div class="card-meta">
+        <span class="badge type">${r.category}</span>
+        ${r.cuisine ? `<span class="badge">${r.cuisine}</span>` : ''}
+        <span class="dist">📍 ${formatDist(r.dist)}</span>
+      </div>
+      ${r.addr ? `<div class="card-addr">📌 ${r.addr}</div>` : ''}
+      ${r.phone ? `<div class="card-addr">📞 ${r.phone}</div>` : ''}
+    `;
+
+    card.addEventListener('click', () => focusRestaurant(r));
+    list.appendChild(card);
+  });
+}
+
+function renderMarkers() {
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
+
+  const markerIcon = L.divIcon({
+    className: '',
+    html: `<div style="width:10px;height:10px;background:#c0392b;border:2px solid #fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>`,
+    iconSize:[10,10], iconAnchor:[5,5]
+  });
+
+  filteredRestaurants.forEach(r => {
+    const m = L.marker([r.lat, r.lng], { icon: markerIcon })
+      .addTo(map)
+      .bindPopup(`<b>${r.name}</b><br/><small>${r.category}</small>${r.addr ? `<br/>${r.addr}` : ''}`);
+    markers.push(m);
+  });
+}
+
+function focusRestaurant(r) {
+  map.flyTo([r.lat, r.lng], 18, { duration: 1 });
+  markers.find(m => {
+    if (Math.abs(m.getLatLng().lat - r.lat) < 0.0001) { m.openPopup(); return true; }
+    return false;
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   FILTERS
+═══════════════════════════════════════════════ */
+function buildCategories() {
+  const el = document.getElementById('catsEl');
+  Object.keys(CATEGORIES).forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'cat' + (cat === 'Todos' ? ' active' : '');
+    btn.textContent = cat;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.cat').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeCategory = cat;
+      renderList();
+    });
+    el.appendChild(btn);
+  });
+}
+
+function applyFilters() { renderList(); }
+
+/* ═══════════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════════ */
+function haversine(la1, lo1, la2, lo2) {
+  const R = 6371000, r = Math.PI / 180;
+  const dLat = (la2 - la1) * r, dLon = (lo2 - lo1) * r;
+  const a = Math.sin(dLat/2)**2 + Math.cos(la1*r)*Math.cos(la2*r)*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function formatDist(m) {
+  return m < 1000 ? `${Math.round(m)} m` : `${(m/1000).toFixed(1)} km`;
+}
+
+function isOpenNow(hours) {
+  // Simplified check — real parsing is complex
+  try {
+    const now = new Date();
+    const day = ['Su','Mo','Tu','We','Th','Fr','Sa'][now.getDay()];
+    if (hours.toLowerCase().includes('24/7')) return true;
+    return hours.includes(day);
+  } catch { return null; }
+}
+
+function setLoadMsg(msg) { document.getElementById('loadMsg').textContent = msg; }
+function hideLoading() { document.getElementById('loading').classList.add('hidden'); }
+function showError(msg) {
+  hideLoading();
+  showSidebarMsg('⚠️', 'Error', msg);
+}
+function showSidebarMsg(ico, title, text) {
+  document.getElementById('listEl').innerHTML = `
+    <div class="msg">
+      <div class="ico">${ico}</div>
+      <h3>${title}</h3>
+      <p>${text}</p>
+    </div>`;
+}
+</script>
+</body>
+</html>
