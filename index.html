@@ -192,7 +192,9 @@ html.dark #themeToggle .icon-moon{display:block}
 html.dark #loading{background:var(--bg)}
 html.dark #searchInput{color:var(--ink)}
 html.dark .list{scrollbar-color:var(--border) transparent}
-html.dark :is(.sort-btn:not(.active), .ftoggle-btn){color:var(--red);border-color:var(--border)}
+html.dark .sort-btn.active{background:transparent;color:var(--red);border-color:var(--red)}
+html.dark .ftoggle-btn{color:var(--ink2)}
+html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
 </style>
 </head>
 <body>
@@ -411,6 +413,7 @@ const DB = [
   {id:'po05',name:'Bon - Reposteria',cat:'Postres',gama:'Accesible',addr:'Varias ubicaciones, Santo Domingo',phone:'',lat:18.4730,lng:-69.9295,desc:'La reposteria mas popular y accesible de RD. Presencia en toda la ciudad.',trend:false},
   {id:'he01',name:'Casa Gelato',cat:'Helados',gama:'Alta',addr:'Av. Abraham Lincoln, Piantini',phone:'',lat:18.4836,lng:-69.9388,desc:'Gelato artesanal italiano preparado diariamente con frutas tropicales dominicanas. El mas premium del pais.',trend:true},
   {id:'he02',name:'Bon Glace',cat:'Helados',gama:'Media',addr:'Varias ubicaciones, Santo Domingo',phone:'',lat:18.4750,lng:-69.9355,desc:'La heladeria mas querida de RD. Sabores dominicanos unicos como tamarindo, guanabana y chinola.',trend:true},
+  {id:'he06',name:'Heladerias Bon',cat:'Helados',gama:'Accesible',addr:'Varias ubicaciones, Santo Domingo',phone:'',lat:18.4748,lng:-69.9350,desc:'La cadena de heladerias mas popular y accesible de RD. Sabores clasicos dominicanos en toda la ciudad.',trend:false},
   {id:'he03',name:'Helados Buen Sabor',cat:'Helados',gama:'Accesible',addr:'Varias ubicaciones, Santo Domingo',phone:'',lat:18.4725,lng:-69.9220,desc:'Paletas, helados y raspaduras dominicanas. El clasico de barrio que nunca falla.',trend:false},
   {id:'he04',name:'Cold Stone Creamery - Agora',cat:'Helados',gama:'Media',addr:'Agora Mall, Av. Abraham Lincoln',phone:'',lat:18.4823,lng:-69.9382,desc:'Helados americanos personalizados mezclados en piedra fria. Mix-ins creativos y sabores premium.',trend:false},
   {id:'he05',name:"Menchie's Frozen Yogurt",cat:'Helados',gama:'Media',addr:'Acropolis Center, Av. Winston Churchill',phone:'',lat:18.4618,lng:-69.9452,desc:'Frozen yogurt self-service con toppings ilimitados. La opcion saludable y divertida.',trend:false},
@@ -485,7 +488,7 @@ function parseOSM(el, lat, lng) {
   if (!name) return null;
   const cuisine = t.cuisine || '';
   const amenity = t.amenity || '';
-  return {id:'osm-'+el.id, name, cat:detectCat(cuisine,amenity), gama:null,
+  return {id:'osm-'+el.id, name, cat:detectCat(cuisine,amenity), gama:(amenity==='fast_food'?'Accesible':null),
     addr:[t['addr:street'],t['addr:housenumber']].filter(Boolean).join(' ')||'',
     phone:t.phone||'', desc:'', trend:false, isDB:false,
     dist:haversine(lat,lng,el.lat,el.lon), lat:el.lat, lng:el.lon, cuisine};
@@ -639,6 +642,7 @@ function toggleAdv() {
   el.classList.toggle('open', !open);
   el.classList.toggle('closed', open);
   btn.textContent = open ? '+ Filtrar' : '- Cerrar';
+  btn.classList.toggle('is-open', !open);
 }
 
 function updateBadges(cat, gama) {
