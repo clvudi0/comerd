@@ -7,9 +7,17 @@
 <script>
   (function(){
     var saved = localStorage.getItem('theme');
-    if(saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)){
+    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if(saved === 'dark' || (!saved && prefersDark)){
       document.documentElement.classList.add('dark');
     }
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e){
+      if(!localStorage.getItem('theme')){
+        document.documentElement.classList.toggle('dark', e.matches);
+        var cb = document.getElementById('themeToggle');
+        if(cb) cb.checked = e.matches;
+      }
+    });
   })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -325,8 +333,8 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
 
     <div class="range-wrap">
       <span class="range-label">&#128205; Radio</span>
-      <input type="range" id="radiusSlider" min="500" max="20000" step="500" value="6000"/>
-      <span class="range-val" id="radiusVal">6 km</span>
+      <input type="range" id="radiusSlider" min="500" max="20000" step="500" value="2000"/>
+      <span class="range-val" id="radiusVal">2 km</span>
     </div>
 
     <div class="adv closed" id="advFilters">
@@ -369,7 +377,7 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
 </div>
 
 <script>
-let RADIUS_M = 6000;
+let RADIUS_M = 2000;
 const GAMA_ORDER  = {Alta:0,Media:1,Accesible:2};
 const GAMA_LABEL  = {Alta:'Gama Alta',Media:'Gama Media',Accesible:'Accesible'};
 const GAMA_COLOR  = {Alta:'#9a7418',Media:'#b52828',Accesible:'#246e42'};
