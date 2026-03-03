@@ -116,13 +116,13 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
 .rb-label{font-size:.65rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em}
 #resultsCount{color:var(--red);font-weight:700}
 #filterSummary{font-size:.62rem;color:var(--ink3)}
-.list{flex:1;overflow-y:auto;padding:.6rem;display:flex;flex-direction:column;gap:.42rem;scrollbar-width:thin;scrollbar-color:var(--border) transparent;min-height:0}
-.card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:.72rem .9rem .72rem 1rem;cursor:pointer;transition:all .2s;animation:fadeUp .3s ease both;position:relative}
+.list{flex:1;overflow-y:auto;padding:.6rem;display:flex;flex-direction:column;gap:.42rem;scrollbar-width:thin;scrollbar-color:var(--border) transparent;min-height:0;will-change:scroll-position}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:.72rem .9rem .72rem 1rem;cursor:pointer;transition:all .2s;animation:fadeUp .3s ease both;position:relative;contain:layout style}
 .card::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:3px;border-radius:0 2px 2px 0;background:var(--gold);opacity:0;transition:opacity .2s}
 .card[data-gama="Alta"]::before{opacity:1;background:var(--gold)}
 .card:hover{border-color:var(--red);box-shadow:0 3px 18px rgba(181,40,40,.11);transform:translateY(-1px)}
 .card:hover::before{opacity:1;background:var(--red)!important}
-@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0}to{opacity:1}}
 .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.45rem;margin-bottom:.22rem}
 .card-name{font-weight:600;font-size:.9rem;line-height:1.25;flex:1;min-width:0;word-break:break-word}
 .gama-tag{font-size:.58rem;font-weight:700;padding:.14rem .46rem;border-radius:100px;white-space:nowrap;letter-spacing:.04em;flex-shrink:0}
@@ -500,8 +500,18 @@ let map, allRestaurants = [];
 const markerMap = new Map();
 let userLat = 18.4741, userLng = -69.9307;
 let activeFilters = {cat:'Todos', gama:'Todos', sort:'gama'};
+let $list, $count, $search, $filterSummary, $activeCt, $cityName, $loadMsg;
 
 window.addEventListener('DOMContentLoaded', () => {
+  // Cache DOM refs once
+  $list = $list;
+  $count = $count;
+  $search = $search;
+  $filterSummary = $filterSummary;
+  $activeCt = $activeCt;
+  $cityName = $cityName;
+  $loadMsg = $loadMsg;
+
   buildCategories();
   // Cache DOM collections after build
   window._sortBtns = Array.from(document.querySelectorAll('#sortRow .sort-btn'));
@@ -510,7 +520,7 @@ window.addEventListener('DOMContentLoaded', () => {
   if (!navigator.geolocation) { startDefault(); return; }
   navigator.geolocation.getCurrentPosition(
     pos => { userLat = pos.coords.latitude; userLng = pos.coords.longitude; boot(); },
-    ()  => { startDefault(); document.getElementById('cityName').textContent = 'Santo Domingo'; },
+    ()  => { startDefault(); $cityName.textContent = 'Santo Domingo'; },
     {enableHighAccuracy:true, timeout:12000, maximumAge:0}
   );
 });
@@ -559,24 +569,39 @@ async function reverseGeocode(lat, lng) {
   try {
     const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`);
     const d = await r.json();
-    document.getElementById('cityName').textContent = d.address.city||d.address.town||d.address.village||d.address.municipality||'RD';
-  } catch { document.getElementById('cityName').textContent = 'RD'; }
+    $cityName.textContent = d.address.city||d.address.town||d.address.village||d.address.municipality||'RD';
+  } catch { $cityName.textContent = 'RD'; }
 }
 
-async function mergeLoad(lat, lng) {
-  document.getElementById('loadMsg').textContent = 'Cargando restaurantes...';
+async let _osmCache = {lat:null, lng:null, radius:null, data:[]};
+
+function mergeLoad(lat, lng) {
+  if($loadMsg) $loadMsg.textContent = 'Cargando restaurantes...';
   const dbWithDist = DB.map(r => ({...r, dist:haversine(lat,lng,r.lat,r.lng), isDB:true}));
   let osmNew = [];
+  const radiusKey = Math.round(RADIUS_M/500)*500;
+  // Use cached OSM data if location+radius unchanged
+  if(_osmCache.lat===lat && _osmCache.lng===lng && _osmCache.radius===radiusKey){
+    const dbNames = new Set(DB.map(r=>r.name.toLowerCase()));
+    osmNew = _osmCache.data.filter(e=>e&&!dbNames.has(e.name.toLowerCase()));
+    allRestaurants = [...dbWithDist, ...osmNew];
+    hideLoading();
+    allRestaurants.forEach(r=>{if(!markerMap.has(r.id))createMarker(r);});
+    applyFilters();
+    return;
+  }
   try {
     const q = `[out:json][timeout:25];(node["amenity"="restaurant"](around:${RADIUS_M},${lat},${lng});node["amenity"="fast_food"](around:${RADIUS_M},${lat},${lng});node["amenity"="cafe"](around:${RADIUS_M},${lat},${lng});node["amenity"="bar"](around:${RADIUS_M},${lat},${lng}););out body;`;
     const res = await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)});
     const data = await res.json();
     const dbNames = new Set(DB.map(r => r.name.toLowerCase()));
-    osmNew = data.elements.map(e => parseOSM(e,lat,lng)).filter(e => e && !dbNames.has(e.name.toLowerCase()));
+    const parsed = data.elements.map(e => parseOSM(e,lat,lng)).filter(Boolean);
+    _osmCache = {lat, lng, radius:radiusKey, data:parsed};
+    osmNew = parsed.filter(e => !dbNames.has(e.name.toLowerCase()));
   } catch(e) {}
   allRestaurants = [...dbWithDist, ...osmNew];
   hideLoading();
-  allRestaurants.forEach(r => { if (!markerMap.has(r.id)) createMarker(r); });
+  allRestaurants.forEach(r => { if (!markerMap.has(r.id) && r.dist <= RADIUS_M * 1.5) createMarker(r); });
   applyFilters();
 }
 
@@ -616,11 +641,11 @@ let _filterTimer;
 function debounceFilter(){ clearTimeout(_filterTimer); _filterTimer = setTimeout(applyFilters, 120); }
 
 // Cache frequent DOM refs
-const _listEl = ()=>document.getElementById('listEl');
-const _countEl = ()=>document.getElementById('resultsCount');
+const _listEl = ()=>$list;
+const _countEl = ()=>$count;
 
 function applyFilters() {
-  const query = document.getElementById('searchInput').value.trim().toLowerCase();
+  const query = $search.value.trim().toLowerCase();
   const {cat, gama, sort} = activeFilters;
   const visible = allRestaurants.filter(r => {
     if (r.dist > RADIUS_M) return false;
@@ -640,8 +665,8 @@ function applyFilters() {
 }
 
 function renderList(items) {
-  const list = document.getElementById('listEl');
-  document.getElementById('resultsCount').textContent = items.length;
+  const list = $list;
+  $count.textContent = items.length;
   if (!items.length) {
     list.innerHTML = `<div class="msg"><div class="ico">&#128269;</div><h3>Sin resultados</h3><p>Prueba con otra combinacion de filtros.</p></div>`;
     return;
@@ -652,7 +677,7 @@ function renderList(items) {
     const card = document.createElement('div');
     card.className = 'card';
     card.setAttribute('data-gama', r.gama||'');
-    card.style.animationDelay = `${Math.min(i*15,280)}ms`;
+    // animation delay removed for performance
     const gamaHtml = r.gama ? `<span class="gama-tag gt-${r.gama.toLowerCase()}">${GAMA_LABEL[r.gama]}</span>` : '';
     card.innerHTML = `
       <div class="card-top"><div class="card-name">${r.name}</div>${gamaHtml}</div>
@@ -794,12 +819,12 @@ function updateBadges(cat, gama) {
   let n = 0;
   if (cat !== 'Todos') n++;
   if (gama !== 'Todos') n++;
-  const el = document.getElementById('activeCt');
+  const el = $activeCt;
   el.textContent = n; el.classList.toggle('on', n>0);
   const parts = [];
   if (cat !== 'Todos') parts.push(cat);
   if (gama !== 'Todos') parts.push(GAMA_LABEL[gama]);
-  document.getElementById('filterSummary').textContent = parts.join(' · ');
+  $filterSummary.textContent = parts.join(' · ');
 }
 
 function haversine(la1,lo1,la2,lo2){
