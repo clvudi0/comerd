@@ -189,6 +189,13 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
 #themeToggle .icon-moon{display:none}
 html.dark #themeToggle .icon-sun{display:none}
 html.dark #themeToggle .icon-moon{display:block}
+/* ─── RANGE SLIDER ───────────────────────────────────── */
+.range-wrap{display:flex;align-items:center;gap:.5rem;padding:.42rem .65rem;border-bottom:1px solid var(--border);background:var(--s2);flex-shrink:0}
+.range-label{font-size:.68rem;color:var(--ink2);white-space:nowrap}
+.range-val{font-size:.68rem;font-weight:600;color:var(--red);white-space:nowrap;min-width:52px;text-align:right}
+#radiusSlider{flex:1;-webkit-appearance:none;appearance:none;height:3px;border-radius:2px;background:var(--border);outline:none;cursor:pointer}
+#radiusSlider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;border-radius:50%;background:var(--red);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.25);cursor:pointer}
+#radiusSlider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--red);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.25);cursor:pointer;border:none}
 html.dark #loading{background:var(--bg)}
 html.dark #searchInput{color:var(--ink)}
 html.dark .list{scrollbar-color:var(--border) transparent}
@@ -295,6 +302,12 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
       </div>
     </div>
 
+    <div class="range-wrap">
+      <span class="range-label">&#128205; Radio</span>
+      <input type="range" id="radiusSlider" min="500" max="20000" step="500" value="6000"/>
+      <span class="range-val" id="radiusVal">6 km</span>
+    </div>
+
     <div class="adv closed" id="advFilters">
       <div class="adv-inner">
         <div class="frow">
@@ -334,7 +347,7 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
 </div>
 
 <script>
-const RADIUS_M = 6000;
+let RADIUS_M = 6000;
 const GAMA_ORDER  = {Alta:0,Media:1,Accesible:2};
 const GAMA_LABEL  = {Alta:'Gama Alta',Media:'Gama Media',Accesible:'Accesible'};
 const GAMA_COLOR  = {Alta:'#9a7418',Media:'#b52828',Accesible:'#246e42'};
@@ -669,6 +682,25 @@ function haversine(la1,lo1,la2,lo2){
 }
 function formatDist(m){return m<1000?`${Math.round(m)} m`:`${(m/1000).toFixed(1)} km`}
 function hideLoading(){document.getElementById('loading').classList.add('hidden')}
+
+// ── RADIUS SLIDER ──
+(function(){
+  const slider = document.getElementById('radiusSlider');
+  const label  = document.getElementById('radiusVal');
+  function fmtR(m){ return m >= 1000 ? (m/1000).toFixed(1).replace('.0','') + ' km' : m + ' m'; }
+  slider.addEventListener('input', function(){
+    RADIUS_M = parseInt(this.value);
+    label.textContent = fmtR(RADIUS_M);
+  });
+  slider.addEventListener('change', function(){
+    RADIUS_M = parseInt(this.value);
+    label.textContent = fmtR(RADIUS_M);
+    // Re-run load with new radius if map is ready
+    if(typeof map !== 'undefined' && map){
+      mergeLoad(userLat, userLng);
+    }
+  });
+})();
 
 (function(){
   const BREAKPOINT=700, MAP_NORMAL_H=220, TRANSITION=300;
