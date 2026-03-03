@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
+/* ─── DESIGN TOKENS ─────────────────────────────────────── */
 :root{
   --bg:#f6f1e9;--surface:#fffdf8;--s2:#ede7d8;
   --ink:#17130d;--ink2:#5a5248;--ink3:#9a9088;
@@ -17,14 +18,22 @@
   --shadow-sm:0 1px 4px rgba(0,0,0,.06);
   --shadow-md:0 4px 20px rgba(0,0,0,.1);
   --shadow-lg:0 8px 40px rgba(0,0,0,.14);
+  --map-h:220px;        /* mobile normal height — overridden by JS */
+  --map-transition:.3s cubic-bezier(.4,0,.2,1);
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;overflow:hidden}
-body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;height:100vh}
-button{font-family:'Outfit',sans-serif;cursor:pointer}
-input{font-family:'Outfit',sans-serif}
 
-/* LOADING */
+/* ─── GLOBAL ─────────────────────────────────────────────── */
+body{
+  font-family:'Outfit',sans-serif;
+  background:var(--bg);color:var(--ink);
+  display:flex;flex-direction:column;
+  height:100vh;overflow:hidden;
+}
+button{font-family:'Outfit',sans-serif;cursor:pointer}
+input {font-family:'Outfit',sans-serif}
+
+/* ─── LOADING ────────────────────────────────────────────── */
 #loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2rem;z-index:9999;transition:opacity .6s,visibility .6s}
 #loading.hidden{opacity:0;visibility:hidden;pointer-events:none}
 .ld-brand{font-family:'Cormorant Garamond',serif;font-size:4rem;color:var(--red);line-height:1}
@@ -34,7 +43,7 @@ input{font-family:'Outfit',sans-serif}
 .ld-fill{height:100%;width:0;background:var(--red);animation:ldbar 2.5s ease forwards}
 @keyframes ldbar{to{width:100%}}
 
-/* HEADER */
+/* ─── HEADER ─────────────────────────────────────────────── */
 header{display:flex;align-items:center;justify-content:space-between;padding:.7rem 1.2rem;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;box-shadow:var(--shadow-sm);z-index:200;gap:1rem;flex-wrap:wrap}
 .brand{font-family:'Cormorant Garamond',serif;font-size:1.75rem;font-weight:700;line-height:1;color:var(--ink)}
 .brand em{color:var(--red);font-style:normal}
@@ -43,19 +52,19 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
 .loc-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:blink 2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
 
-/* LAYOUT */
+/* ─── DESKTOP LAYOUT ─────────────────────────────────────── */
 .layout{display:grid;grid-template-columns:360px 1fr;flex:1;overflow:hidden;min-height:0}
 
-/* SIDEBAR */
+/* ─── SIDEBAR ────────────────────────────────────────────── */
 .sidebar{display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--surface);overflow:hidden;min-height:0}
 
-/* SEARCH */
+/* ─── SEARCH ─────────────────────────────────────────────── */
 .search-wrap{padding:.7rem;border-bottom:1px solid var(--border);position:relative;flex-shrink:0}
 .s-icon{position:absolute;left:1.55rem;top:50%;transform:translateY(-50%);color:var(--ink3);font-size:.85rem;pointer-events:none}
 #searchInput{width:100%;background:var(--s2);border:1.5px solid var(--border);border-radius:var(--r);padding:.55rem 1rem .55rem 2.2rem;font-size:.86rem;color:var(--ink);outline:none;transition:border-color .2s}
 #searchInput:focus{border-color:var(--red);background:var(--surface)}
 
-/* FEATURED */
+/* ─── FEATURED ───────────────────────────────────────────── */
 .featured{flex-shrink:0;margin:.65rem;border-radius:var(--r);overflow:hidden;position:relative;cursor:pointer;box-shadow:var(--shadow-md);transition:transform .2s;background:#1a0a05}
 .featured:hover{transform:translateY(-1px);box-shadow:var(--shadow-lg)}
 .feat-bg{position:absolute;inset:0;background:linear-gradient(135deg,rgba(181,40,40,.85) 0%,rgba(26,10,5,.96) 100%)}
@@ -67,14 +76,14 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
 .feat-tag{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:100px;padding:.16rem .55rem;font-size:.62rem;color:#fff}
 .feat-tag.g{background:rgba(154,116,24,.4);border-color:rgba(200,170,60,.5);color:#fdd060}
 
-/* CATEGORIES */
+/* ─── CATEGORIES ─────────────────────────────────────────── */
 .cat-scroll{flex-shrink:0;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);padding:.55rem .65rem;display:flex;gap:.3rem}
 .cat-scroll::-webkit-scrollbar{display:none}
 .cat-btn{background:var(--s2);border:1.5px solid var(--border);border-radius:100px;padding:.25rem .72rem;font-size:.7rem;color:var(--ink2);white-space:nowrap;transition:all .17s;font-weight:400}
 .cat-btn:hover{border-color:var(--red);color:var(--red)}
 .cat-btn.active{background:var(--red);border-color:var(--red);color:#fff;font-weight:600}
 
-/* FILTER TOGGLE BAR */
+/* ─── FILTER BAR ─────────────────────────────────────────── */
 .filter-bar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:.42rem .65rem;border-bottom:1px solid var(--border);background:var(--s2);gap:.4rem;flex-wrap:wrap}
 .fb-left{display:flex;align-items:center;gap:.4rem;font-size:.68rem;color:var(--ink2)}
 .active-ct{background:var(--red);color:#fff;border-radius:100px;padding:.08rem .42rem;font-size:.62rem;font-weight:600;display:none}
@@ -84,10 +93,9 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
 .sort-btn:hover,.ftoggle-btn:hover{border-color:var(--red);color:var(--red)}
 .sort-btn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
 
-/* ADVANCED FILTERS */
+/* ─── ADVANCED FILTERS ───────────────────────────────────── */
 .adv{overflow:hidden;transition:max-height .3s ease;border-bottom:1px solid var(--border);flex-shrink:0}
-.adv.open{max-height:160px}
-.adv.closed{max-height:0}
+.adv.open{max-height:160px}.adv.closed{max-height:0}
 .adv-inner{padding:.55rem .65rem;display:flex;flex-direction:column;gap:.45rem}
 .frow{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
 .fl{font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);min-width:44px}
@@ -98,49 +106,28 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
 .chip.ga.active{background:var(--gold);border-color:var(--gold);color:#fff}
 .chip.gr.active{background:var(--green);border-color:var(--green);color:#fff}
 
-/* RESULTS BAR */
+/* ─── RESULTS BAR ────────────────────────────────────────── */
 .results-bar{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:.38rem .65rem;border-bottom:1px solid var(--border)}
 .rb-label{font-size:.65rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em}
 #resultsCount{color:var(--red);font-weight:700}
 #filterSummary{font-size:.62rem;color:var(--ink3)}
 
-/* LIST */
+/* ─── LIST ───────────────────────────────────────────────── */
 .list{flex:1;overflow-y:auto;padding:.6rem;display:flex;flex-direction:column;gap:.42rem;scrollbar-width:thin;scrollbar-color:var(--border) transparent;min-height:0}
 
-.card{
-  background:var(--surface);
-  border:1.5px solid var(--border);
-  border-radius:var(--r);
-  padding:.72rem .9rem .72rem 1rem;
-  cursor:pointer;
-  transition:all .2s;
-  animation:fadeUp .3s ease both;
-  position:relative;
-}
-.card::before{
-  content:'';
-  position:absolute;
-  left:0;top:4px;bottom:4px;
-  width:3px;
-  border-radius:0 2px 2px 0;
-  background:var(--gold);
-  opacity:0;
-  transition:opacity .2s;
-}
+/* ─── CARDS ──────────────────────────────────────────────── */
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:.72rem .9rem .72rem 1rem;cursor:pointer;transition:all .2s;animation:fadeUp .3s ease both;position:relative}
+.card::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:3px;border-radius:0 2px 2px 0;background:var(--gold);opacity:0;transition:opacity .2s}
 .card[data-gama="Alta"]::before{opacity:1;background:var(--gold)}
-.card[data-gama="Media"]::before{opacity:0}
-.card[data-gama="Accesible"]::before{opacity:0}
 .card:hover{border-color:var(--red);box-shadow:0 3px 18px rgba(181,40,40,.11);transform:translateY(-1px)}
 .card:hover::before{opacity:1;background:var(--red)!important}
 @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-
 .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.45rem;margin-bottom:.22rem}
 .card-name{font-weight:600;font-size:.9rem;line-height:1.25;flex:1;min-width:0;word-break:break-word}
 .gama-tag{font-size:.58rem;font-weight:700;padding:.14rem .46rem;border-radius:100px;white-space:nowrap;letter-spacing:.04em;flex-shrink:0}
 .gt-alta{background:#fdf3d0;color:var(--gold);border:1px solid #e5cc70}
 .gt-media{background:#fde8e8;color:var(--red);border:1px solid #f0aaaa}
 .gt-accesible{background:#e6f4ed;color:var(--green);border:1px solid #98d4b0}
-
 .card-meta{display:flex;align-items:center;gap:.26rem;flex-wrap:wrap;margin-bottom:.18rem}
 .tag{font-size:.63rem;padding:.12rem .43rem;border-radius:100px;background:var(--s2);border:1px solid var(--border);color:var(--ink2)}
 .card-dist{font-size:.66rem;color:var(--ink3);margin-left:auto;white-space:nowrap}
@@ -148,13 +135,14 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
 .card-desc{margin-top:.32rem;font-size:.7rem;color:var(--ink2);line-height:1.45;font-style:italic;border-top:1px solid var(--s2);padding-top:.32rem}
 .trend{display:inline-flex;align-items:center;gap:.18rem;background:#fff4e0;border:1px solid #f0d080;border-radius:100px;padding:.1rem .48rem;font-size:.58rem;color:#9a6010;margin-top:.22rem}
 
-/* MSG */
+/* ─── EMPTY MSG ──────────────────────────────────────────── */
 .msg{padding:2rem 1rem;text-align:center;color:var(--ink3)}
 .msg .ico{font-size:2rem;margin-bottom:.6rem}
 .msg h3{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--ink);margin-bottom:.3rem}
 .msg p{font-size:.77rem;line-height:1.6}
 
-/* MAP */
+/* ─── MAP (desktop) ──────────────────────────────────────── */
+#map-wrap{position:relative;flex:1;min-height:0;overflow:hidden}
 #map{width:100%;height:100%}
 .leaflet-tile{filter:saturate(.85) brightness(.96)}
 .leaflet-popup-content-wrapper{border-radius:10px!important;box-shadow:var(--shadow-lg)!important;border:1px solid var(--border)!important}
@@ -163,159 +151,170 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
 .pop-cat{font-size:.68rem;color:var(--ink3)}
 .pop-gama{font-size:.66rem;font-weight:600;margin-top:.1rem}
 .pop-addr{font-size:.66rem;color:var(--ink3);margin-top:.08rem}
-
-/* MAP WRAP (desktop) */
-#map-wrap{position:relative;flex:1;min-height:0;overflow:hidden}
 .map-legend{position:absolute;bottom:26px;right:10px;z-index:500;background:rgba(255,253,248,.94);border:1px solid var(--border);border-radius:8px;padding:.48rem .68rem;font-size:.63rem;color:var(--ink2);backdrop-filter:blur(4px);box-shadow:var(--shadow-sm)}
 .leg-row{display:flex;align-items:center;gap:.38rem;margin-bottom:.18rem}
 .leg-row:last-child{margin-bottom:0}
 .leg-dot{width:10px;height:10px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3);flex-shrink:0}
 
-/* ════════════════════════════════════════════════════════
-   MOBILE  ≤ 700 px  —  List-first vertical layout
-   Map is an INLINE COLLAPSIBLE WIDGET with 3 states:
-     CLOSED   → hidden entirely
-     NORMAL   → 220 px inline box in the page flow
-     FULLSCREEN → fixed overlay over everything
-   ════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   MOBILE  ≤ 700 px
+   Architecture:
+   • body scrolls naturally (no overflow:hidden trap)
+   • header is sticky
+   • .layout is a single flex column
+   • #map-wrap (desktop panel) is hidden
+   • #mob-map-widget is the inline map component:
+       state="closed"     → control bar only, map hidden
+       state="normal"     → control bar + 220px map box
+       state="fullscreen" → fixed overlay, map fills screen
+   • #map div always stays inside #mob-map-widget .map-box
+     so Leaflet never needs to be re-initialized
+═══════════════════════════════════════════════════════════ */
 
-/* Elements only used in mobile — invisible on desktop */
-.mob-map-bar    { display: none }
-.sheet-handle   { display: none }
-#mob-map-widget { display: none }
+/* ── Desktop-only elements hidden on mobile ── */
+.map-legend { display: none } /* re-shown inside widget below */
 
 @media (max-width: 700px) {
 
-  /* 1. Scrollable page — no overflow:hidden trap */
-  html, body {
-    height: auto;
-    min-height: 100dvh;
-    overflow-x: hidden;
-    overflow-y: auto;
+  /* ── 1. Root: natural scroll, dvh-safe ── */
+  html { height: 100%; }
+  body {
+    height: auto; min-height: 100dvh;
+    overflow-x: hidden; overflow-y: auto;
   }
-  body { display: flex; flex-direction: column; }
 
-  /* 2. Header: sticky, compact, single line */
+  /* ── 2. Sticky header ── */
   header {
     position: sticky; top: 0; z-index: 300;
-    padding: .5rem 1rem;
+    padding: .48rem 1rem;
     flex-wrap: nowrap; gap: .5rem;
   }
   .brand { font-size: 1.4rem }
   .brand-sub { display: none }
   .loc-pill { padding: .26rem .65rem; font-size: .68rem; white-space: nowrap; flex-shrink: 0 }
 
-  /* 3. Layout: single column normal flow */
-  .layout { display: flex; flex-direction: column; flex: 1; overflow: visible; }
+  /* ── 3. Layout: single scrollable column ── */
+  .layout { display: block; overflow: visible; }
 
-  /* 4. Sidebar = full page column */
+  /* ── 4. Sidebar fills column ── */
   .sidebar {
     display: flex; flex-direction: column;
-    width: 100%; border-right: none;
-    overflow: visible; min-height: 0; flex: 1;
+    width: 100%; overflow: visible;
+    border-right: none; min-height: 0;
   }
 
-  /* 5. Desktop map panel: hidden on mobile */
-  #map-wrap { display: none }
+  /* ── 5. Desktop map panel: completely hidden ── */
+  #map-wrap { display: none !important; }
 
-  /* ── MAP WIDGET ─────────────────────────────────────── */
-
-  /* Control bar above the map */
-  .mob-map-bar {
-    display: flex; align-items: center;
-    justify-content: space-between;
-    padding: .4rem .75rem;
-    background: var(--s2);
-    border-bottom: 1px solid var(--border);
-    border-top: 1px solid var(--border);
-    gap: .5rem; flex-shrink: 0;
-  }
-  .mob-map-label {
-    font-size: .72rem; font-weight: 600;
-    color: var(--ink2);
-    display: flex; align-items: center; gap: .3rem;
-  }
-  .mob-map-actions { display: flex; gap: .28rem; align-items: center; }
-  .mma-btn {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 100px;
-    padding: .2rem .58rem;
-    font-size: .67rem; font-weight: 500;
-    color: var(--ink2);
-    transition: all .15s; white-space: nowrap;
-  }
-  .mma-btn.is-active { background: var(--red); border-color: var(--red); color: #fff; }
-  .mma-btn.close-btn.is-active { background: var(--ink); border-color: var(--ink); }
-
-  /* Widget wrapper */
-  #mob-map-widget {
-    display: block; flex-shrink: 0;
-    background: var(--surface);
-    overflow: hidden;
-  }
-
-  /* Animated map box */
-  #mob-map-widget .map-inner {
-    width: 100%; height: 0;
-    overflow: hidden;
-    transition: height .3s cubic-bezier(.4,0,.2,1);
-    position: relative;
-  }
-  #mob-map-widget .map-inner #map {
-    width: 100%; height: 100%;
-  }
-  /* Legend inside widget */
-  #mob-map-widget .map-legend {
-    position: absolute;
-    bottom: 8px; right: 8px; top: auto;
-    font-size: .58rem; padding: .26rem .46rem;
-  }
-
-  /* FULLSCREEN overlay state */
-  #mob-map-widget.map-fs {
-    position: fixed; inset: 0; z-index: 800;
-    border: none; overflow: hidden;
-  }
-  #mob-map-widget.map-fs .mob-map-bar {
-    position: absolute; top: 0; left: 0; right: 0;
-    z-index: 10; box-shadow: var(--shadow-md);
-    border-top: none;
-  }
-  #mob-map-widget.map-fs .map-inner {
-    height: 100dvh !important;
-    padding-top: 41px; /* bar height */
-    box-sizing: border-box;
-  }
-
-  /* 6. Search & filters */
-  .search-wrap { padding: .52rem .75rem; flex-shrink: 0 }
+  /* ── 6. Search & controls ── */
+  .search-wrap { padding: .52rem .75rem }
   #searchInput { font-size: 16px; padding: .5rem .9rem .5rem 2.1rem }
-  .featured    { margin: .5rem .65rem .25rem; flex-shrink: 0 }
+  .featured    { margin: .5rem .65rem .3rem; flex-shrink: 0 }
   .cat-scroll  { flex-shrink: 0 }
-  .filter-bar  { padding: .38rem .75rem; gap: .28rem; flex-wrap: wrap; flex-shrink: 0 }
-  .results-bar { padding: .3rem .75rem; flex-shrink: 0 }
+  .filter-bar  { padding: .38rem .75rem; gap: .28rem; flex-wrap: wrap }
+  .results-bar { padding: .3rem .75rem }
   .adv         { flex-shrink: 0 }
   .sort-row    { flex-wrap: wrap; gap: .22rem }
   .sort-btn, .ftoggle-btn { padding: .26rem .64rem; font-size: .71rem }
   .cat-btn     { padding: .3rem .78rem; font-size: .74rem }
 
-  /* 7. List: natural flow scroll */
+  /* ── 7. List: flows naturally ── */
   .list {
     flex: none; overflow-y: visible;
-    padding: .45rem .65rem 2.5rem;
-    min-height: 160px;
+    padding: .45rem .65rem 3rem;
+    min-height: 120px;
   }
 
-  /* 8. Cards: no truncation */
-  .card { padding: .7rem .88rem .7rem .98rem; min-width: 0; }
+  /* ── 8. Cards ── */
+  .card { padding: .7rem .88rem .7rem .98rem; min-width: 0 }
   .card-name {
-    font-size: .92rem;
     white-space: normal; word-break: break-word;
     overflow: visible; text-overflow: unset;
     min-width: 0; flex: 1;
   }
   .card-desc { display: none }
+
+  /* ══════════════════════════════════════════
+     MAP WIDGET
+  ══════════════════════════════════════════ */
+  #mob-map-widget {
+    /* sits between search and featured card */
+    flex-shrink: 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Control bar — always visible */
+  .map-ctrl-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .4rem .75rem;
+    background: var(--s2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    gap: .5rem;
+  }
+  .map-ctrl-left {
+    display: flex; align-items: center; gap: .32rem;
+    font-size: .72rem; font-weight: 600; color: var(--ink2);
+  }
+  .map-ctrl-left svg { flex-shrink: 0 }
+  .map-ctrl-right { display: flex; gap: .26rem; align-items: center }
+
+  /* State buttons */
+  .map-state-btn {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 100px;
+    padding: .22rem .6rem;
+    font-size: .67rem; font-weight: 500;
+    color: var(--ink2);
+    transition: background .15s, border-color .15s, color .15s;
+    white-space: nowrap; line-height: 1.3;
+  }
+  .map-state-btn:hover { border-color: var(--red); color: var(--red) }
+  .map-state-btn[data-state="normal"].is-active   { background: var(--red);  border-color: var(--red);  color: #fff }
+  .map-state-btn[data-state="fullscreen"].is-active { background: var(--gold); border-color: var(--gold); color: #fff }
+  .map-state-btn[data-state="closed"].is-active   { background: var(--ink2); border-color: var(--ink2); color: #fff }
+
+  /* Map box — height animated, always contains #map */
+  .map-box {
+    overflow: hidden;
+    height: 0;                         /* JS sets this */
+    transition: height var(--map-transition);
+    position: relative;
+  }
+  .map-box #map {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+  }
+
+  /* Legend inside widget */
+  .map-box .map-legend {
+    display: block;                    /* re-enable, was hidden */
+    position: absolute;
+    bottom: 8px; right: 8px; top: auto;
+    font-size: .58rem; padding: .26rem .48rem;
+    z-index: 500;
+  }
+
+  /* ── FULLSCREEN overlay ── */
+  #mob-map-widget.is-fullscreen {
+    position: fixed; inset: 0; z-index: 800;
+    display: flex; flex-direction: column;
+    border: none;
+  }
+  #mob-map-widget.is-fullscreen .map-ctrl-bar {
+    flex-shrink: 0;
+    box-shadow: var(--shadow-md);
+    border-top: none;
+  }
+  #mob-map-widget.is-fullscreen .map-box {
+    flex: 1;
+    height: auto !important;  /* flex takes over from JS height */
+    transition: none;
+  }
 }
 </style>
 </head>
@@ -340,6 +339,10 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
 </header>
 
 <div class="layout">
+
+  <!-- ╔══════════════════════════════════════════════════╗
+       ║  SIDEBAR (desktop) / main column (mobile)       ║
+       ╚══════════════════════════════════════════════════╝ -->
   <aside class="sidebar" id="sidebar">
 
     <div class="search-wrap">
@@ -347,20 +350,35 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
       <input id="searchInput" type="text" placeholder="Buscar restaurante, cocina, barrio..." oninput="applyFilters()"/>
     </div>
 
-    <!-- ═══ MOBILE MAP WIDGET (hidden on desktop via CSS) ═══ -->
+    <!-- ╔══════════════════════════════════════════════╗
+         ║  MOBILE MAP WIDGET                          ║
+         ║  #map lives here permanently on mobile.     ║
+         ║  CSS hides this entire block on desktop.    ║
+         ╚══════════════════════════════════════════════╝ -->
     <div id="mob-map-widget">
-      <div class="mob-map-bar">
-        <span class="mob-map-label">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+
+      <!-- Control bar: always visible in mobile -->
+      <div class="map-ctrl-bar">
+        <div class="map-ctrl-left">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
           Mapa
-        </span>
-        <div class="mob-map-actions">
-          <button class="mma-btn" id="mapBtnNormal"   onclick="setMapMode('normal')">Normal</button>
-          <button class="mma-btn" id="mapBtnExpand"   onclick="setMapMode('fullscreen')">&#x26F6; Expandir</button>
-          <button class="mma-btn close-btn" id="mapBtnClose" onclick="setMapMode('closed')">&#x2715; Cerrar</button>
+        </div>
+        <div class="map-ctrl-right">
+          <button class="map-state-btn" data-state="normal"
+                  onclick="setMapState('normal')">&#9974; Normal</button>
+          <button class="map-state-btn" data-state="fullscreen"
+                  onclick="setMapState('fullscreen')">&#x26F6; Expandir</button>
+          <button class="map-state-btn" data-state="closed"
+                  onclick="setMapState('closed')">&#x2715; Cerrar</button>
         </div>
       </div>
-      <div class="map-inner">
+
+      <!-- Map container: #map always lives here on mobile -->
+      <div class="map-box" id="mapBox">
         <div id="map"></div>
         <div class="map-legend">
           <div class="leg-row"><div class="leg-dot" style="background:#9a7418"></div>Gama Alta</div>
@@ -369,8 +387,9 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
           <div class="leg-row"><div class="leg-dot" style="background:#888"></div>Sin clasificar</div>
         </div>
       </div>
+
     </div>
-    <!-- ═══ END MOBILE MAP WIDGET ═══ -->
+    <!-- END MOBILE MAP WIDGET -->
 
     <div class="featured" id="featCard" onclick="focusFeatured()">
       <div class="feat-bg"></div>
@@ -439,9 +458,14 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
         <p>Acepta el permiso de geolocalizacion para ver los mejores restaurantes cerca de ti.</p>
       </div>
     </div>
+
   </aside>
 
-  <!-- Desktop map panel — hidden on mobile via CSS -->
+  <!-- ╔══════════════════════════════════════════════════╗
+       ║  DESKTOP MAP PANEL                              ║
+       ║  Hidden on mobile via CSS.                      ║
+       ║  On desktop, #map gets moved here by JS.        ║
+       ╚══════════════════════════════════════════════════╝ -->
   <div id="map-wrap">
     <div class="map-legend">
       <div class="leg-row"><div class="leg-dot" style="background:#9a7418"></div>Gama Alta</div>
@@ -450,6 +474,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
       <div class="leg-row"><div class="leg-dot" style="background:#888"></div>Sin clasificar</div>
     </div>
   </div>
+
 </div>
 
 <script>
@@ -602,22 +627,8 @@ window.addEventListener('DOMContentLoaded', () => {
   );
 });
 
-function startDefault() { ensureMapPlaced(); initMap(userLat, userLng); mergeLoad(userLat, userLng); }
-function boot() { ensureMapPlaced(); initMap(userLat, userLng); reverseGeocode(userLat, userLng); mergeLoad(userLat, userLng); }
-
-/* Place #map in the correct parent before Leaflet init */
-function ensureMapPlaced() {
-  const mapEl   = document.getElementById('map');
-  const isMob   = window.innerWidth <= 700;
-  const mapInner = document.querySelector('#mob-map-widget .map-inner');
-  const mapWrap  = document.getElementById('map-wrap');
-  if (isMob && mapInner && mapEl.parentElement !== mapInner) {
-    const legend = mapInner.querySelector('.map-legend');
-    mapInner.insertBefore(mapEl, legend || null);
-  } else if (!isMob && mapWrap && mapEl.parentElement !== mapWrap) {
-    mapWrap.insertBefore(mapEl, mapWrap.firstChild);
-  }
-}
+function startDefault() { ensurePlaced(); initMap(userLat, userLng); mergeLoad(userLat, userLng); }
+function boot()         { ensurePlaced(); initMap(userLat, userLng); reverseGeocode(userLat, userLng); mergeLoad(userLat, userLng); }
 
 /* ═══════════════ MAP ═══════════════ */
 function initMap(lat, lng) {
@@ -630,6 +641,8 @@ function initMap(lat, lng) {
     iconSize:[16,16], iconAnchor:[8,8]});
   L.marker([lat,lng],{icon:youIcon}).addTo(map).bindPopup('<b>Tu estas aqui</b>');
   L.circle([lat,lng],{radius:RADIUS_M,color:'#b52828',fillColor:'#b52828',fillOpacity:.04,weight:1,dashArray:'5'}).addTo(map);
+  /* Tell the mobile widget that Leaflet is ready */
+  if (typeof initMobileWidget === 'function') initMobileWidget();
 }
 
 async function reverseGeocode(lat, lng) {
@@ -878,90 +891,148 @@ function haversine(la1,lo1,la2,lo2){
 function formatDist(m){return m<1000?`${Math.round(m)} m`:`${(m/1000).toFixed(1)} km`}
 function hideLoading(){document.getElementById('loading').classList.add('hidden')}
 
-/* ═══════════════════════════════════════════════════════════
-   MOBILE MAP WIDGET
-   States: 'closed' | 'normal' | 'fullscreen'
-   The #map div lives in #mob-map-widget on mobile, and gets
-   moved back to #map-wrap on desktop.
-   ═══════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   MAP PLACEMENT + MOBILE WIDGET
+   ─────────────────────────────────────────────────────────────────
+   Strategy
+   ─────────────────────────────────────────────────────────────────
+   • On DESKTOP (>700 px):
+       #map lives inside #map-wrap (the right panel).
+       Leaflet fills 100% of that panel.
+
+   • On MOBILE (≤700 px):
+       #map lives inside #mob-map-widget .map-box permanently.
+       We NEVER move the element — moving a Leaflet container
+       destroys tiles and breaks the instance.
+       Instead we move it ONCE at boot before L.map() is called,
+       and keep it there for mobile sessions.
+       Resize / orientation change just calls invalidateSize().
+
+   Widget states (mobile only)
+   ─────────────────────────────────────────────────────────────────
+   'normal'     → map-box height = MAP_NORMAL_H (220 px)
+   'fullscreen' → widget becomes a fixed overlay, map fills screen
+   'closed'     → map-box height = 0, map-ctrl-bar still visible
+═══════════════════════════════════════════════════════════════════ */
 (function () {
-  const BREAKPOINT = 700;
-  const isMobile   = () => window.innerWidth <= BREAKPOINT;
+  /* ── Config ── */
+  const BREAKPOINT   = 700;
+  const MAP_NORMAL_H = 220;   // px — inline "normal" map height
+  const TRANSITION   = 300;   // ms — matches CSS var(--map-transition)
 
-  const widget   = document.getElementById('mob-map-widget');
-  const mapInner = widget ? widget.querySelector('.map-inner') : null;
+  /* ── Elements ── */
   const mapWrap  = document.getElementById('map-wrap');
+  const widget   = document.getElementById('mob-map-widget');
+  const mapBox   = document.getElementById('mapBox');
   const mapEl    = document.getElementById('map');
-  const btnNormal = document.getElementById('mapBtnNormal');
-  const btnExpand = document.getElementById('mapBtnExpand');
-  const btnClose  = document.getElementById('mapBtnClose');
 
-  const NORMAL_H = 220; // px for normal state
-  let mapMode = 'normal';
+  /* ── State ── */
+  let currentState = 'normal';
+  let mapReady     = false;   // true once L.map() has been called
 
-  /* Move #map into the right container */
-  function placeMap() {
+  /* ─────────────────────────────────────────────────────────────
+     isMobile()
+  ───────────────────────────────────────────────────────────── */
+  function isMobile() { return window.innerWidth <= BREAKPOINT; }
+
+  /* ─────────────────────────────────────────────────────────────
+     ensurePlaced()
+     Called ONCE before L.map() to put #map in the right home.
+     After that we never move it again.
+  ───────────────────────────────────────────────────────────── */
+  window.ensurePlaced = function () {
     if (isMobile()) {
-      if (mapInner && mapEl.parentElement !== mapInner) {
-        const legend = mapInner.querySelector('.map-legend');
-        mapInner.insertBefore(mapEl, legend || null);
+      /* Mobile: #map should be the first child of .map-box */
+      if (mapEl.parentElement !== mapBox) {
+        mapBox.insertBefore(mapEl, mapBox.firstChild);
       }
     } else {
-      if (mapWrap && mapEl.parentElement !== mapWrap) {
+      /* Desktop: #map should be the first child of #map-wrap */
+      if (mapEl.parentElement !== mapWrap) {
         mapWrap.insertBefore(mapEl, mapWrap.firstChild);
       }
     }
-    setTimeout(() => { if (map) map.invalidateSize(); }, 60);
-  }
-
-  /* Apply a map display mode (mobile only) */
-  function applyMapMode(mode, animate) {
-    mapMode = mode;
-    if (!widget || !mapInner) return;
-    widget.classList.remove('map-fs');
-    if (!animate) { mapInner.style.transition = 'none'; }
-
-    if (mode === 'closed')     { mapInner.style.height = '0px'; }
-    else if (mode === 'normal'){ mapInner.style.height = NORMAL_H + 'px'; }
-    else if (mode === 'fullscreen') {
-      widget.classList.add('map-fs');
-      mapInner.style.height = window.innerHeight + 'px';
-    }
-
-    if (!animate) { mapInner.offsetHeight; mapInner.style.transition = ''; }
-
-    if (btnNormal) btnNormal.classList.toggle('is-active', mode === 'normal');
-    if (btnExpand) btnExpand.classList.toggle('is-active', mode === 'fullscreen');
-    if (btnClose)  btnClose.classList.toggle('is-active',  mode === 'closed');
-
-    setTimeout(() => { if (map) map.invalidateSize(); }, 320);
-  }
-
-  /* Public: called from HTML onclick buttons */
-  window.setMapMode = function (mode) {
-    if (!isMobile()) return;
-    applyMapMode(mode, true);
   };
 
-  /* Init */
-  function init() {
-    placeMap();
-    if (isMobile()) applyMapMode('normal', false);
-    else if (map) map.invalidateSize();
+  /* ─────────────────────────────────────────────────────────────
+     applyMapState(state, animate)
+     Only runs on mobile. Updates heights + classes.
+  ───────────────────────────────────────────────────────────── */
+  function applyMapState(state, animate) {
+    currentState = state;
+    if (!animate) mapBox.style.transition = 'none';
+
+    if (state === 'closed') {
+      widget.classList.remove('is-fullscreen');
+      mapBox.style.height = '0px';
+
+    } else if (state === 'normal') {
+      widget.classList.remove('is-fullscreen');
+      mapBox.style.height = MAP_NORMAL_H + 'px';
+
+    } else if (state === 'fullscreen') {
+      widget.classList.add('is-fullscreen');
+      /* height is controlled by flex in fullscreen — set to a large
+         value so the transition looks good before flex takes over */
+      mapBox.style.height = window.innerHeight + 'px';
+    }
+
+    if (!animate) {
+      mapBox.offsetHeight; // force reflow
+      mapBox.style.transition = '';
+    }
+
+    /* Update button active states */
+    document.querySelectorAll('.map-state-btn').forEach(btn => {
+      btn.classList.toggle('is-active', btn.dataset.state === state);
+    });
+
+    /* Give Leaflet time to finish the CSS transition */
+    if (mapReady) setTimeout(() => map.invalidateSize(), TRANSITION + 20);
   }
 
+  /* ─────────────────────────────────────────────────────────────
+     setMapState() — exposed to onclick handlers in HTML
+  ───────────────────────────────────────────────────────────── */
+  window.setMapState = function (state) {
+    if (!isMobile()) return;
+    applyMapState(state, true);
+  };
+
+  /* ─────────────────────────────────────────────────────────────
+     initMobile() — called once after L.map() exists
+  ───────────────────────────────────────────────────────────── */
+  window.initMobileWidget = function () {
+    mapReady = true;
+    if (isMobile()) {
+      /* Desktop map css sets #map height:100% which is fine;
+         on mobile we start in normal state */
+      applyMapState('normal', false);
+    } else {
+      /* Desktop: widget is hidden by CSS, ensure #map fills wrap */
+      if (map) map.invalidateSize();
+    }
+  };
+
+  /* ─────────────────────────────────────────────────────────────
+     Resize / orientation change handler
+  ───────────────────────────────────────────────────────────── */
   let resizeTimer;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
-      placeMap();
-      if (isMobile()) applyMapMode(mapMode, false);
-      else if (map) map.invalidateSize();
+      if (isMobile()) {
+        if (currentState === 'fullscreen') {
+          /* keep fullscreen map sized to new viewport */
+          mapBox.style.height = window.innerHeight + 'px';
+        } else if (currentState === 'normal') {
+          mapBox.style.height = MAP_NORMAL_H + 'px';
+        }
+      }
+      if (mapReady) map.invalidateSize();
     }, 80);
   });
 
-  if (document.readyState === 'complete') setTimeout(init, 150);
-  else window.addEventListener('load', () => setTimeout(init, 150));
 })();
 </script>
 </body>
