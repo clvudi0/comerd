@@ -107,25 +107,23 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
 /* LIST */
 .list{flex:1;overflow-y:auto;padding:.6rem;display:flex;flex-direction:column;gap:.42rem;scrollbar-width:thin;scrollbar-color:var(--border) transparent;min-height:0}
 
-/* ── FIX 1: cards — left border must not clip name ── */
 .card{
   background:var(--surface);
   border:1.5px solid var(--border);
   border-radius:var(--r);
-  padding:.72rem .9rem .72rem 1rem;   /* left padding gives room */
+  padding:.72rem .9rem .72rem 1rem;
   cursor:pointer;
   transition:all .2s;
   animation:fadeUp .3s ease both;
   position:relative;
 }
-/* left accent bar sits OUTSIDE the content box */
 .card::before{
   content:'';
   position:absolute;
   left:0;top:4px;bottom:4px;
   width:3px;
   border-radius:0 2px 2px 0;
-  background:var(--gold);           /* default gold for Alta */
+  background:var(--gold);
   opacity:0;
   transition:opacity .2s;
 }
@@ -297,7 +295,6 @@ const GAMA_LABEL  = {Alta:'Gama Alta', Media:'Gama Media', Accesible:'Accesible'
 const GAMA_COLOR  = {Alta:'#9a7418', Media:'#b52828', Accesible:'#246e42'};
 const PRECIO_MAP  = {Alta:'$$$$', Media:'$$$', Accesible:'$$'};
 
-/* FIX 3 — new categories added */
 const CATS = ['Todos','Criolla','Mariscos','Parrilla','Hamburguesas','Pizza',
               'Internacional','Asiatica','Mexicana','Cafe','Postres','Helados',
               'Fast Food','Bares','Vegetariana'];
@@ -338,7 +335,7 @@ const DB = [
   {id:'pa04',name:'Casa Vera',               cat:'Parrilla',     gama:'Media',     addr:'Piantini, Santo Domingo',                    phone:'',             lat:18.4754,lng:-69.9400, desc:'Parrilla y cocina criolla. El favorito para cenas navideñas y reuniones familiares.', trend:false},
   {id:'pa05',name:'Roust Churrasqueria',     cat:'Parrilla',     gama:'Media',     addr:'Av. Roberto Pastoriza, Santo Domingo',       phone:'',             lat:18.4730,lng:-69.9310, desc:'Churrasco y mariscos en porciones generosas. Excelente relacion precio-calidad.', trend:false},
 
-  // ── HAMBURGUESAS (nueva categoria) Alta/Media
+  // ── HAMBURGUESAS
   {id:'hm01',name:'BURRA - Burger & Birra',  cat:'Hamburguesas', gama:'Alta',      addr:'Av. Tiradentes 25, Santo Domingo',           phone:'',             lat:18.4791,lng:-69.9269, desc:'Hamburguesas artesanales de media libra con carne de res importada y cervezas craft. El burger bar mas trendy de SD.', trend:true},
   {id:'hm02',name:'Smashed Burgers SD',      cat:'Hamburguesas', gama:'Media',     addr:'Piantini, Santo Domingo',                    phone:'',             lat:18.4762,lng:-69.9395, desc:'Smash burgers estilo americano con doble patty, queso american y salsas de autor. Muy popular entre jovenes.', trend:true},
   {id:'hm03',name:'The Burger Shack',        cat:'Hamburguesas', gama:'Media',     addr:'Zona Colonial, Santo Domingo',               phone:'',             lat:18.4745,lng:-69.8860, desc:'Burgers gourmet en ambiente casual. Opciones de pollo, res y plant-based.', trend:false},
@@ -372,7 +369,7 @@ const DB = [
   // ASIATICA Media
   {id:'as03',name:'Yokomo',                  cat:'Asiatica',     gama:'Media',     addr:'Santo Domingo',                              phone:'',             lat:18.4760,lng:-69.9300, desc:'Sushi fusion con giro dominicano. Creativo, accesible y muy popular entre jovenes.', trend:false},
 
-  // ── MEXICANA (nueva categoria)
+  // ── MEXICANA
   {id:'mx01',name:'El Burrito Mexicano',     cat:'Mexicana',     gama:'Media',     addr:'Piantini, Santo Domingo',                    phone:'',             lat:18.4758,lng:-69.9392, desc:'Tacos, burritos y enchiladas autenticos preparados por chef mexicano. El favorito de los amantes de la cocina mexicana en SD.', trend:true},
   {id:'mx02',name:'Taco Loco',              cat:'Mexicana',     gama:'Accesible', addr:'Av. 27 de Febrero, Santo Domingo',            phone:'',             lat:18.4790,lng:-69.9340, desc:'Tacos callejeros estilo Ciudad de Mexico. Economico y delicioso. Con opciones vegetarianas.', trend:false},
   {id:'mx03',name:'Taco Bell - Piantini',    cat:'Mexicana',     gama:'Accesible', addr:'Piantini, Santo Domingo',                    phone:'',             lat:18.4762,lng:-69.9400, desc:'Comida mexicana rapida con drive-thru. Mexican Pizza, burritos y nachos clasicos.', trend:false},
@@ -393,14 +390,14 @@ const DB = [
   {id:'cf12',name:'Santo Domingo Cafe - Sambil', cat:'Cafe',     gama:'Accesible', addr:'Plaza Sambil, 2do Nivel',                    phone:'',             lat:18.4769,lng:-69.9618, desc:'Punto de encuentro dentro del Sambil.', trend:false},
   {id:'cf13',name:'Corner Cafe',             cat:'Cafe',         gama:'Accesible', addr:'Zona Colonial, Santo Domingo',               phone:'',             lat:18.4742,lng:-69.8855, desc:'Cafeteria de barrio. Ideal para desayuno rapido en la Zona Colonial.', trend:false},
 
-  // ── POSTRES (nueva categoria — sin helados)
+  // ── POSTRES
   {id:'po01',name:'Dulceria Oriol',          cat:'Postres',      gama:'Alta',      addr:'C. Roberto Pastoriza, Piantini',             phone:'',             lat:18.4763,lng:-69.9385, desc:'La pasteleria fina mas elegante de SD. Macarons, tartas artesanales y pasteles de bodas de lujo. Ingredientes importados de Francia.', trend:true},
   {id:'po02',name:'Sweet Lab',               cat:'Postres',      gama:'Media',     addr:'Piantini, Santo Domingo',                    phone:'',             lat:18.4755,lng:-69.9392, desc:'Crepes, waffles y postres artesanales modernos. Muy popular en Instagram. El sitio de moda para los jovenes.', trend:true},
   {id:'po03',name:'La Cremerie',             cat:'Postres',      gama:'Media',     addr:'Zona Colonial, Santo Domingo',               phone:'',             lat:18.4738,lng:-69.8858, desc:'Postres franceses y dominicanos en la Zona Colonial. Croissants frescos cada manana.', trend:false},
   {id:'po04',name:'Pasteleria Haagen',       cat:'Postres',      gama:'Media',     addr:'Varias ubicaciones, Santo Domingo',          phone:'',             lat:18.4748,lng:-69.9380, desc:'Cadena de pastelerias con tortas, queques y postres dominicanos clasicos para toda ocasion.', trend:false},
   {id:'po05',name:'Bon - Reposteria',        cat:'Postres',      gama:'Accesible', addr:'Varias ubicaciones, Santo Domingo',          phone:'',             lat:18.4730,lng:-69.9295, desc:'La reposteria mas popular y accesible de RD. Presencia en toda la ciudad.', trend:false},
 
-  // ── HELADOS (nueva categoria separada)
+  // ── HELADOS
   {id:'he01',name:'Casa Gelato',             cat:'Helados',      gama:'Alta',      addr:'Av. Abraham Lincoln, Piantini',              phone:'',             lat:18.4836,lng:-69.9388, desc:'Gelato artesanal italiano preparado diariamente con frutas tropicales dominicanas. El mas premium del pais.', trend:true},
   {id:'he02',name:'Bon Glace',               cat:'Helados',      gama:'Media',     addr:'Varias ubicaciones, Santo Domingo',          phone:'',             lat:18.4750,lng:-69.9355, desc:'La heladeria mas querida de RD. Sabores dominicanos unicos como tamarindo, guanabana y chinola.', trend:true},
   {id:'he03',name:'Helados Buen Sabor',      cat:'Helados',      gama:'Accesible', addr:'Varias ubicaciones, Santo Domingo',          phone:'',             lat:18.4725,lng:-69.9220, desc:'Paletas, helados y raspaduras dominicanas. El clasico de barrio que nunca falla.', trend:false},
@@ -425,7 +422,7 @@ const DB = [
 
 /* ═══════════════ STATE ═══════════════ */
 let map, allRestaurants = [];
-const markerMap = new Map(); // id -> L.marker (persists across filter changes)
+const markerMap = new Map();
 let userLat = 18.4741, userLng = -69.9307;
 let activeFilters = {cat:'Todos', gama:'Todos', precio:'Todos', sort:'gama'};
 
@@ -450,7 +447,7 @@ function initMap(lat, lng) {
     attribution:'© <a href="https://osm.org/copyright">OpenStreetMap</a>', maxZoom:19
   }).addTo(map);
   const youIcon = L.divIcon({className:'',
-    html:`<div style="width:16px;height:16px;background:#b52828;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 10px rgba(0,0,0,.45)"></div>`,
+    html:`<div style="width:16px;height:16px;background:#b52828;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 10px rgba(0,0,0,.45);pointer-events:none"></div>`,
     iconSize:[16,16], iconAnchor:[8,8]});
   L.marker([lat,lng],{icon:youIcon}).addTo(map).bindPopup('<b>Tu estas aqui</b>');
   L.circle([lat,lng],{radius:RADIUS_M,color:'#b52828',fillColor:'#b52828',fillOpacity:.04,weight:1,dashArray:'5'}).addTo(map);
@@ -478,7 +475,6 @@ async function mergeLoad(lat, lng) {
   } catch(e) {}
   allRestaurants = [...dbWithDist, ...osmNew];
   hideLoading();
-  // Pre-create ALL markers (hidden initially)
   allRestaurants.forEach(r => { if (!markerMap.has(r.id)) createMarker(r); });
   applyFilters();
 }
@@ -516,7 +512,7 @@ function detectCat(cuisine, amenity) {
   return 'Internacional';
 }
 
-/* ═══════════════ APPLY FILTERS — single source of truth ═══════════════ */
+/* ═══════════════ APPLY FILTERS ═══════════════ */
 function applyFilters() {
   const query = document.getElementById('searchInput').value.trim().toLowerCase();
   const {cat, gama, precio, sort} = activeFilters;
@@ -543,7 +539,7 @@ function applyFilters() {
   }
 
   renderList(visible);
-  syncMap(visible);  // ← map always matches list exactly
+  syncMap(visible);
   updateBadges(cat, gama);
 }
 
@@ -584,16 +580,10 @@ function renderList(items) {
   });
 }
 
-/* ═══════════════ MAP SYNC ═══════════════
-   Show ONLY filtered items, hide the rest.
-   Markers are reused — never recreated.
-═══════════════════════════════════════ */
+/* ═══════════════ MAP SYNC ═══════════════ */
 function syncMap(visible) {
   if (!map) return;
-  const visSet = new Set(visible.map(r => r.id));
-  // Hide all
-  markerMap.forEach((m, id) => { if (map.hasLayer(m)) map.removeLayer(m); });
-  // Show only filtered
+  markerMap.forEach((m) => { if (map.hasLayer(m)) map.removeLayer(m); });
   visible.forEach(r => {
     const m = markerMap.get(r.id);
     if (m) m.addTo(map);
@@ -603,22 +593,33 @@ function syncMap(visible) {
 function createMarker(r) {
   const color = r.gama ? GAMA_COLOR[r.gama] : '#888888';
   const size  = r.gama === 'Alta' ? 14 : 10;
-  const icon  = L.divIcon({
+
+  // ── FIX: use a larger transparent wrapper so the click area is reliable,
+  //    even for small grey (OSM) dots. pointer-events:all ensures the inner
+  //    div is always clickable regardless of Leaflet's className:'' quirk.
+  const wrapSize = Math.max(size, 20);
+  const offset   = Math.round((wrapSize - size) / 2);
+  const icon = L.divIcon({
     className: '',
-    html: `<div style="width:${size}px;height:${size}px;background:${color};border:2px solid #fff;border-radius:50%;box-shadow:0 1px 5px rgba(0,0,0,.4);cursor:pointer"></div>`,
-    iconSize: [size,size], iconAnchor: [size/2,size/2]
+    html: `<div style="width:${wrapSize}px;height:${wrapSize}px;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:all">
+             <div style="width:${size}px;height:${size}px;background:${color};border:2px solid #fff;border-radius:50%;box-shadow:0 1px 5px rgba(0,0,0,.4);pointer-events:all"></div>
+           </div>`,
+    iconSize:   [wrapSize, wrapSize],
+    iconAnchor: [wrapSize/2, wrapSize/2]
   });
+
   const gamaLine = r.gama ? `<div class="pop-gama" style="color:${color}">${GAMA_LABEL[r.gama]}</div>` : '';
   const m = L.marker([r.lat, r.lng], {icon, riseOnHover:true})
-    .bindPopup(`<div class="pop-name">${r.name}</div><div class="pop-cat">${r.cat}</div>${gamaLine}${r.addr?`<div class="pop-addr">${r.addr}</div>`:''}`, {autoPan:true});
+    .bindPopup(
+      `<div class="pop-name">${r.name}</div><div class="pop-cat">${r.cat}</div>${gamaLine}${r.addr?`<div class="pop-addr">${r.addr}</div>`:''}`,
+      {autoPan:true}
+    );
   m._rid = r.id;
   markerMap.set(r.id, m);
-  // Don't add to map yet — syncMap controls visibility
   return m;
 }
 
 function focusRestaurant(r) {
-  // Ensure marker is visible first
   const m = markerMap.get(r.id);
   if (m && !map.hasLayer(m)) m.addTo(map);
   map.flyTo([r.lat, r.lng], 18, {duration:.7});
@@ -628,7 +629,6 @@ function focusRestaurant(r) {
 function focusFeatured() {
   const feat = DB.find(r => r.id === 'ma01');
   if (!feat) return;
-  // Reset to Todos
   document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat==='Todos'));
   activeFilters.cat = 'Todos';
   applyFilters();
