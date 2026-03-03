@@ -511,16 +511,7 @@ html.dark .list{ scrollbar-color:var(--border) transparent }
             <button class="chip gr" data-val="Accesible" onclick="setFilter('gama',this)">Accesible</button>
           </div>
         </div>
-        <div class="frow">
-          <span class="fl">Precio</span>
-          <div class="chips" id="precioChips">
-            <button class="chip active" data-val="Todos" onclick="setFilter('precio',this)">Todos</button>
-            <button class="chip ga" data-val="$$$$" onclick="setFilter('precio',this)">$$$$</button>
-            <button class="chip" data-val="$$$" onclick="setFilter('precio',this)">$$$</button>
-            <button class="chip" data-val="$$" onclick="setFilter('precio',this)">$$</button>
-            <button class="chip gr" data-val="$" onclick="setFilter('precio',this)">$</button>
-          </div>
-        </div>
+        
       </div>
     </div>
 
@@ -561,8 +552,6 @@ const RADIUS_M = 6000;
 const GAMA_ORDER  = {Alta:0, Media:1, Accesible:2};
 const GAMA_LABEL  = {Alta:'Gama Alta', Media:'Gama Media', Accesible:'Accesible'};
 const GAMA_COLOR  = {Alta:'#9a7418', Media:'#b52828', Accesible:'#246e42'};
-const PRECIO_MAP  = {Alta:'$$$$', Media:'$$$', Accesible:'$$'};
-
 const CATS = ['Todos','Criolla','Mariscos','Parrilla','Hamburguesas','Pizza',
               'Internacional','Asiatica','Mexicana','Cafe','Postres','Helados',
               'Fast Food','Bares','Vegetariana'];
@@ -692,7 +681,7 @@ const DB = [
 let map, allRestaurants = [];
 const markerMap = new Map();
 let userLat = 18.4741, userLng = -69.9307;
-let activeFilters = {cat:'Todos', gama:'Todos', precio:'Todos', sort:'gama'};
+let activeFilters = {cat:'Todos', gama:'Todos', sort:'gama'};
 
 /* ═══════════════ BOOT ═══════════════ */
 window.addEventListener('DOMContentLoaded', () => {
@@ -959,14 +948,7 @@ function updateBadges(cat, gama) {
   let n = 0;
   if (cat!=='Todos') n++;
   if (gama!=='Todos') n++;
-  if (activeFilters.precio!=='Todos') n++;
-  const el = document.getElementById('activeCt');
-  el.textContent = n; el.classList.toggle('on', n>0);
-  const parts = [];
-  if (cat!=='Todos') parts.push(cat);
-  if (gama!=='Todos') parts.push(GAMA_LABEL[gama]);
-  document.getElementById('filterSummary').textContent = parts.join(' · ');
-}
+  
 
 /* ═══════════════ UTILS ═══════════════ */
 function haversine(la1,lo1,la2,lo2){
