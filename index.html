@@ -172,182 +172,150 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
 .leg-dot{width:10px;height:10px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3);flex-shrink:0}
 
 /* ════════════════════════════════════════════════════════
-   MOBILE  ≤ 700 px  —  bottom-sheet over full-screen map
-   Root causes fixed:
-   1. dvh instead of vh  →  iOS Safari toolbar bug
-   2. body is the flex column; layout gets remaining space via flex:1
-   3. map-wrap is position:absolute inset:0 inside layout
-   4. sidebar is position:absolute bottom:0 — true overlay
-   5. overflow on the right containers only, not on parents
-   6. invalidateSize called after every height transition
-   7. card-name uses min-width:0 + white-space normal — no truncation
+   MOBILE  ≤ 700 px  —  List-first vertical layout
+   Map is an INLINE COLLAPSIBLE WIDGET with 3 states:
+     CLOSED   → hidden entirely
+     NORMAL   → 220 px inline box in the page flow
+     FULLSCREEN → fixed overlay over everything
    ════════════════════════════════════════════════════════ */
 
-/* ── drag handle hidden on desktop ── */
-.sheet-handle { display:none }
-#mapToggleBtn { display:none }
+/* Elements only used in mobile — invisible on desktop */
+.mob-map-bar    { display: none }
+.sheet-handle   { display: none }
+#mob-map-widget { display: none }
 
-@media (max-width:700px) {
+@media (max-width: 700px) {
 
-  /* 1 ── Root: use dvh so iOS address-bar doesn't clip the viewport */
-  html { height: 100%; }
-  body {
-    height: 100dvh;          /* dynamic viewport height — iOS-safe */
-    overflow: hidden;         /* single scroll surface */
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* 2 ── Header: compact, never wraps */
-  header {
-    flex-shrink: 0;
-    padding: .5rem 1rem;
-    flex-wrap: nowrap;
-    gap: .5rem;
-  }
-  .brand      { font-size: 1.45rem }
-  .brand-sub  { display: none }
-  .loc-pill   { padding: .28rem .7rem; font-size: .7rem; white-space:nowrap }
-
-  /* 3 ── Layout: fills remaining height, map sits full-bleed behind sheet */
-  .layout {
-    display: block;           /* not grid — sidebar is absolutely placed */
-    position: relative;
-    flex: 1 1 0;              /* takes remaining height after header */
-    min-height: 0;
-    overflow: hidden;         /* clip children, not scroll */
-  }
-
-  /* 4 ── Map wrap: fills the entire layout area */
-  #map-wrap {
-    position: absolute;
-    inset: 0;                 /* top/right/bottom/left = 0 */
-    overflow: hidden;
-  }
-  #map {
-    width: 100%;
-    height: 100%;             /* fills map-wrap which fills layout */
-  }
-
-  /* 5 ── Bottom sheet: overlays the map from the bottom */
-  .sidebar {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    /* JS sets --sh; fallback = peek state */
-    height: var(--sh, 52px);
-    max-height: 88dvh;
-    min-height: 52px;
-    border-right: none;
-    border-top: 1.5px solid var(--border);
-    border-radius: 16px 16px 0 0;
-    box-shadow: 0 -6px 32px rgba(0,0,0,.13);
-    background: var(--surface);
-    z-index: 400;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    /* smooth snap animation */
-    transition: height .28s cubic-bezier(.4,0,.2,1);
-    /* allow list scroll but not page scroll */
-    touch-action: none;
-  }
-
-  /* 6 ── Drag handle — always visible, big tap target */
-  .sheet-handle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    padding: .6rem 0 .4rem;
-    cursor: grab;
-    /* extend tap area */
-    min-height: 36px;
-  }
-  .sheet-handle-bar {
-    width: 40px; height: 4px;
-    border-radius: 2px;
-    background: var(--border);
-    pointer-events: none;
-  }
-
-  /* 7 ── Sheet content: only .list scrolls; everything else is fixed chrome */
-  .search-wrap  { flex-shrink:0; padding:.4rem .75rem }
-  .featured     { display:none }
-  .cat-scroll   { flex-shrink:0 }
-  .filter-bar   { flex-shrink:0; padding:.35rem .75rem; gap:.3rem; flex-wrap:wrap }
-  .results-bar  { flex-shrink:0; padding:.28rem .75rem }
-  .adv          { flex-shrink:0 }
-
-  .list {
-    flex: 1 1 0;
-    min-height: 0;
+  /* 1. Scrollable page — no overflow:hidden trap */
+  html, body {
+    height: auto;
+    min-height: 100dvh;
+    overflow-x: hidden;
     overflow-y: auto;
-    -webkit-overflow-scrolling: touch; /* momentum scroll iOS */
-    padding: .4rem .65rem .75rem;
-    overscroll-behavior: contain;      /* stop scroll leaking to map */
+  }
+  body { display: flex; flex-direction: column; }
+
+  /* 2. Header: sticky, compact, single line */
+  header {
+    position: sticky; top: 0; z-index: 300;
+    padding: .5rem 1rem;
+    flex-wrap: nowrap; gap: .5rem;
+  }
+  .brand { font-size: 1.4rem }
+  .brand-sub { display: none }
+  .loc-pill { padding: .26rem .65rem; font-size: .68rem; white-space: nowrap; flex-shrink: 0 }
+
+  /* 3. Layout: single column normal flow */
+  .layout { display: flex; flex-direction: column; flex: 1; overflow: visible; }
+
+  /* 4. Sidebar = full page column */
+  .sidebar {
+    display: flex; flex-direction: column;
+    width: 100%; border-right: none;
+    overflow: visible; min-height: 0; flex: 1;
   }
 
-  /* 8 ── Input: prevent iOS auto-zoom (font-size must be ≥ 16px) */
-  #searchInput { font-size: 16px; padding: .48rem .9rem .48rem 2.1rem }
+  /* 5. Desktop map panel: hidden on mobile */
+  #map-wrap { display: none }
 
-  /* 9 ── Cards: proper text wrapping — the core truncation fix */
-  .card {
-    padding: .7rem .9rem .7rem 1rem;
-    /* ensure card itself doesn't overflow sheet width */
-    min-width: 0;
-    overflow: hidden;
+  /* ── MAP WIDGET ─────────────────────────────────────── */
+
+  /* Control bar above the map */
+  .mob-map-bar {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    padding: .4rem .75rem;
+    background: var(--s2);
+    border-bottom: 1px solid var(--border);
+    border-top: 1px solid var(--border);
+    gap: .5rem; flex-shrink: 0;
   }
-  .card-name {
-    font-size: .92rem;
-    white-space: normal;     /* allow wrap */
-    word-break: break-word;  /* break very long words */
-    overflow: visible;       /* don't clip */
-    text-overflow: unset;
-    min-width: 0;
-    flex: 1;
+  .mob-map-label {
+    font-size: .72rem; font-weight: 600;
+    color: var(--ink2);
+    display: flex; align-items: center; gap: .3rem;
   }
-  /* Hide descriptions on mobile — keeps cards compact */
-  .card-desc { display: none }
-
-  /* 10 ── Filter buttons: wrap gracefully on small screens */
-  .sort-row { flex-wrap: wrap; gap: .25rem }
-  .sort-btn, .ftoggle-btn { padding: .26rem .65rem; font-size: .72rem }
-  .cat-btn  { padding: .3rem .78rem; font-size: .74rem }
-
-  /* 11 ── Map legend: top-right, out of sheet's way */
-  .map-legend {
-    bottom: auto;
-    top: 10px; right: 10px;
-    font-size: .6rem;
-    padding: .32rem .52rem;
-  }
-
-  /* 12 ── Map toggle pill — shown when sheet is fully expanded */
-  #mapToggleBtn {
-    display: flex;
-    align-items: center;
-    gap: .35rem;
-    position: absolute;
-    top: 10px; left: 10px;
-    z-index: 450;
+  .mob-map-actions { display: flex; gap: .28rem; align-items: center; }
+  .mma-btn {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 100px;
-    padding: .32rem .82rem;
-    font-size: .72rem;
-    font-weight: 600;
+    padding: .2rem .58rem;
+    font-size: .67rem; font-weight: 500;
     color: var(--ink2);
-    box-shadow: var(--shadow-md);
-    cursor: pointer;
-    /* hidden by default, JS shows it */
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity .2s;
+    transition: all .15s; white-space: nowrap;
   }
-  #mapToggleBtn.visible {
-    opacity: 1;
-    pointer-events: auto;
+  .mma-btn.is-active { background: var(--red); border-color: var(--red); color: #fff; }
+  .mma-btn.close-btn.is-active { background: var(--ink); border-color: var(--ink); }
+
+  /* Widget wrapper */
+  #mob-map-widget {
+    display: block; flex-shrink: 0;
+    background: var(--surface);
+    overflow: hidden;
   }
+
+  /* Animated map box */
+  #mob-map-widget .map-inner {
+    width: 100%; height: 0;
+    overflow: hidden;
+    transition: height .3s cubic-bezier(.4,0,.2,1);
+    position: relative;
+  }
+  #mob-map-widget .map-inner #map {
+    width: 100%; height: 100%;
+  }
+  /* Legend inside widget */
+  #mob-map-widget .map-legend {
+    position: absolute;
+    bottom: 8px; right: 8px; top: auto;
+    font-size: .58rem; padding: .26rem .46rem;
+  }
+
+  /* FULLSCREEN overlay state */
+  #mob-map-widget.map-fs {
+    position: fixed; inset: 0; z-index: 800;
+    border: none; overflow: hidden;
+  }
+  #mob-map-widget.map-fs .mob-map-bar {
+    position: absolute; top: 0; left: 0; right: 0;
+    z-index: 10; box-shadow: var(--shadow-md);
+    border-top: none;
+  }
+  #mob-map-widget.map-fs .map-inner {
+    height: 100dvh !important;
+    padding-top: 41px; /* bar height */
+    box-sizing: border-box;
+  }
+
+  /* 6. Search & filters */
+  .search-wrap { padding: .52rem .75rem; flex-shrink: 0 }
+  #searchInput { font-size: 16px; padding: .5rem .9rem .5rem 2.1rem }
+  .featured    { margin: .5rem .65rem .25rem; flex-shrink: 0 }
+  .cat-scroll  { flex-shrink: 0 }
+  .filter-bar  { padding: .38rem .75rem; gap: .28rem; flex-wrap: wrap; flex-shrink: 0 }
+  .results-bar { padding: .3rem .75rem; flex-shrink: 0 }
+  .adv         { flex-shrink: 0 }
+  .sort-row    { flex-wrap: wrap; gap: .22rem }
+  .sort-btn, .ftoggle-btn { padding: .26rem .64rem; font-size: .71rem }
+  .cat-btn     { padding: .3rem .78rem; font-size: .74rem }
+
+  /* 7. List: natural flow scroll */
+  .list {
+    flex: none; overflow-y: visible;
+    padding: .45rem .65rem 2.5rem;
+    min-height: 160px;
+  }
+
+  /* 8. Cards: no truncation */
+  .card { padding: .7rem .88rem .7rem .98rem; min-width: 0; }
+  .card-name {
+    font-size: .92rem;
+    white-space: normal; word-break: break-word;
+    overflow: visible; text-overflow: unset;
+    min-width: 0; flex: 1;
+  }
+  .card-desc { display: none }
 }
 </style>
 </head>
@@ -373,14 +341,36 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
 
 <div class="layout">
   <aside class="sidebar" id="sidebar">
-    <div class="sheet-handle" id="sheetHandle">
-      <div class="sheet-handle-bar"></div>
-    </div>
 
     <div class="search-wrap">
       <span class="s-icon">&#9906;</span>
       <input id="searchInput" type="text" placeholder="Buscar restaurante, cocina, barrio..." oninput="applyFilters()"/>
     </div>
+
+    <!-- ═══ MOBILE MAP WIDGET (hidden on desktop via CSS) ═══ -->
+    <div id="mob-map-widget">
+      <div class="mob-map-bar">
+        <span class="mob-map-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Mapa
+        </span>
+        <div class="mob-map-actions">
+          <button class="mma-btn" id="mapBtnNormal"   onclick="setMapMode('normal')">Normal</button>
+          <button class="mma-btn" id="mapBtnExpand"   onclick="setMapMode('fullscreen')">&#x26F6; Expandir</button>
+          <button class="mma-btn close-btn" id="mapBtnClose" onclick="setMapMode('closed')">&#x2715; Cerrar</button>
+        </div>
+      </div>
+      <div class="map-inner">
+        <div id="map"></div>
+        <div class="map-legend">
+          <div class="leg-row"><div class="leg-dot" style="background:#9a7418"></div>Gama Alta</div>
+          <div class="leg-row"><div class="leg-dot" style="background:#b52828"></div>Gama Media</div>
+          <div class="leg-row"><div class="leg-dot" style="background:#246e42"></div>Accesible</div>
+          <div class="leg-row"><div class="leg-dot" style="background:#888"></div>Sin clasificar</div>
+        </div>
+      </div>
+    </div>
+    <!-- ═══ END MOBILE MAP WIDGET ═══ -->
 
     <div class="featured" id="featCard" onclick="focusFeatured()">
       <div class="feat-bg"></div>
@@ -451,9 +441,8 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
     </div>
   </aside>
 
+  <!-- Desktop map panel — hidden on mobile via CSS -->
   <div id="map-wrap">
-    <div id="map"></div>
-    <button id="mapToggleBtn" onclick="toggleMapFull()">🗺 Ver mapa</button>
     <div class="map-legend">
       <div class="leg-row"><div class="leg-dot" style="background:#9a7418"></div>Gama Alta</div>
       <div class="leg-row"><div class="leg-dot" style="background:#b52828"></div>Gama Media</div>
@@ -613,8 +602,22 @@ window.addEventListener('DOMContentLoaded', () => {
   );
 });
 
-function startDefault() { initMap(userLat, userLng); mergeLoad(userLat, userLng); }
-function boot() { initMap(userLat, userLng); reverseGeocode(userLat, userLng); mergeLoad(userLat, userLng); }
+function startDefault() { ensureMapPlaced(); initMap(userLat, userLng); mergeLoad(userLat, userLng); }
+function boot() { ensureMapPlaced(); initMap(userLat, userLng); reverseGeocode(userLat, userLng); mergeLoad(userLat, userLng); }
+
+/* Place #map in the correct parent before Leaflet init */
+function ensureMapPlaced() {
+  const mapEl   = document.getElementById('map');
+  const isMob   = window.innerWidth <= 700;
+  const mapInner = document.querySelector('#mob-map-widget .map-inner');
+  const mapWrap  = document.getElementById('map-wrap');
+  if (isMob && mapInner && mapEl.parentElement !== mapInner) {
+    const legend = mapInner.querySelector('.map-legend');
+    mapInner.insertBefore(mapEl, legend || null);
+  } else if (!isMob && mapWrap && mapEl.parentElement !== mapWrap) {
+    mapWrap.insertBefore(mapEl, mapWrap.firstChild);
+  }
+}
 
 /* ═══════════════ MAP ═══════════════ */
 function initMap(lat, lng) {
@@ -875,144 +878,90 @@ function haversine(la1,lo1,la2,lo2){
 function formatDist(m){return m<1000?`${Math.round(m)} m`:`${(m/1000).toFixed(1)} km`}
 function hideLoading(){document.getElementById('loading').classList.add('hidden')}
 
-/* ═══════════════════════════════════════════════════════
-   MOBILE BOTTOM SHEET
-   — Three snap states: PEEK | HALF | FULL
-   — Drag to any position, release snaps to nearest state
-   — map.invalidateSize() after every transition
-   — iOS Safari dvh-safe: heights from window.innerHeight
-   — overscroll-behavior:contain stops map panning while
-     user scrolls the list
-   ═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   MOBILE MAP WIDGET
+   States: 'closed' | 'normal' | 'fullscreen'
+   The #map div lives in #mob-map-widget on mobile, and gets
+   moved back to #map-wrap on desktop.
+   ═══════════════════════════════════════════════════════════ */
 (function () {
   const BREAKPOINT = 700;
   const isMobile   = () => window.innerWidth <= BREAKPOINT;
 
-  const sidebar    = document.getElementById('sidebar');
-  const handle     = document.getElementById('sheetHandle');
-  const list       = document.getElementById('listEl');
-  const mapToggle  = document.getElementById('mapToggleBtn');
+  const widget   = document.getElementById('mob-map-widget');
+  const mapInner = widget ? widget.querySelector('.map-inner') : null;
+  const mapWrap  = document.getElementById('map-wrap');
+  const mapEl    = document.getElementById('map');
+  const btnNormal = document.getElementById('mapBtnNormal');
+  const btnExpand = document.getElementById('mapBtnExpand');
+  const btnClose  = document.getElementById('mapBtnClose');
 
-  // Snap state indices
-  const PEEK = 0, HALF = 1, FULL = 2;
-  let state = PEEK;
+  const NORMAL_H = 220; // px for normal state
+  let mapMode = 'normal';
 
-  // Compute pixel heights from current window size (dvh-safe)
-  function snapH(s) {
-    const h = window.innerHeight;
-    if (s === PEEK) return Math.round(h * 0.14);   // ~peek: handle + search + cats
-    if (s === HALF) return Math.round(h * 0.52);   // half screen
-    return Math.round(h * 0.88);                   // almost full
-  }
-
-  function applyHeight(px, animate) {
-    if (!animate) sidebar.style.transition = 'none';
-    sidebar.style.setProperty('--sh', px + 'px');
-    if (!animate) {
-      // force reflow then re-enable transitions
-      sidebar.offsetHeight; // eslint-disable-line
-      sidebar.style.transition = '';
+  /* Move #map into the right container */
+  function placeMap() {
+    if (isMobile()) {
+      if (mapInner && mapEl.parentElement !== mapInner) {
+        const legend = mapInner.querySelector('.map-legend');
+        mapInner.insertBefore(mapEl, legend || null);
+      }
+    } else {
+      if (mapWrap && mapEl.parentElement !== mapWrap) {
+        mapWrap.insertBefore(mapEl, mapWrap.firstChild);
+      }
     }
+    setTimeout(() => { if (map) map.invalidateSize(); }, 60);
   }
 
-  function setState(s, animate = true) {
-    state = Math.max(PEEK, Math.min(FULL, s));
-    applyHeight(snapH(state), animate);
+  /* Apply a map display mode (mobile only) */
+  function applyMapMode(mode, animate) {
+    mapMode = mode;
+    if (!widget || !mapInner) return;
+    widget.classList.remove('map-fs');
+    if (!animate) { mapInner.style.transition = 'none'; }
 
-    // Show "Ver mapa" pill only when sheet is FULL (map hidden)
-    mapToggle.classList.toggle('visible', state === FULL);
+    if (mode === 'closed')     { mapInner.style.height = '0px'; }
+    else if (mode === 'normal'){ mapInner.style.height = NORMAL_H + 'px'; }
+    else if (mode === 'fullscreen') {
+      widget.classList.add('map-fs');
+      mapInner.style.height = window.innerHeight + 'px';
+    }
 
-    // Allow list to scroll only when sheet is HALF or FULL
-    list.style.overflowY = state === PEEK ? 'hidden' : 'auto';
+    if (!animate) { mapInner.offsetHeight; mapInner.style.transition = ''; }
 
-    // Leaflet needs to know its container changed size
-    setTimeout(() => { if (map) map.invalidateSize(); }, 300);
+    if (btnNormal) btnNormal.classList.toggle('is-active', mode === 'normal');
+    if (btnExpand) btnExpand.classList.toggle('is-active', mode === 'fullscreen');
+    if (btnClose)  btnClose.classList.toggle('is-active',  mode === 'closed');
+
+    setTimeout(() => { if (map) map.invalidateSize(); }, 320);
   }
 
-  // ── Tap handle: cycle PEEK → HALF → FULL → PEEK ──────────────
-  handle.addEventListener('click', () => {
+  /* Public: called from HTML onclick buttons */
+  window.setMapMode = function (mode) {
     if (!isMobile()) return;
-    setState((state + 1) % 3);
-  });
-
-  // ── Drag handle ───────────────────────────────────────────────
-  let dragY0 = 0, dragH0 = 0, dragging = false;
-
-  function dragStart(e) {
-    if (!isMobile()) return;
-    dragging = true;
-    dragY0 = e.touches ? e.touches[0].clientY : e.clientY;
-    dragH0 = sidebar.offsetHeight;
-    sidebar.style.transition = 'none';    // disable during drag
-  }
-
-  function dragMove(e) {
-    if (!dragging) return;
-    e.preventDefault();                   // stop page scroll
-    const y   = e.touches ? e.touches[0].clientY : e.clientY;
-    const dy  = dragY0 - y;              // positive = dragging up
-    const raw = dragH0 + dy;
-    const clamped = Math.max(48, Math.min(window.innerHeight * 0.9, raw));
-    sidebar.style.setProperty('--sh', clamped + 'px');
-  }
-
-  function dragEnd() {
-    if (!dragging) return;
-    dragging = false;
-    sidebar.style.transition = '';        // re-enable snap animation
-    const h  = sidebar.offsetHeight;
-    const vh = window.innerHeight;
-    // Snap: below 25 % → PEEK, 25–65 % → HALF, above 65 % → FULL
-    if      (h < vh * 0.25) setState(PEEK);
-    else if (h < vh * 0.65) setState(HALF);
-    else                    setState(FULL);
-  }
-
-  handle.addEventListener('touchstart', dragStart, { passive: true });
-  handle.addEventListener('mousedown',  dragStart);
-  document.addEventListener('touchmove', dragMove, { passive: false });
-  document.addEventListener('mousemove', dragMove);
-  document.addEventListener('touchend',  dragEnd);
-  document.addEventListener('mouseup',   dragEnd);
-
-  // ── Tap map area while FULL → collapse to HALF ────────────────
-  document.getElementById('map').addEventListener('pointerdown', () => {
-    if (isMobile() && state === FULL) setState(HALF);
-  });
-
-  // ── "Ver mapa" button → collapse to PEEK ─────────────────────
-  window.toggleMapFull = function () {
-    if (isMobile()) setState(PEEK);
+    applyMapMode(mode, true);
   };
 
-  // ── Init & resize ─────────────────────────────────────────────
+  /* Init */
   function init() {
-    if (isMobile()) {
-      setState(PEEK, false);  // no animation on first paint
-    } else {
-      // Desktop: remove any inline styles the sheet code set
-      sidebar.style.removeProperty('--sh');
-      sidebar.style.transition = '';
-      mapToggle.classList.remove('visible');
-      list.style.overflowY = '';
-      if (map) map.invalidateSize();
-    }
+    placeMap();
+    if (isMobile()) applyMapMode('normal', false);
+    else if (map) map.invalidateSize();
   }
 
-  // Re-init on orientation change / resize
+  let resizeTimer;
   window.addEventListener('resize', () => {
-    // Recalculate snap height in case viewport changed (e.g. keyboard opened)
-    if (isMobile()) applyHeight(snapH(state), false);
-    else init();
-    if (map) map.invalidateSize();
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      placeMap();
+      if (isMobile()) applyMapMode(mapMode, false);
+      else if (map) map.invalidateSize();
+    }, 80);
   });
 
-  // Small delay so Leaflet finishes initialising before first paint
-  if (document.readyState === 'complete') {
-    init();
-  } else {
-    window.addEventListener('load', init);
-  }
+  if (document.readyState === 'complete') setTimeout(init, 150);
+  else window.addEventListener('load', () => setTimeout(init, 150));
 })();
 </script>
 </body>
