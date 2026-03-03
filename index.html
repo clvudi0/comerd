@@ -193,13 +193,22 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
   #mob-map-widget.is-fullscreen .map-ctrl-bar{flex-shrink:0;box-shadow:var(--shadow-md);border-top:none}
   #mob-map-widget.is-fullscreen .map-box{flex:1;height:auto!important;transition:none}
 }
-#themeToggle{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:var(--s2);border:1.5px solid var(--border);border-radius:50%;color:var(--ink2);transition:background .2s,border-color .2s,color .2s,transform .15s;flex-shrink:0;cursor:pointer;padding:0}
-#themeToggle:hover{border-color:var(--red);color:var(--red);transform:scale(1.08)}
-#themeToggle svg{width:16px;height:16px;transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .25s;pointer-events:none}
-#themeToggle .icon-sun{display:block}
-#themeToggle .icon-moon{display:none}
-html.dark #themeToggle .icon-sun{display:none}
-html.dark #themeToggle .icon-moon{display:block}
+.themeToggle{color:var(--ink2);width:2.2em;flex-shrink:0}
+.st-sunMoonThemeToggleBtn{position:relative;cursor:pointer}
+.st-sunMoonThemeToggleBtn .themeToggleInput{opacity:0;width:100%;aspect-ratio:1;margin:0;cursor:pointer}
+.st-sunMoonThemeToggleBtn svg{position:absolute;left:0;top:0;width:100%;height:100%;transition:transform .4s ease;transform:rotate(40deg)}
+.st-sunMoonThemeToggleBtn svg .sunMoon{transform-origin:center center;transition:inherit;transform:scale(1)}
+.st-sunMoonThemeToggleBtn svg .sunRay{transform-origin:center center;transform:scale(0)}
+.st-sunMoonThemeToggleBtn svg mask>circle{transition:transform .64s cubic-bezier(.41,.64,.32,1.575);transform:translate(0px,0px)}
+.st-sunMoonThemeToggleBtn svg .sunRay2{animation-delay:.05s!important}
+.st-sunMoonThemeToggleBtn svg .sunRay3{animation-delay:.1s!important}
+.st-sunMoonThemeToggleBtn svg .sunRay4{animation-delay:.17s!important}
+.st-sunMoonThemeToggleBtn svg .sunRay5{animation-delay:.25s!important}
+.st-sunMoonThemeToggleBtn .themeToggleInput:checked+svg{transform:rotate(90deg)}
+.st-sunMoonThemeToggleBtn .themeToggleInput:checked+svg mask>circle{transform:translate(16px,-3px)}
+.st-sunMoonThemeToggleBtn .themeToggleInput:checked+svg .sunMoon{transform:scale(.55)}
+.st-sunMoonThemeToggleBtn .themeToggleInput:checked+svg .sunRay{animation:showRay1832 .4s ease 0s 1 forwards}
+@keyframes showRay1832{0%{transform:scale(0)}100%{transform:scale(1)}}
 /* ─── RANGE SLIDER ───────────────────────────────────── */
 .range-wrap{display:flex;align-items:center;gap:.5rem;padding:.42rem .65rem;border-bottom:1px solid var(--border);background:var(--s2);flex-shrink:0}
 .range-label{font-size:.68rem;color:var(--ink2);white-space:nowrap}
@@ -234,18 +243,24 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
       <div class="loc-dot"></div>
       <span id="cityName">Detectando...</span>
     </div>
-    <button id="themeToggle" aria-label="Cambiar tema" title="Cambiar tema">
-      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="4"/>
-        <line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/>
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-        <line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/>
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+    <label for="themeToggle" class="themeToggle st-sunMoonThemeToggleBtn">
+      <input type="checkbox" id="themeToggle" class="themeToggleInput"/>
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" stroke="none">
+        <mask id="moon-mask">
+          <rect x="0" y="0" width="20" height="20" fill="white"></rect>
+          <circle cx="11" cy="3" r="8" fill="black"></circle>
+        </mask>
+        <circle class="sunMoon" cx="10" cy="10" r="8" mask="url(#moon-mask)"></circle>
+        <g>
+          <circle class="sunRay sunRay1" cx="18" cy="10" r="1.5"></circle>
+          <circle class="sunRay sunRay2" cx="14" cy="16.928" r="1.5"></circle>
+          <circle class="sunRay sunRay3" cx="6" cy="16.928" r="1.5"></circle>
+          <circle class="sunRay sunRay4" cx="2" cy="10" r="1.5"></circle>
+          <circle class="sunRay sunRay5" cx="6" cy="3.1718" r="1.5"></circle>
+          <circle class="sunRay sunRay6" cx="14" cy="3.1718" r="1.5"></circle>
+        </g>
       </svg>
-      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
-      </svg>
-    </button>
+    </label>
   </div>
 </header>
 
@@ -824,16 +839,17 @@ function hideLoading(){document.getElementById('loading').classList.add('hidden'
 
 (function(){
   const DURATION=650;
-  const btn=document.getElementById('themeToggle');
+  const checkbox=document.getElementById('themeToggle');
   const html=document.documentElement;
-  if(!btn)return;
-  btn.addEventListener('click',async function(){
-    const rect=btn.getBoundingClientRect();
-    const x=rect.left+rect.width/2, y=rect.top+rect.height/2;
+  if(!checkbox)return;
+  if(html.classList.contains('dark')) checkbox.checked=true;
+  checkbox.addEventListener('change',async function(){
+    const rect=checkbox.getBoundingClientRect();
+    const x=rect.left+rect.width/2,y=rect.top+rect.height/2;
     const maxR=Math.hypot(Math.max(x,window.innerWidth-x),Math.max(y,window.innerHeight-y));
     function applyTheme(){
-      html.classList.toggle('dark');
-      localStorage.setItem('theme',html.classList.contains('dark')?'dark':'light');
+      html.classList.toggle('dark',checkbox.checked);
+      localStorage.setItem('theme',checkbox.checked?'dark':'light');
       if(typeof map!=='undefined'&&map)setTimeout(()=>map.invalidateSize(),50);
     }
     if(!document.startViewTransition){applyTheme();return;}
