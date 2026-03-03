@@ -27,7 +27,6 @@ html.dark{
   --bg:#0f0d0a;--surface:#1a1612;--s2:#211d18;
   --ink:#f0ebe0;--ink2:#b8ad9e;--ink3:#6e6358;
   --border:#2e2822;
-  --red:#e05555;
   --shadow-sm:0 1px 4px rgba(0,0,0,.3);
   --shadow-md:0 4px 20px rgba(0,0,0,.5);
   --shadow-lg:0 8px 40px rgba(0,0,0,.6);
@@ -121,7 +120,6 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
 .adv-inner{padding:.55rem .65rem;display:flex;flex-direction:column;gap:.45rem}
 .frow{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
 .fl{font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);min-width:44px}
-html.dark .fl{color:#e05555;font-weight:600}
 .chips{display:flex;gap:.26rem;flex-wrap:wrap}
 .chip{background:var(--s2);border:1px solid var(--border);border-radius:100px;padding:.19rem .6rem;font-size:.68rem;color:var(--ink2);transition:all .16s}
 .chip:hover{border-color:var(--red);color:var(--red)}
@@ -513,6 +511,16 @@ html.dark .list{ scrollbar-color:var(--border) transparent }
             <button class="chip gr" data-val="Accesible" onclick="setFilter('gama',this)">Accesible</button>
           </div>
         </div>
+        <div class="frow">
+          <span class="fl">Precio</span>
+          <div class="chips" id="precioChips">
+            <button class="chip active" data-val="Todos" onclick="setFilter('precio',this)">Todos</button>
+            <button class="chip ga" data-val="$$$$" onclick="setFilter('precio',this)">$$$$</button>
+            <button class="chip" data-val="$$$" onclick="setFilter('precio',this)">$$$</button>
+            <button class="chip" data-val="$$" onclick="setFilter('precio',this)">$$</button>
+            <button class="chip gr" data-val="$" onclick="setFilter('precio',this)">$</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -684,7 +692,7 @@ const DB = [
 let map, allRestaurants = [];
 const markerMap = new Map();
 let userLat = 18.4741, userLng = -69.9307;
-let activeFilters = {cat:'Todos', gama:'Todos', sort:'gama'};
+let activeFilters = {cat:'Todos', gama:'Todos', precio:'Todos', sort:'gama'};
 
 /* ═══════════════ BOOT ═══════════════ */
 window.addEventListener('DOMContentLoaded', () => {
@@ -702,20 +710,18 @@ function boot()         { ensurePlaced(); initMap(userLat, userLng); reverseGeoc
 
 /* ═══════════════ MAP ═══════════════ */
 function initMap(lat, lng) {
-  map = L.map('map').setView([lat, lng], 14);
-  const lightTiles = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', {
-    maxZoom: 20,
-    attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-  });
-  const darkTiles = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
-    maxZoom: 20,
-    attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-  });
-  // Pick correct tiles based on current theme
-  (document.documentElement.classList.contains('dark') ? darkTiles : lightTiles).addTo(map);
-  // Store on map instance so theme toggler can swap them
-  map._lightTiles = lightTiles;
-  map._darkTiles  = darkTiles;
+  // Bounding box of Republica Dominicana (with small padding)
+  const RD_BOUNDS = L.latLngBounds(
+    L.latLng(17.36, -72.10),  // SW corner
+    L.latLng(20.10, -68.10)   // NE corner
+  );
+  map = L.map('map', {
+    maxBounds: RD_BOUNDS,
+    maxBoundsViscosity: 0.85,  // soft bounce — map pulls back smoothly
+    minZoom: 8,                // zoom 8 = whole RD visible
+    maxZoom: 19
+  }).setView([lat, lng], 14);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {attribution: "© OpenStreetMap", maxZoom:19}).addTo(map);
   const youIcon = L.divIcon({className:'',
     html:`<div style="width:16px;height:16px;background:#b52828;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 10px rgba(0,0,0,.45);pointer-events:none"></div>`,
     iconSize:[16,16], iconAnchor:[8,8]});
@@ -787,15 +793,12 @@ function detectCat(cuisine, amenity) {
 /* ═══════════════ APPLY FILTERS ═══════════════ */
 function applyFilters() {
   const query = document.getElementById('searchInput').value.trim().toLowerCase();
-  const {cat, gama, precio, sort} = activeFilters;
+  const {cat, gama, sort} = activeFilters;
 
   const visible = allRestaurants.filter(r => {
     if (cat !== 'Todos' && r.cat !== cat) return false;
-    if (gama !== 'Todos' && r.gama !== gama) return false;
-    if (precio !== 'Todos') {
-      const rp = r.gama ? (PRECIO_MAP[r.gama]||'$$') : '$$';
-      if (rp !== precio) return false;
-    }
+    // OSM restaurants have gama:null — only exclude if a specific gama is active AND the restaurant has a known gama
+    if (gama !== 'Todos' && r.gama !== null && r.gama !== gama) return false;
     if (query && !r.name.toLowerCase().includes(query) &&
         !(r.cat||'').toLowerCase().includes(query) &&
         !(r.desc||'').toLowerCase().includes(query)) return false;
@@ -855,10 +858,13 @@ function renderList(items) {
 /* ═══════════════ MAP SYNC ═══════════════ */
 function syncMap(visible) {
   if (!map) return;
-  markerMap.forEach((m) => { if (map.hasLayer(m)) map.removeLayer(m); });
-  visible.forEach(r => {
-    const m = markerMap.get(r.id);
-    if (m) m.addTo(map);
+  const visibleIds = new Set(visible.map(r => r.id));
+  markerMap.forEach((m, id) => {
+    if (visibleIds.has(id)) {
+      if (!map.hasLayer(m)) m.addTo(map);
+    } else {
+      if (map.hasLayer(m)) map.removeLayer(m);
+    }
   });
 }
 
@@ -891,23 +897,10 @@ function createMarker(r) {
   return m;
 }
 
-let _focusedId = null;
 function focusRestaurant(r) {
   const m = markerMap.get(r.id);
   if (m && !map.hasLayer(m)) m.addTo(map);
-  if (_focusedId === r.id) {
-    // Deselect — fly back to saved zoom
-    _focusedId = null;
-    const returnZoom = map._preSelectZoom || 14;
-    map._preSelectZoom = null;
-    map.flyTo([r.lat, r.lng], returnZoom, {duration: 0.6});
-    if (m) m.closePopup();
-    return;
-  }
-  // Save current zoom before zooming in
-  map._preSelectZoom = map.getZoom();
-  _focusedId = r.id;
-  map.flyTo([r.lat, r.lng], 17, {duration: 0.7});
+  map.flyTo([r.lat, r.lng], 18, {duration:.7});
   setTimeout(() => { if (m) m.openPopup(); }, 750);
 }
 
@@ -939,7 +932,7 @@ function buildCategories() {
 }
 
 function setFilter(type, btn) {
-  const groupId = 'gamaChips';
+  const groupId = type==='gama' ? 'gamaChips' : 'precioChips';
   document.querySelectorAll(`#${groupId} .chip`).forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   activeFilters[type] = btn.dataset.val;
@@ -1165,17 +1158,6 @@ function hideLoading(){document.getElementById('loading').classList.add('hidden'
       if (typeof map !== 'undefined' && map) {
         setTimeout(() => {
           map.invalidateSize();
-          // Swap tile layers to match new theme
-          const isDarkNow = document.documentElement.classList.contains('dark');
-          if (map._lightTiles && map._darkTiles) {
-            if (isDarkNow) {
-              if (!map.hasLayer(map._darkTiles))  map.addLayer(map._darkTiles);
-              if (map.hasLayer(map._lightTiles))  map.removeLayer(map._lightTiles);
-            } else {
-              if (!map.hasLayer(map._lightTiles)) map.addLayer(map._lightTiles);
-              if (map.hasLayer(map._darkTiles))   map.removeLayer(map._darkTiles);
-            }
-          }
         }, 50);
       }
     }
