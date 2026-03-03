@@ -58,7 +58,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
 .loc-pill{display:flex;align-items:center;gap:.45rem;background:var(--s2);border:1px solid var(--border);border-radius:100px;padding:.38rem .9rem;font-size:.78rem;color:var(--gold);font-weight:500}
 .loc-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:blink 2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
-.layout{display:grid;grid-template-columns:var(--sidebar-w,360px) 1fr;flex:1;overflow:hidden;min-height:0}
+.layout{display:grid;grid-template-columns:var(--sidebar-w,360px) 5px 1fr;flex:1;overflow:hidden;min-height:0}
 .resize-handle{width:5px;background:transparent;cursor:col-resize;flex-shrink:0;position:relative;z-index:100;transition:background .15s}
 .resize-handle:hover,.resize-handle.dragging{background:var(--red)}
 .sidebar{display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--surface);overflow:hidden;min-height:0}
@@ -847,7 +847,7 @@ function hideLoading(){document.getElementById('loading').classList.add('hidden'
     if(!dragging) return;
     const diff = e.clientX - startX;
     const newW = Math.min(Math.max(startW + diff, 220), window.innerWidth * 0.6);
-    layout.style.setProperty('--sidebar-w', newW + 'px');
+    layout.style.gridTemplateColumns = newW + 'px 5px 1fr';
     if(typeof map !== 'undefined' && map) map.invalidateSize();
   });
 
