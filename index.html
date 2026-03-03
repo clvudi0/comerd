@@ -710,7 +710,17 @@ function boot()         { ensurePlaced(); initMap(userLat, userLng); reverseGeoc
 
 /* ═══════════════ MAP ═══════════════ */
 function initMap(lat, lng) {
-  map = L.map('map').setView([lat, lng], 14);
+  // Bounding box of Republica Dominicana (with small padding)
+  const RD_BOUNDS = L.latLngBounds(
+    L.latLng(17.36, -72.10),  // SW corner
+    L.latLng(20.10, -68.10)   // NE corner
+  );
+  map = L.map('map', {
+    maxBounds: RD_BOUNDS,
+    maxBoundsViscosity: 0.85,  // soft bounce — map pulls back smoothly
+    minZoom: 8,                // zoom 8 = whole RD visible
+    maxZoom: 19
+  }).setView([lat, lng], 14);
   const lightTiles = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', {
     maxZoom: 20,
     attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
