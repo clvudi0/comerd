@@ -631,12 +631,12 @@ function syncMap(visible) {
 
 function createMarker(r) {
   const color = GAMA_COLOR[r.gama] || GAMA_COLOR['Accesible'];
-  const size  = r.gama === 'Alta' ? 14 : 10;
-  const wrapSize = Math.max(size, 20);
+  const size = r.gama === 'Alta' ? 7 : 5;
+  const ws = 24;
   const icon = L.divIcon({
     className:'',
-    html:`<div style="width:${wrapSize}px;height:${wrapSize}px;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:all"><div style="width:${size}px;height:${size}px;background:${color};border:2px solid #fff;border-radius:50%;box-shadow:0 1px 5px rgba(0,0,0,.4);pointer-events:all"></div></div>`,
-    iconSize:[wrapSize,wrapSize], iconAnchor:[wrapSize/2,wrapSize/2]
+    html:`<div style="width:${ws}px;height:${ws}px;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:all"><div data-dot style="width:${size}px;height:${size}px;background:${color};border:1.5px solid rgba(255,255,255,.9);border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.35);pointer-events:all;transition:transform .2s,box-shadow .2s"></div></div>`,
+    iconSize:[ws,ws], iconAnchor:[ws/2,ws/2]
   });
   const gamaLine = r.gama ? `<div class="pop-gama" style="color:${color}">${GAMA_LABEL[r.gama]}</div>` : '';
   const m = L.marker([r.lat,r.lng],{icon,riseOnHover:true})
@@ -646,11 +646,26 @@ function createMarker(r) {
   return m;
 }
 
+let _activeDot = null;
 function focusRestaurant(r) {
+  if (_activeDot) {
+    _activeDot.style.transform = 'scale(1)';
+    _activeDot.style.boxShadow = '0 1px 4px rgba(0,0,0,.35)';
+  }
   const m = markerMap.get(r.id);
   if (m && !map.hasLayer(m)) m.addTo(map);
   map.flyTo([r.lat,r.lng], 18, {duration:.7});
-  setTimeout(() => { if (m) m.openPopup(); }, 750);
+  setTimeout(() => {
+    if (m) {
+      m.openPopup();
+      const dot = m.getElement() && m.getElement().querySelector('[data-dot]');
+      if (dot) {
+        dot.style.transform = 'scale(3)';
+        dot.style.boxShadow = '0 2px 10px rgba(0,0,0,.5)';
+        _activeDot = dot;
+      }
+    }
+  }, 750);
 }
 
 function focusFeatured() {
