@@ -474,10 +474,12 @@ function initMap(lat, lng) {
       RADIUS_M = parseInt(this.value);
       label.textContent = fmtR(RADIUS_M);
       window.radiusCircle.setRadius(RADIUS_M);
+      applyFilters();
     });
     slider.addEventListener('change', function(){
       RADIUS_M = parseInt(this.value);
       label.textContent = fmtR(RADIUS_M);
+      applyFilters();
       mergeLoad(userLat, userLng);
     });
   })();
@@ -545,6 +547,7 @@ function applyFilters() {
   const query = document.getElementById('searchInput').value.trim().toLowerCase();
   const {cat, gama, sort} = activeFilters;
   const visible = allRestaurants.filter(r => {
+    if (r.dist > RADIUS_M) return false;
     if (cat !== 'Todos' && r.cat !== cat) return false;
     if (gama !== 'Todos' && r.gama !== null && r.gama !== gama) return false;
     if (query && !r.name.toLowerCase().includes(query) &&
