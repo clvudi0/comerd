@@ -369,9 +369,6 @@ html.dark #themeToggle .icon-sun{ display:none }
 html.dark #themeToggle .icon-moon{ display:block }
 
 /* dark mode loading */
-/* dark mode: invert OSM tiles */
-html.dark .leaflet-tile{ filter:invert(.92) hue-rotate(180deg) saturate(.7) brightness(.85) }
-html.dark .leaflet-container{ background:#111 }
 html.dark #loading{ background:var(--bg) }
 /* dark mode search input */
 html.dark #searchInput{ color:var(--ink) }
@@ -682,37 +679,7 @@ const DB = [
   {id:'ff04',name:"Wendy's - Abraham Lincoln", cat:'Fast Food',  gama:'Accesible', addr:'Av. Abraham Lincoln, Santo Domingo',         phone:'',             lat:18.4830,lng:-69.9390, desc:"12 ubicaciones en SD. El Frosty y el Dave's Single son los mas pedidos.", trend:false},
   {id:'ff05',name:'Pollos Victorina',        cat:'Fast Food',    gama:'Accesible', addr:'Varias ubicaciones, Santo Domingo',          phone:'',             lat:18.4750,lng:-69.9350, desc:'Cadena dominicana favorita. Burgers, wraps y pollo frito al mejor precio local.', trend:true},
   {id:'ff06',name:'Pica Pollo',              cat:'Fast Food',    gama:'Accesible', addr:'Av. Tiradentes 25, Santo Domingo',           phone:'',             lat:18.4793,lng:-69.9270, desc:'Pollo frito crujiente con tostones o moro. Menos de 4 dolares. Lo mas autentico del pais.', trend:true},
-  {id:'ff07',name:"McDonald's - 27 de Febrero",cat:'Fast Food',gama:'Accesible',addr:'Av. 27 de Febrero, SD',phone:'',lat:18.4790,lng:-69.9200,desc:"McDonald's drive-thru.",trend:false},
-  {id:'ff08',name:"McDonald's - Galeria 360",cat:'Fast Food',gama:'Accesible',addr:'Galeria 360, Churchill',phone:'',lat:18.4778,lng:-69.9480,desc:"McDonald's Galeria 360.",trend:false},
-  {id:'ff09',name:"McDonald's - Sambil",cat:'Fast Food',gama:'Accesible',addr:'Sambil, JFK',phone:'',lat:18.4870,lng:-69.9370,desc:"McDonald's Sambil.",trend:false},
-  {id:'ff10',name:"McDonald's - Agora Mall",cat:'Fast Food',gama:'Accesible',addr:'Agora Mall, JFK',phone:'',lat:18.4825,lng:-69.9418,desc:"McDonald's Agora.",trend:false},
-  {id:'ff11',name:"McDonald's - Megacentro",cat:'Fast Food',gama:'Accesible',addr:'Megacentro',phone:'',lat:18.4740,lng:-69.8750,desc:"McDonald's Megacentro.",trend:false},
-  {id:'ff12',name:"McDonald's - SD Este",cat:'Fast Food',gama:'Accesible',addr:'Av. Charles de Gaulle',phone:'',lat:18.4850,lng:-69.8600,desc:"McDonald's SD Este.",trend:false},
-  {id:'ff13',name:"Burger King - 27 de Febrero",cat:'Fast Food',gama:'Accesible',addr:'Av. 27 de Febrero',phone:'',lat:18.4795,lng:-69.9350,desc:'BK drive-thru.',trend:false},
-  {id:'ff14',name:"Burger King - Sambil",cat:'Fast Food',gama:'Accesible',addr:'Sambil',phone:'',lat:18.4868,lng:-69.9365,desc:'BK Sambil.',trend:false},
-  {id:'ff15',name:"Burger King - Galeria 360",cat:'Fast Food',gama:'Accesible',addr:'Galeria 360',phone:'',lat:18.4780,lng:-69.9482,desc:'BK Galeria 360.',trend:false},
-  {id:'ff16',name:"Burger King - Megacentro",cat:'Fast Food',gama:'Accesible',addr:'Megacentro',phone:'',lat:18.4742,lng:-69.8748,desc:'BK Megacentro.',trend:false},
-  {id:'ff17',name:"Burger King - Agora Mall",cat:'Fast Food',gama:'Accesible',addr:'Agora Mall',phone:'',lat:18.4826,lng:-69.9420,desc:'BK Agora.',trend:false},
-  {id:'ff18',name:"Burger King - Acropolis",cat:'Fast Food',gama:'Accesible',addr:'Acropolis Center',phone:'',lat:18.4617,lng:-69.9451,desc:'BK Acropolis.',trend:false},
-  {id:'ff19',name:"KFC - Sambil",cat:'Fast Food',gama:'Accesible',addr:'Sambil',phone:'',lat:18.4869,lng:-69.9368,desc:'KFC Sambil.',trend:false},
-  {id:'ff20',name:"KFC - Galeria 360",cat:'Fast Food',gama:'Accesible',addr:'Galeria 360',phone:'',lat:18.4779,lng:-69.9483,desc:'KFC Galeria 360.',trend:false},
-  {id:'ff21',name:"KFC - Megacentro",cat:'Fast Food',gama:'Accesible',addr:'Megacentro',phone:'',lat:18.4741,lng:-69.8749,desc:'KFC Megacentro.',trend:false},
-  {id:'ff22',name:"KFC - Agora Mall",cat:'Fast Food',gama:'Accesible',addr:'Agora Mall',phone:'',lat:18.4824,lng:-69.9416,desc:'KFC Agora.',trend:false},
-  {id:'ff23',name:"KFC - 27 de Febrero",cat:'Fast Food',gama:'Accesible',addr:'Av. 27 de Febrero',phone:'',lat:18.4793,lng:-69.9198,desc:'KFC drive-thru.',trend:false},
-  {id:'ff24',name:"KFC - Acropolis",cat:'Fast Food',gama:'Accesible',addr:'Acropolis Center',phone:'',lat:18.4618,lng:-69.9452,desc:'KFC Acropolis.',trend:false},
-  {id:'ff25',name:"Wendy's - Sambil",cat:'Fast Food',gama:'Accesible',addr:'Sambil',phone:'',lat:18.4867,lng:-69.9362,desc:"Wendy's Sambil.",trend:false},
-  {id:'ff26',name:"Wendy's - Galeria 360",cat:'Fast Food',gama:'Accesible',addr:'Galeria 360',phone:'',lat:18.4776,lng:-69.9481,desc:"Wendy's Galeria 360.",trend:false},
-  {id:'ff27',name:"Wendy's - Agora Mall",cat:'Fast Food',gama:'Accesible',addr:'Agora Mall',phone:'',lat:18.4823,lng:-69.9415,desc:"Wendy's Agora.",trend:false},
-  {id:'ff28',name:"Wendy's - Megacentro",cat:'Fast Food',gama:'Accesible',addr:'Megacentro',phone:'',lat:18.4743,lng:-69.8751,desc:"Wendy's Megacentro.",trend:false},
-  {id:'ff29',name:"Little Caesars - Piantini",cat:'Fast Food',gama:'Accesible',addr:'Av. Abraham Lincoln, Piantini',phone:'',lat:18.4815,lng:-69.9388,desc:'Pizza al instante y pan loco.',trend:false},
-  {id:'ff30',name:"Little Caesars - Sambil",cat:'Fast Food',gama:'Accesible',addr:'Sambil',phone:'',lat:18.4866,lng:-69.9360,desc:'Little Caesars Sambil.',trend:false},
-  {id:'ff31',name:"Little Caesars - Galeria 360",cat:'Fast Food',gama:'Accesible',addr:'Galeria 360',phone:'',lat:18.4777,lng:-69.9479,desc:'Little Caesars Galeria 360.',trend:false},
-  {id:'ff32',name:"Little Caesars - Agora Mall",cat:'Fast Food',gama:'Accesible',addr:'Agora Mall',phone:'',lat:18.4822,lng:-69.9413,desc:'Little Caesars Agora.',trend:false},
-  {id:'ff33',name:"Little Caesars - Megacentro",cat:'Fast Food',gama:'Accesible',addr:'Megacentro',phone:'',lat:18.4739,lng:-69.8747,desc:'Little Caesars Megacentro.',trend:false},
-  {id:'ff34',name:"Little Caesars - 27 de Febrero",cat:'Fast Food',gama:'Accesible',addr:'Av. 27 de Febrero',phone:'',lat:18.4791,lng:-69.9195,desc:'Little Caesars drive-thru.',trend:false},
-  {id:'ff35',name:"Little Caesars - Los Prados",cat:'Fast Food',gama:'Accesible',addr:'Los Prados, SD Norte',phone:'',lat:18.5020,lng:-69.9280,desc:'Little Caesars Los Prados.',trend:false},
-  {id:'ff36',name:"Little Caesars - Acropolis",cat:'Fast Food',gama:'Accesible',addr:'Acropolis Center',phone:'',lat:18.4619,lng:-69.9453,desc:'Little Caesars Acropolis.',trend:false},
-  {id:'ff37',name:"Little Caesars - Alma Rosa",cat:'Fast Food',gama:'Accesible',addr:'Alma Rosa, SD Este',phone:'',lat:18.4760,lng:-69.8520,desc:'Little Caesars Alma Rosa.',trend:false},
+
   // ── BARES
   {id:'ba01',name:'Room 504 (sobre La Cassina)', cat:'Bares',   gama:'Alta',      addr:'Av. Abraham Lincoln 1001, Piantini (2do piso)', phone:'809-563-2400', lat:18.4842,lng:-69.9396, desc:'El club lounge mas exclusivo de SD. DJs internacionales de jueves a domingo sobre el mejor restaurante del pais.', trend:true},
   {id:'ba02',name:'El Buho Cafe',            cat:'Bares',        gama:'Media',     addr:'Zona Colonial, Santo Domingo',               phone:'',             lat:18.4736,lng:-69.8850, desc:'Bar de personalidad propia. Cocktails artesanales y musica en vivo. El dueno atiende personalmente.', trend:false},
@@ -744,9 +711,19 @@ function boot()         { ensurePlaced(); initMap(userLat, userLng); reverseGeoc
 /* ═══════════════ MAP ═══════════════ */
 function initMap(lat, lng) {
   map = L.map('map').setView([lat, lng], 14);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution:'© <a href="https://osm.org/copyright">OpenStreetMap</a>', maxZoom:19
-  }).addTo(map);
+  const lightTiles = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', {
+    maxZoom: 20,
+    attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  });
+  const darkTiles = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
+    maxZoom: 20,
+    attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  });
+  // Pick correct tiles based on current theme
+  (document.documentElement.classList.contains('dark') ? darkTiles : lightTiles).addTo(map);
+  // Store on map instance so theme toggler can swap them
+  map._lightTiles = lightTiles;
+  map._darkTiles  = darkTiles;
   const youIcon = L.divIcon({className:'',
     html:`<div style="width:16px;height:16px;background:#b52828;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 10px rgba(0,0,0,.45);pointer-events:none"></div>`,
     iconSize:[16,16], iconAnchor:[8,8]});
@@ -818,15 +795,12 @@ function detectCat(cuisine, amenity) {
 /* ═══════════════ APPLY FILTERS ═══════════════ */
 function applyFilters() {
   const query = document.getElementById('searchInput').value.trim().toLowerCase();
-  const {cat, gama, precio, sort} = activeFilters;
+  const {cat, gama, sort} = activeFilters;
 
   const visible = allRestaurants.filter(r => {
     if (cat !== 'Todos' && r.cat !== cat) return false;
-    if (gama !== 'Todos' && r.gama !== gama) return false;
-    if (precio !== 'Todos') {
-      const rp = r.gama ? (PRECIO_MAP[r.gama]||'$$') : '$$';
-      if (rp !== precio) return false;
-    }
+    // OSM restaurants have gama:null — only exclude if a specific gama is active AND the restaurant has a known gama
+    if (gama !== 'Todos' && r.gama !== null && r.gama !== gama) return false;
     if (query && !r.name.toLowerCase().includes(query) &&
         !(r.cat||'').toLowerCase().includes(query) &&
         !(r.desc||'').toLowerCase().includes(query)) return false;
@@ -886,10 +860,13 @@ function renderList(items) {
 /* ═══════════════ MAP SYNC ═══════════════ */
 function syncMap(visible) {
   if (!map) return;
-  markerMap.forEach((m) => { if (map.hasLayer(m)) map.removeLayer(m); });
-  visible.forEach(r => {
-    const m = markerMap.get(r.id);
-    if (m) m.addTo(map);
+  const visibleIds = new Set(visible.map(r => r.id));
+  markerMap.forEach((m, id) => {
+    if (visibleIds.has(id)) {
+      if (!map.hasLayer(m)) m.addTo(map);
+    } else {
+      if (map.hasLayer(m)) map.removeLayer(m);
+    }
   });
 }
 
@@ -1181,7 +1158,20 @@ function hideLoading(){document.getElementById('loading').classList.add('hidden'
       localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
       /* Leaflet map may need re-tile after dark filter change */
       if (typeof map !== 'undefined' && map) {
-        setTimeout(() => map.invalidateSize(), 50);
+        setTimeout(() => {
+          map.invalidateSize();
+          // Swap tile layers to match new theme
+          const isDarkNow = document.documentElement.classList.contains('dark');
+          if (map._lightTiles && map._darkTiles) {
+            if (isDarkNow) {
+              if (!map.hasLayer(map._darkTiles))  map.addLayer(map._darkTiles);
+              if (map.hasLayer(map._lightTiles))  map.removeLayer(map._lightTiles);
+            } else {
+              if (!map.hasLayer(map._lightTiles)) map.addLayer(map._lightTiles);
+              if (map.hasLayer(map._darkTiles))   map.removeLayer(map._darkTiles);
+            }
+          }
+        }, 50);
       }
     }
 
