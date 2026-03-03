@@ -495,6 +495,15 @@ function initMap(lat, lng) {
   L.marker([lat,lng],{icon:youIcon}).addTo(map).bindPopup('<b>Tu estas aqui</b>');
   window.radiusCircle = L.circle([lat,lng],{radius:RADIUS_M,color:'#b52828',fillColor:'#b52828',fillOpacity:.04,weight:1,dashArray:'5'}).addTo(map);
 
+  // Reset active dot when clicking empty map area
+  map.on('click', function() {
+    if (_activeDot) {
+      _activeDot.style.transform = 'scale(1)';
+      _activeDot.style.boxShadow = '0 1px 4px rgba(0,0,0,.35)';
+      _activeDot = null;
+    }
+  });
+
   // Init slider now that circle exists
   (function(){
     const slider = document.getElementById('radiusSlider');
