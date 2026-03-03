@@ -514,16 +514,7 @@ html.dark .list{ scrollbar-color:var(--border) transparent }
             <button class="chip gr" data-val="Accesible" onclick="setFilter('gama',this)">Accesible</button>
           </div>
         </div>
-        <div class="frow">
-          <span class="fl">Precio</span>
-          <div class="chips" id="precioChips">
-            <button class="chip active" data-val="Todos" onclick="setFilter('precio',this)">Todos</button>
-            <button class="chip ga" data-val="$$$$" onclick="setFilter('precio',this)">$$$$</button>
-            <button class="chip" data-val="$$$" onclick="setFilter('precio',this)">$$$</button>
-            <button class="chip" data-val="$$" onclick="setFilter('precio',this)">$$</button>
-            <button class="chip gr" data-val="$" onclick="setFilter('precio',this)">$</button>
-          </div>
-        </div>
+
       </div>
     </div>
 
@@ -695,7 +686,7 @@ const DB = [
 let map, allRestaurants = [];
 const markerMap = new Map();
 let userLat = 18.4741, userLng = -69.9307;
-let activeFilters = {cat:'Todos', gama:'Todos', precio:'Todos', sort:'gama'};
+let activeFilters = {cat:'Todos', gama:'Todos', sort:'gama'};
 
 /* ═══════════════ BOOT ═══════════════ */
 window.addEventListener('DOMContentLoaded', () => {
@@ -788,15 +779,11 @@ function detectCat(cuisine, amenity) {
 /* ═══════════════ APPLY FILTERS ═══════════════ */
 function applyFilters() {
   const query = document.getElementById('searchInput').value.trim().toLowerCase();
-  const {cat, gama, precio, sort} = activeFilters;
+  const {cat, gama, sort} = activeFilters;
 
   const visible = allRestaurants.filter(r => {
     if (cat !== 'Todos' && r.cat !== cat) return false;
     if (gama !== 'Todos' && r.gama !== gama) return false;
-    if (precio !== 'Todos') {
-      const rp = r.gama ? (PRECIO_MAP[r.gama]||'$$') : '$$';
-      if (rp !== precio) return false;
-    }
     if (query && !r.name.toLowerCase().includes(query) &&
         !(r.cat||'').toLowerCase().includes(query) &&
         !(r.desc||'').toLowerCase().includes(query)) return false;
@@ -927,7 +914,7 @@ function buildCategories() {
 }
 
 function setFilter(type, btn) {
-  const groupId = type==='gama' ? 'gamaChips' : 'precioChips';
+  const groupId = 'gamaChips';
   document.querySelectorAll(`#${groupId} .chip`).forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   activeFilters[type] = btn.dataset.val;
@@ -954,7 +941,7 @@ function updateBadges(cat, gama) {
   let n = 0;
   if (cat!=='Todos') n++;
   if (gama!=='Todos') n++;
-  if (activeFilters.precio!=='Todos') n++;
+
   const el = document.getElementById('activeCt');
   el.textContent = n; el.classList.toggle('on', n>0);
   const parts = [];
@@ -1129,7 +1116,7 @@ function hideLoading(){document.getElementById('loading').classList.add('hidden'
 
   /* ── Restore saved preference on load ── */
   const saved = localStorage.getItem('theme');
-  if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+  if (saved === 'dark') {
     html.classList.add('dark');
   }
 
