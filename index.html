@@ -504,13 +504,13 @@ let $list, $count, $search, $filterSummary, $activeCt, $cityName, $loadMsg;
 
 window.addEventListener('DOMContentLoaded', () => {
   // Cache DOM refs once
-  $list = $list;
-  $count = $count;
-  $search = $search;
-  $filterSummary = $filterSummary;
-  $activeCt = $activeCt;
-  $cityName = $cityName;
-  $loadMsg = $loadMsg;
+  $list        = document.getElementById('listEl');
+  $count       = document.getElementById('resultsCount');
+  $search      = document.getElementById('searchInput');
+  $filterSummary = document.getElementById('filterSummary');
+  $activeCt    = document.getElementById('activeCt');
+  $cityName    = document.getElementById('cityName');
+  $loadMsg     = document.getElementById('loadMsg');
 
   buildCategories();
   // Cache DOM collections after build
@@ -575,7 +575,7 @@ async function reverseGeocode(lat, lng) {
 
 async let _osmCache = {lat:null, lng:null, radius:null, data:[]};
 
-function mergeLoad(lat, lng) {
+async function mergeLoad(lat, lng) {
   if($loadMsg) $loadMsg.textContent = 'Cargando restaurantes...';
   const dbWithDist = DB.map(r => ({...r, dist:haversine(lat,lng,r.lat,r.lng), isDB:true}));
   let osmNew = [];
