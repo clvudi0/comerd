@@ -164,19 +164,76 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
 .pop-gama{font-size:.66rem;font-weight:600;margin-top:.1rem}
 .pop-addr{font-size:.66rem;color:var(--ink3);margin-top:.08rem}
 
-/* MAP LEGEND */
+/* MAP WRAP (desktop) */
+#map-wrap{position:relative;flex:1;min-height:0;overflow:hidden}
 .map-legend{position:absolute;bottom:26px;right:10px;z-index:500;background:rgba(255,253,248,.94);border:1px solid var(--border);border-radius:8px;padding:.48rem .68rem;font-size:.63rem;color:var(--ink2);backdrop-filter:blur(4px);box-shadow:var(--shadow-sm)}
 .leg-row{display:flex;align-items:center;gap:.38rem;margin-bottom:.18rem}
 .leg-row:last-child{margin-bottom:0}
 .leg-dot{width:10px;height:10px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3);flex-shrink:0}
 
-/* RESPONSIVE */
+/* ═══ MOBILE — bottom-sheet layout ═══ */
 @media(max-width:700px){
-  html,body{overflow:auto}
-  .layout{grid-template-columns:1fr;overflow:visible}
-  #map{height:280px!important}
-  .sidebar{max-height:580px}
+  html,body{overflow:hidden;height:100%;height:100dvh}
+  body{height:100dvh}
+
+  header{padding:.5rem 1rem;gap:.5rem}
+  .brand{font-size:1.5rem}
+  .brand-sub{display:none}
+  .loc-pill{padding:.3rem .75rem;font-size:.72rem}
+
+  .layout{display:block;position:relative;flex:1;min-height:0;overflow:hidden}
+  #map-wrap{position:absolute;inset:0}
+  #map{width:100%;height:100%}
+
+  /* Bottom sheet */
+  .sidebar{
+    position:absolute;bottom:0;left:0;right:0;
+    height:var(--sheet-h,210px);
+    max-height:85dvh;
+    border-right:none;
+    border-top:1px solid var(--border);
+    border-radius:18px 18px 0 0;
+    box-shadow:0 -4px 30px rgba(0,0,0,.14);
+    z-index:400;overflow:hidden;
+    display:flex;flex-direction:column;
+    transition:height .3s cubic-bezier(.4,0,.2,1);
+    background:var(--surface);
+    touch-action:none;
+  }
+  .sidebar.sheet-peek { --sheet-h:210px }
+  .sidebar.sheet-half { --sheet-h:58dvh }
+  .sidebar.sheet-full { --sheet-h:85dvh }
+
+  /* Drag handle */
+  .sheet-handle{display:flex;align-items:center;justify-content:center;padding:.55rem 0 .25rem;flex-shrink:0;cursor:pointer}
+  .sheet-handle-bar{width:36px;height:4px;border-radius:2px;background:var(--border)}
+
+  .featured{display:none}
+
+  .search-wrap{padding:.4rem .75rem}
+  #searchInput{padding:.48rem .9rem .48rem 2rem;font-size:.88rem}
+
+  .cat-btn{padding:.32rem .82rem;font-size:.76rem}
+  .filter-bar{padding:.35rem .75rem;gap:.3rem}
+  .sort-btn,.ftoggle-btn{padding:.26rem .68rem;font-size:.72rem}
+  .results-bar{padding:.28rem .75rem}
+
+  .card{padding:.75rem .95rem .75rem 1.05rem}
+  .card-name{font-size:.93rem}
+  .card-desc{display:none}
+
+  .map-legend{bottom:auto;top:10px;right:10px;font-size:.6rem;padding:.35rem .55rem}
+
+  .list{-webkit-overflow-scrolling:touch;padding:.35rem .6rem .5rem}
+
+  #mapToggleBtn{
+    display:flex;position:absolute;top:10px;left:10px;z-index:450;
+    background:var(--surface);border:1px solid var(--border);border-radius:100px;
+    padding:.35rem .85rem;font-size:.72rem;font-weight:600;color:var(--ink2);
+    align-items:center;gap:.35rem;box-shadow:var(--shadow-md);cursor:pointer;
+  }
 }
+#mapToggleBtn{display:none}
 </style>
 </head>
 <body>
@@ -200,7 +257,10 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
 </header>
 
 <div class="layout">
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
+    <div class="sheet-handle" id="sheetHandle">
+      <div class="sheet-handle-bar"></div>
+    </div>
 
     <div class="search-wrap">
       <span class="s-icon">&#9906;</span>
@@ -276,8 +336,9 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
     </div>
   </aside>
 
-  <div style="position:relative;flex:1;min-height:0;overflow:hidden">
+  <div id="map-wrap">
     <div id="map"></div>
+    <button id="mapToggleBtn" onclick="toggleMapFull()">🗺 Ver mapa</button>
     <div class="map-legend">
       <div class="leg-row"><div class="leg-dot" style="background:#9a7418"></div>Gama Alta</div>
       <div class="leg-row"><div class="leg-dot" style="background:#b52828"></div>Gama Media</div>
@@ -698,6 +759,102 @@ function haversine(la1,lo1,la2,lo2){
 }
 function formatDist(m){return m<1000?`${Math.round(m)} m`:`${(m/1000).toFixed(1)} km`}
 function hideLoading(){document.getElementById('loading').classList.add('hidden')}
+
+/* ═══════════════ MOBILE BOTTOM SHEET ═══════════════ */
+(function(){
+  const isMobile = () => window.innerWidth <= 700;
+  const sidebar  = document.getElementById('sidebar');
+  const handle   = document.getElementById('sheetHandle');
+  const STATES   = ['sheet-peek','sheet-half','sheet-full'];
+  let   stateIdx = 0;
+
+  function setState(idx){
+    stateIdx = Math.max(0, Math.min(idx, STATES.length-1));
+    STATES.forEach((s,i) => sidebar.classList.toggle(s, i===stateIdx));
+    // refresh map after sheet animates
+    setTimeout(()=>{ if(map) map.invalidateSize(); }, 320);
+  }
+
+  // Tap handle → cycle through states
+  handle.addEventListener('click', ()=>{
+    if(!isMobile()) return;
+    setState((stateIdx+1) % STATES.length);
+  });
+
+  // Drag handle
+  let dragStartY=0, dragStartH=0, dragging=false;
+  function onDragStart(e){
+    if(!isMobile()) return;
+    dragging=true;
+    dragStartY = e.touches ? e.touches[0].clientY : e.clientY;
+    dragStartH = sidebar.offsetHeight;
+    document.addEventListener('mousemove', onDragMove);
+    document.addEventListener('touchmove', onDragMove, {passive:false});
+    document.addEventListener('mouseup',   onDragEnd);
+    document.addEventListener('touchend',  onDragEnd);
+  }
+  function onDragMove(e){
+    if(!dragging) return;
+    e.preventDefault();
+    const y = e.touches ? e.touches[0].clientY : e.clientY;
+    const newH = dragStartH - (y - dragStartY);
+    const maxH = window.innerHeight * 0.85;
+    const minH = 100;
+    sidebar.style.height = Math.min(maxH, Math.max(minH, newH)) + 'px';
+    sidebar.style.transition = 'none';
+  }
+  function onDragEnd(){
+    if(!dragging) return;
+    dragging = false;
+    sidebar.style.transition = '';
+    const h = sidebar.offsetHeight;
+    const vh = window.innerHeight;
+    sidebar.style.height = '';
+    // Snap to nearest state
+    if(h < vh*0.25)       setState(0);
+    else if(h < vh*0.60)  setState(1);
+    else                   setState(2);
+    document.removeEventListener('mousemove', onDragMove);
+    document.removeEventListener('touchmove', onDragMove);
+    document.removeEventListener('mouseup',   onDragEnd);
+    document.removeEventListener('touchend',  onDragEnd);
+  }
+  handle.addEventListener('mousedown',  onDragStart);
+  handle.addEventListener('touchstart', onDragStart, {passive:true});
+
+  // When user scrolls list to top and tries to go further up → collapse
+  const list = document.getElementById('listEl');
+  list.addEventListener('scroll', ()=>{
+    if(list.scrollTop===0 && stateIdx===2){
+      // don't auto-collapse; let them manually drag
+    }
+  });
+
+  // Apply initial state on mobile
+  function initMobile(){
+    if(isMobile()){
+      sidebar.classList.add('sheet-peek');
+      stateIdx=0;
+    } else {
+      STATES.forEach(s=>sidebar.classList.remove(s));
+    }
+  }
+  window.addEventListener('resize', initMobile);
+  initMobile();
+
+  // Map toggle button
+  window.toggleMapFull = function(){
+    if(!isMobile()) return;
+    if(stateIdx===0) setState(0); // already peeked, just ensure map visible
+    else setState(0);
+    setTimeout(()=>{ if(map) map.invalidateSize(); }, 320);
+  };
+
+  // Tapping map area collapses sheet to peek so map is visible
+  document.getElementById('map').addEventListener('click', ()=>{
+    if(isMobile() && stateIdx===2) setState(1);
+  });
+})();
 </script>
 </body>
 </html>
