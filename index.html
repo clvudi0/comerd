@@ -36,9 +36,7 @@ html.dark{
   --shadow-md:0 4px 20px rgba(0,0,0,.5);
   --shadow-lg:0 8px 40px rgba(0,0,0,.6);
 }
-::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal;}
-::view-transition-old(root){z-index:1}::view-transition-new(root){z-index:9999}
-html.dark::view-transition-old(root){z-index:9999}html.dark::view-transition-new(root){z-index:1}
+
 .sort-btn,.ftoggle-btn{transition:color .17s,border-color .17s,background .17s}
 .cat-btn{transition:all .17s}
 .chip{transition:all .16s}
@@ -847,7 +845,7 @@ function hideLoading(){document.getElementById('loading').classList.add('hidden'
 })();
 
 (function(){
-  const DURATION=650;
+  const DURATION=350; // kept for reference
   const checkbox=document.getElementById('themeToggle');
   const html=document.documentElement;
   if(!checkbox)return;
@@ -861,20 +859,30 @@ function hideLoading(){document.getElementById('loading').classList.add('hidden'
       localStorage.setItem('theme',checkbox.checked?'dark':'light');
       if(typeof map!=='undefined'&&map)setTimeout(()=>map.invalidateSize(),50);
     }
-    if(!document.startViewTransition){applyTheme();return;}
-    // Disable CSS transitions during view-transition to prevent freeze
-    const noTr = document.createElement('style');
-    noTr.textContent = '*{transition:none!important}';
-    document.head.appendChild(noTr);
-    const transition=document.startViewTransition(()=>applyTheme());
-    await transition.ready;
-    document.documentElement.animate(
-      {clipPath:[`circle(0px at ${x}px ${y}px)`,`circle(${maxR}px at ${x}px ${y}px)`]},
-      {duration:DURATION,easing:'cubic-bezier(0.4,0,0.2,1)',pseudoElement:'::view-transition-new(root)'}
-    );
-    await transition.finished;
-    // Re-enable transitions after animation completes
-    document.head.removeChild(noTr);
+    // Hide map during transition to prevent freeze (Leaflet is heavy)
+    const mapEl = document.getElementById('map-wrap');
+    const mobMap = document.getElementById('mapBox');
+    if(mapEl) mapEl.style.visibility='hidden';
+    if(mobMap) mobMap.style.visibility='hidden';
+
+    applyTheme();
+
+    // Simple fade instead of heavy clip-path
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;pointer-events:none;background:'+
+      (checkbox.checked ? '#0f0d0a' : '#f6f1e9')+';opacity:1;transition:opacity 350ms ease';
+    document.body.appendChild(overlay);
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        overlay.style.opacity = '0';
+        overlay.addEventListener('transitionend', ()=>{
+          document.body.removeChild(overlay);
+          if(mapEl) mapEl.style.visibility='';
+          if(mobMap) mobMap.style.visibility='';
+          if(typeof map!=='undefined'&&map) map.invalidateSize();
+        }, {once:true});
+      });
+    });
   });
 })();
 
