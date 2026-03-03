@@ -39,6 +39,15 @@ html.dark{
 ::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal;}
 ::view-transition-old(root){z-index:1}::view-transition-new(root){z-index:9999}
 html.dark::view-transition-old(root){z-index:9999}html.dark::view-transition-new(root){z-index:1}
+*{transition:background-color .4s ease,border-color .4s ease,color .4s ease,box-shadow .4s ease}
+.sort-btn,.ftoggle-btn,.cat-btn,.chip,.card,.featured,.map-state-btn,#themeToggle,.ld-fill,.loc-dot,.card::before,.mdot{transition:unset}
+.sort-btn,.ftoggle-btn{transition:color .17s,border-color .17s,background .17s}
+.cat-btn{transition:all .17s}
+.chip{transition:all .16s}
+.card{transition:border-color .2s,box-shadow .2s,transform .2s,background-color .4s}
+.card::before{transition:opacity .2s,background .2s}
+.mdot{transition:transform .2s,box-shadow .2s}
+#themeToggle{transition:background .2s,border-color .2s,color .2s,transform .15s}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;height:100vh;overflow:hidden;}
 button{font-family:'Outfit',sans-serif;cursor:pointer}
@@ -191,6 +200,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
 #themeToggle .icon-moon{display:none}
 html.dark #themeToggle .icon-sun{display:none}
 html.dark #themeToggle .icon-moon{display:block}
+
 /* ─── RANGE SLIDER ───────────────────────────────────── */
 .range-wrap{display:flex;align-items:center;gap:.5rem;padding:.42rem .65rem;border-bottom:1px solid var(--border);background:var(--s2);flex-shrink:0}
 .range-label{font-size:.68rem;color:var(--ink2);white-space:nowrap}
@@ -212,7 +222,7 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
   <div class="ld-brand">Come<b>RD</b></div>
   <div class="ld-sub">Descubre lo mejor de Republica Dominicana</div>
   <div class="ld-bar"><div class="ld-fill"></div></div>
-  <div style="font-size:.74rem;color:var(--ink3)" id="loadMsg">Obteniendo tu ubicacion...</div>
+
 </div>
 
 <header>
@@ -814,7 +824,7 @@ function hideLoading(){document.getElementById('loading').classList.add('hidden'
 })();
 
 (function(){
-  const DURATION=400;
+  const DURATION=600;
   const btn=document.getElementById('themeToggle');
   const html=document.documentElement;
   if(!btn)return;
@@ -832,7 +842,7 @@ function hideLoading(){document.getElementById('loading').classList.add('hidden'
     await transition.ready;
     document.documentElement.animate(
       {clipPath:[`circle(0px at ${x}px ${y}px)`,`circle(${maxR}px at ${x}px ${y}px)`]},
-      {duration:DURATION,easing:'ease-in-out',pseudoElement:'::view-transition-new(root)'}
+      {duration:DURATION,easing:'cubic-bezier(0.4,0,0.2,1)',pseudoElement:'::view-transition-new(root)'}
     );
   });
 })();
