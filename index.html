@@ -712,7 +712,7 @@ function initMap(lat, lng) {
     html:`<div style="width:16px;height:16px;background:#b52828;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 10px rgba(0,0,0,.45);pointer-events:none"></div>`,
     iconSize:[16,16], iconAnchor:[8,8]});
   L.marker([lat,lng],{icon:youIcon}).addTo(map).bindPopup('<b>Tu estas aqui</b>');
-  L.circle([lat,lng],{radius:RADIUS_M,color:'#b52828',fillColor:'#b52828',fillOpacity:.04,weight:1,dashArray:'5'}).addTo(map);
+  L.circle([lat,lng],{radius:10000,color:'#b52828',fillColor:'#b52828',fillOpacity:.04,weight:1,dashArray:'5'}).addTo(map);
   /* Tell the mobile widget that Leaflet is ready */
   if (typeof initMobileWidget === 'function') initMobileWidget();
 }
@@ -730,31 +730,53 @@ async function mergeLoad(lat, lng) {
   document.getElementById('loadMsg').textContent = 'Cargando restaurantes...';
   const dbWithDist = DB.map(r => ({...r, dist:haversine(lat,lng,r.lat,r.lng), isDB:true}));
   let osmNew = [];
+  const OSM_RADIUS = 10000; // 10 km — wider net than the visual circle
   try {
-    const q = `[out:json][timeout:25];(node["amenity"="restaurant"](around:${RADIUS_M},${lat},${lng});node["amenity"="fast_food"](around:${RADIUS_M},${lat},${lng});node["amenity"="cafe"](around:${RADIUS_M},${lat},${lng});node["amenity"="bar"](around:${RADIUS_M},${lat},${lng}););out body;`;
-    const res = await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)});
+    // Include node + way + relation, and use center for ways so we get lat/lon
+    const q = `[out:json][timeout:30];(
+      node["amenity"~"restaurant|fast_food|cafe|bar|food_court|ice_cream"](around:${OSM_RADIUS},${lat},${lng});
+      way["amenity"~"restaurant|fast_food|cafe|bar|food_court|ice_cream"](around:${OSM_RADIUS},${lat},${lng});
+      relation["amenity"~"restaurant|fast_food|cafe|bar|food_court|ice_cream"](around:${OSM_RADIUS},${lat},${lng});
+    );out center;`;
+    const res = await fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST',
+      body: 'data=' + encodeURIComponent(q),
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+    });
+    if (!res.ok) throw new Error('Overpass HTTP ' + res.status);
     const data = await res.json();
     const dbNames = new Set(DB.map(r => r.name.toLowerCase()));
-    osmNew = data.elements.map(e => parseOSM(e, lat, lng)).filter(e => e && !dbNames.has(e.name.toLowerCase()));
-  } catch(e) {}
+    osmNew = data.elements
+      .map(e => parseOSM(e, lat, lng))
+      .filter(e => e && !dbNames.has(e.name.toLowerCase()));
+    console.log(`OSM: ${data.elements.length} raw → ${osmNew.length} nuevos restaurantes`);
+  } catch(e) {
+    console.warn('Overpass falló, usando solo DB:', e.message);
+  }
   allRestaurants = [...dbWithDist, ...osmNew];
+  console.log(`Total restaurantes: ${allRestaurants.length} (${dbWithDist.length} DB + ${osmNew.length} OSM)`);
   hideLoading();
   allRestaurants.forEach(r => { if (!markerMap.has(r.id)) createMarker(r); });
   applyFilters();
 }
 
 function parseOSM(el, lat, lng) {
-  if (!el.lat || !el.lon) return null;
+  // nodes → el.lat/el.lon; ways & relations → el.center.lat/el.center.lon
+  const elLat = el.lat != null ? el.lat : (el.center ? el.center.lat : null);
+  const elLon = el.lon != null ? el.lon : (el.center ? el.center.lon : null);
+  if (!elLat || !elLon) return null;
   const t = el.tags || {};
-  const name = t.name || t['name:es'] || '';
+  const name = t.name || t['name:es'] || t['name:en'] || '';
   if (!name) return null;
   const cuisine = t.cuisine || '';
   const amenity = t.amenity || '';
   return {
     id:'osm-'+el.id, name, cat:detectCat(cuisine, amenity),
-    gama:null, addr:[t['addr:street'],t['addr:housenumber']].filter(Boolean).join(' ')||'',
-    phone:t.phone||'', desc:'', trend:false, isDB:false,
-    dist:haversine(lat,lng,el.lat,el.lon), lat:el.lat, lng:el.lon, cuisine
+    gama:null,
+    addr:[t['addr:street'],t['addr:housenumber']].filter(Boolean).join(' ') || t['addr:full'] || '',
+    phone:t.phone || t['contact:phone'] || '',
+    desc:'', trend:false, isDB:false,
+    dist:haversine(lat,lng,elLat,elLon), lat:elLat, lng:elLon, cuisine
   };
 }
 
@@ -783,7 +805,8 @@ function applyFilters() {
 
   const visible = allRestaurants.filter(r => {
     if (cat !== 'Todos' && r.cat !== cat) return false;
-    if (gama !== 'Todos' && r.gama !== gama) return false;
+    // OSM restaurants have gama:null — only exclude them if a specific gama is selected
+    if (gama !== 'Todos' && r.gama !== null && r.gama !== gama) return false;
     if (query && !r.name.toLowerCase().includes(query) &&
         !(r.cat||'').toLowerCase().includes(query) &&
         !(r.desc||'').toLowerCase().includes(query)) return false;
