@@ -58,7 +58,9 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
 .loc-pill{display:flex;align-items:center;gap:.45rem;background:var(--s2);border:1px solid var(--border);border-radius:100px;padding:.38rem .9rem;font-size:.78rem;color:var(--gold);font-weight:500}
 .loc-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:blink 2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
-.layout{display:grid;grid-template-columns:360px 1fr;flex:1;overflow:hidden;min-height:0}
+.layout{display:grid;grid-template-columns:var(--sidebar-w,360px) 1fr;flex:1;overflow:hidden;min-height:0}
+.resize-handle{width:5px;background:transparent;cursor:col-resize;flex-shrink:0;position:relative;z-index:100;transition:background .15s}
+.resize-handle:hover,.resize-handle.dragging{background:var(--red)}
 .sidebar{display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--surface);overflow:hidden;min-height:0}
 .search-wrap{padding:.7rem;border-bottom:1px solid var(--border);position:relative;flex-shrink:0}
 .s-icon{position:absolute;left:1.55rem;top:50%;transform:translateY(-50%);color:var(--ink3);font-size:.85rem;pointer-events:none}
@@ -337,6 +339,7 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
 
   </aside>
 
+  <div class="resize-handle" id="resizeHandle"></div>
   <div id="map-wrap">
     <div class="map-legend">
       <div class="leg-row"><div class="leg-dot" style="background:#9a7418"></div>Gama Alta</div>
@@ -823,6 +826,38 @@ function hideLoading(){document.getElementById('loading').classList.add('hidden'
     );
   });
 })();
+
+// ── SIDEBAR RESIZE ──
+(function(){
+  const handle = document.getElementById('resizeHandle');
+  const layout = document.querySelector('.layout');
+  if(!handle || !layout) return;
+  let dragging = false, startX = 0, startW = 0;
+
+  handle.addEventListener('mousedown', function(e){
+    dragging = true;
+    startX = e.clientX;
+    startW = document.querySelector('.sidebar').offsetWidth;
+    handle.classList.add('dragging');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  });
+
+  document.addEventListener('mousemove', function(e){
+    if(!dragging) return;
+    const diff = e.clientX - startX;
+    const newW = Math.min(Math.max(startW + diff, 220), window.innerWidth * 0.6);
+    layout.style.setProperty('--sidebar-w', newW + 'px');
+    if(typeof map !== 'undefined' && map) map.invalidateSize();
+  });
+
+  document.addEventListener('mouseup', function(){
+    if(!dragging) return;
+    dragging = false;
+    handle.classList.remove('dragging');
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  });
+})();
 </script>
 </body>
-</html>
