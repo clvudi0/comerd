@@ -7,7 +7,7 @@
 <script>
   (function(){
     var saved = localStorage.getItem('theme');
-    if(saved==='dark'||(!saved&&window.matchMedia('(prefers-color-scheme: dark)').matches)){
+    if(saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)){
       document.documentElement.classList.add('dark');
     }
   })();
@@ -25,6 +25,7 @@
   --shadow-sm:0 1px 4px rgba(0,0,0,.06);
   --shadow-md:0 4px 20px rgba(0,0,0,.1);
   --shadow-lg:0 8px 40px rgba(0,0,0,.14);
+  --map-h:220px;
   --map-transition:.3s cubic-bezier(.4,0,.2,1);
 }
 html.dark{
@@ -35,11 +36,11 @@ html.dark{
   --shadow-md:0 4px 20px rgba(0,0,0,.5);
   --shadow-lg:0 8px 40px rgba(0,0,0,.6);
 }
-::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
+::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal;}
 ::view-transition-old(root){z-index:1}::view-transition-new(root){z-index:9999}
 html.dark::view-transition-old(root){z-index:9999}html.dark::view-transition-new(root){z-index:1}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;height:100vh;overflow:hidden}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;height:100vh;overflow:hidden;}
 button{font-family:'Outfit',sans-serif;cursor:pointer}
 input{font-family:'Outfit',sans-serif}
 #loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2rem;z-index:9999;transition:opacity .6s,visibility .6s}
@@ -144,7 +145,8 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
   html{height:100%}
   body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto}
   header{position:sticky;top:0;z-index:300;padding:.48rem 1rem;flex-wrap:nowrap;gap:.5rem}
-  .brand{font-size:1.4rem}.brand-sub{display:none}
+  .brand{font-size:1.4rem}
+  .brand-sub{display:none}
   .loc-pill{padding:.26rem .65rem;font-size:.68rem;white-space:nowrap;flex-shrink:0}
   .layout{display:block;overflow:visible}
   .sidebar{display:flex;flex-direction:column;width:100%;overflow:visible;border-right:none;min-height:0}
@@ -152,8 +154,10 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
   .search-wrap{padding:.52rem .75rem}
   #searchInput{font-size:16px;padding:.5rem .9rem .5rem 2.1rem}
   .featured{margin:.5rem .65rem .3rem;flex-shrink:0}
+  .cat-scroll{flex-shrink:0}
   .filter-bar{padding:.38rem .75rem;gap:.28rem;flex-wrap:wrap}
   .results-bar{padding:.3rem .75rem}
+  .adv{flex-shrink:0}
   .sort-row{flex-wrap:wrap;gap:.22rem}
   .sort-btn,.ftoggle-btn{padding:.26rem .64rem;font-size:.71rem}
   .cat-btn{padding:.3rem .78rem;font-size:.74rem}
@@ -180,7 +184,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
 }
 #themeToggle{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:var(--s2);border:1.5px solid var(--border);border-radius:50%;color:var(--ink2);transition:background .2s,border-color .2s,color .2s,transform .15s;flex-shrink:0;cursor:pointer;padding:0}
 #themeToggle:hover{border-color:var(--red);color:var(--red);transform:scale(1.08)}
-#themeToggle svg{width:16px;height:16px;pointer-events:none}
+#themeToggle svg{width:16px;height:16px;transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .25s;pointer-events:none}
 #themeToggle .icon-sun{display:block}
 #themeToggle .icon-moon{display:none}
 html.dark #themeToggle .icon-sun{display:none}
@@ -208,8 +212,11 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
     <div class="brand-sub">Restaurantes · Republica Dominicana</div>
   </div>
   <div style="display:flex;align-items:center;gap:.6rem;flex-shrink:0">
-    <div class="loc-pill"><div class="loc-dot"></div><span id="cityName">Detectando...</span></div>
-    <button id="themeToggle" aria-label="Cambiar tema">
+    <div class="loc-pill">
+      <div class="loc-dot"></div>
+      <span id="cityName">Detectando...</span>
+    </div>
+    <button id="themeToggle" aria-label="Cambiar tema" title="Cambiar tema">
       <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="4"/>
         <line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/>
@@ -236,7 +243,8 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
       <div class="map-ctrl-bar">
         <div class="map-ctrl-left">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-            <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+            <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/>
+            <circle cx="12" cy="10" r="3"/>
           </svg>
           Mapa
         </div>
@@ -252,7 +260,7 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
           <div class="leg-row"><div class="leg-dot" style="background:#9a7418"></div>Gama Alta</div>
           <div class="leg-row"><div class="leg-dot" style="background:#b52828"></div>Gama Media</div>
           <div class="leg-row"><div class="leg-dot" style="background:#246e42"></div>Accesible</div>
-        </div>
+          </div>
       </div>
     </div>
 
@@ -321,20 +329,20 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
       <div class="leg-row"><div class="leg-dot" style="background:#9a7418"></div>Gama Alta</div>
       <div class="leg-row"><div class="leg-dot" style="background:#b52828"></div>Gama Media</div>
       <div class="leg-row"><div class="leg-dot" style="background:#246e42"></div>Accesible</div>
-    </div>
+      </div>
   </div>
 </div>
 
 <script>
-const RADIUS_M=6000;
-const GAMA_ORDER={Alta:0,Media:1,Accesible:2};
-const GAMA_LABEL={Alta:'Gama Alta',Media:'Gama Media',Accesible:'Accesible'};
-const GAMA_COLOR={Alta:'#9a7418',Media:'#b52828',Accesible:'#246e42'};
-const CATS=['Todos','Criolla','Mariscos','Parrilla','Hamburguesas','Pizza',
-            'Internacional','Asiatica','Mexicana','Cafe','Postres','Helados',
-            'Fast Food','Bares','Vegetariana'];
+const RADIUS_M = 6000;
+const GAMA_ORDER  = {Alta:0,Media:1,Accesible:2};
+const GAMA_LABEL  = {Alta:'Gama Alta',Media:'Gama Media',Accesible:'Accesible'};
+const GAMA_COLOR  = {Alta:'#9a7418',Media:'#b52828',Accesible:'#246e42'};
+const CATS = ['Todos','Criolla','Mariscos','Parrilla','Hamburguesas','Pizza',
+              'Internacional','Asiatica','Mexicana','Cafe','Postres','Helados',
+              'Fast Food','Bares','Vegetariana'];
 
-const DB=[
+const DB = [
   {id:'cr01',name:'Pearl Urban Lounge',cat:'Criolla',gama:'Alta',addr:'Av. Independencia 254, Gazcue',phone:'809-533-2222',lat:18.4701,lng:-69.9050,desc:'Chef con reconocimiento internacional. 500+ plantas en interior. La experiencia gastronomica mas sofisticada de RD.',trend:true},
   {id:'cr02',name:'Ajuala',cat:'Criolla',gama:'Alta',addr:'Piantini, Santo Domingo',phone:'',lat:18.4760,lng:-69.9402,desc:'Chef Saverio Stassi. Casabe en buren de barro, corte Brangus con queso envejecido. Premiado en latinoamerica.',trend:false},
   {id:'cr03',name:'Buche Perico',cat:'Criolla',gama:'Alta',addr:'C. El Conde #53, Zona Colonial',phone:'809-221-0506',lat:18.4740,lng:-69.8872,desc:'Jardin tropical bajo techo de cristal con cascada. Tuna fresco, ravioli de banana madura y cava premiada.',trend:true},
@@ -359,7 +367,7 @@ const DB=[
   {id:'pa04',name:'Casa Vera',cat:'Parrilla',gama:'Media',addr:'Piantini, Santo Domingo',phone:'',lat:18.4754,lng:-69.9400,desc:'Parrilla y cocina criolla. El favorito para cenas navidenas y reuniones familiares.',trend:false},
   {id:'pa05',name:'Roust Churrasqueria',cat:'Parrilla',gama:'Media',addr:'Av. Roberto Pastoriza, Santo Domingo',phone:'',lat:18.4730,lng:-69.9310,desc:'Churrasco y mariscos en porciones generosas. Excelente relacion precio-calidad.',trend:false},
   {id:'hm01',name:'BURRA - Burger & Birra',cat:'Hamburguesas',gama:'Alta',addr:'Av. Tiradentes 25, Santo Domingo',phone:'',lat:18.4791,lng:-69.9269,desc:'Hamburguesas artesanales de media libra con carne de res importada y cervezas craft. El burger bar mas trendy de SD.',trend:true},
-  {id:'hm02',name:'Smashed Burgers SD',cat:'Hamburguesas',gama:'Media',addr:'Piantini, Santo Domingo',phone:'',lat:18.4762,lng:-69.9395,desc:'Smash burgers estilo americano con doble patty, queso american y salsas de autor.',trend:true},
+  {id:'hm02',name:'Smashed Burgers SD',cat:'Hamburguesas',gama:'Media',addr:'Piantini, Santo Domingo',phone:'',lat:18.4762,lng:-69.9395,desc:'Smash burgers estilo americano con doble patty, queso american y salsas de autor. Muy popular entre jovenes.',trend:true},
   {id:'hm03',name:'The Burger Shack',cat:'Hamburguesas',gama:'Media',addr:'Zona Colonial, Santo Domingo',phone:'',lat:18.4745,lng:-69.8860,desc:'Burgers gourmet en ambiente casual. Opciones de pollo, res y plant-based.',trend:false},
   {id:'hm04',name:'Buen Provecho Burgers',cat:'Hamburguesas',gama:'Accesible',addr:'Varias ubicaciones, Santo Domingo',phone:'',lat:18.4720,lng:-69.9200,desc:'Cadena local de burgers accesibles. Populares y sabrosas sin gastar mucho.',trend:false},
   {id:'pi01',name:'Bottega Fratelli',cat:'Pizza',gama:'Alta',addr:'Av. Simon Bolivar 219, Gazcue',phone:'809-682-9951',lat:18.4698,lng:-69.9008,desc:'Tercera generacion familia Vesuvio (desde 1954). Italiana moderna en ambiente elegante con musica en vivo.',trend:false},
@@ -380,7 +388,7 @@ const DB=[
   {id:'as01',name:'Lila Modern Cuisine',cat:'Asiatica',gama:'Alta',addr:'Santo Domingo Norte',phone:'',lat:18.5050,lng:-69.9200,desc:'Fusion asiatica-dominicana contemporanea. Tiradito de pulpo y hamachi ponzu. Cocteleria de autor.',trend:true},
   {id:'as02',name:'El Samurai',cat:'Asiatica',gama:'Alta',addr:'C. del Seminario #57, Gazcue',phone:'809-682-6640',lat:18.4693,lng:-69.8985,desc:'20+ anos con cuatro chefs de Japon. El mejor sushi y sashimi autentico de SD.',trend:false},
   {id:'as03',name:'Yokomo',cat:'Asiatica',gama:'Media',addr:'Santo Domingo',phone:'',lat:18.4760,lng:-69.9300,desc:'Sushi fusion con giro dominicano. Creativo, accesible y muy popular entre jovenes.',trend:false},
-  {id:'mx01',name:'El Burrito Mexicano',cat:'Mexicana',gama:'Media',addr:'Piantini, Santo Domingo',phone:'',lat:18.4758,lng:-69.9392,desc:'Tacos, burritos y enchiladas autenticos preparados por chef mexicano.',trend:true},
+  {id:'mx01',name:'El Burrito Mexicano',cat:'Mexicana',gama:'Media',addr:'Piantini, Santo Domingo',phone:'',lat:18.4758,lng:-69.9392,desc:'Tacos, burritos y enchiladas autenticos preparados por chef mexicano. El favorito de los amantes de la cocina mexicana en SD.',trend:true},
   {id:'mx02',name:'Taco Loco',cat:'Mexicana',gama:'Accesible',addr:'Av. 27 de Febrero, Santo Domingo',phone:'',lat:18.4790,lng:-69.9340,desc:'Tacos callejeros estilo Ciudad de Mexico. Economico y delicioso. Con opciones vegetarianas.',trend:false},
   {id:'mx03',name:'Taco Bell - Piantini',cat:'Mexicana',gama:'Accesible',addr:'Piantini, Santo Domingo',phone:'',lat:18.4762,lng:-69.9400,desc:'Comida mexicana rapida con drive-thru. Mexican Pizza, burritos y nachos clasicos.',trend:false},
   {id:'cf01',name:'Flor de Cafe - Piantini',cat:'Cafe',gama:'Media',addr:'Av. Abraham Lincoln, Piantini',phone:'',lat:18.4749,lng:-69.9413,desc:'La cafeteria de especialidad mas querida de SD. Cafe de origen dominicano y postres artesanales.',trend:true},
@@ -396,10 +404,10 @@ const DB=[
   {id:'cf11',name:'Santo Domingo Cafe - Acropolis',cat:'Cafe',gama:'Accesible',addr:'Acropolis Center, Av. Winston Churchill',phone:'',lat:18.4617,lng:-69.9451,desc:'Menu de cafe y postres clasicos a buen precio.',trend:false},
   {id:'cf12',name:'Santo Domingo Cafe - Sambil',cat:'Cafe',gama:'Accesible',addr:'Plaza Sambil, 2do Nivel',phone:'',lat:18.4769,lng:-69.9618,desc:'Punto de encuentro dentro del Sambil.',trend:false},
   {id:'cf13',name:'Corner Cafe',cat:'Cafe',gama:'Accesible',addr:'Zona Colonial, Santo Domingo',phone:'',lat:18.4742,lng:-69.8855,desc:'Cafeteria de barrio. Ideal para desayuno rapido en la Zona Colonial.',trend:false},
-  {id:'po01',name:'Dulceria Oriol',cat:'Postres',gama:'Alta',addr:'C. Roberto Pastoriza, Piantini',phone:'',lat:18.4763,lng:-69.9385,desc:'La pasteleria fina mas elegante de SD. Macarons, tartas artesanales y pasteles de bodas de lujo.',trend:true},
-  {id:'po02',name:'Sweet Lab',cat:'Postres',gama:'Media',addr:'Piantini, Santo Domingo',phone:'',lat:18.4755,lng:-69.9392,desc:'Crepes, waffles y postres artesanales modernos. Muy popular en Instagram.',trend:true},
+  {id:'po01',name:'Dulceria Oriol',cat:'Postres',gama:'Alta',addr:'C. Roberto Pastoriza, Piantini',phone:'',lat:18.4763,lng:-69.9385,desc:'La pasteleria fina mas elegante de SD. Macarons, tartas artesanales y pasteles de bodas de lujo. Ingredientes importados de Francia.',trend:true},
+  {id:'po02',name:'Sweet Lab',cat:'Postres',gama:'Media',addr:'Piantini, Santo Domingo',phone:'',lat:18.4755,lng:-69.9392,desc:'Crepes, waffles y postres artesanales modernos. Muy popular en Instagram. El sitio de moda para los jovenes.',trend:true},
   {id:'po03',name:'La Cremerie',cat:'Postres',gama:'Media',addr:'Zona Colonial, Santo Domingo',phone:'',lat:18.4738,lng:-69.8858,desc:'Postres franceses y dominicanos en la Zona Colonial. Croissants frescos cada manana.',trend:false},
-  {id:'po04',name:'Pasteleria Haagen',cat:'Postres',gama:'Media',addr:'Varias ubicaciones, Santo Domingo',phone:'',lat:18.4748,lng:-69.9380,desc:'Cadena de pastelerias con tortas, queques y postres dominicanos clasicos.',trend:false},
+  {id:'po04',name:'Pasteleria Haagen',cat:'Postres',gama:'Media',addr:'Varias ubicaciones, Santo Domingo',phone:'',lat:18.4748,lng:-69.9380,desc:'Cadena de pastelerias con tortas, queques y postres dominicanos clasicos para toda ocasion.',trend:false},
   {id:'po05',name:'Bon - Reposteria',cat:'Postres',gama:'Accesible',addr:'Varias ubicaciones, Santo Domingo',phone:'',lat:18.4730,lng:-69.9295,desc:'La reposteria mas popular y accesible de RD. Presencia en toda la ciudad.',trend:false},
   {id:'he01',name:'Casa Gelato',cat:'Helados',gama:'Alta',addr:'Av. Abraham Lincoln, Piantini',phone:'',lat:18.4836,lng:-69.9388,desc:'Gelato artesanal italiano preparado diariamente con frutas tropicales dominicanas. El mas premium del pais.',trend:true},
   {id:'he02',name:'Bon Glace',cat:'Helados',gama:'Media',addr:'Varias ubicaciones, Santo Domingo',phone:'',lat:18.4750,lng:-69.9355,desc:'La heladeria mas querida de RD. Sabores dominicanos unicos como tamarindo, guanabana y chinola.',trend:true},
@@ -413,223 +421,245 @@ const DB=[
   {id:'ff04',name:"Wendy's - Abraham Lincoln",cat:'Fast Food',gama:'Accesible',addr:'Av. Abraham Lincoln, Santo Domingo',phone:'',lat:18.4830,lng:-69.9390,desc:"12 ubicaciones en SD. El Frosty y el Dave's Single son los mas pedidos.",trend:false},
   {id:'ff05',name:'Pollos Victorina',cat:'Fast Food',gama:'Accesible',addr:'Varias ubicaciones, Santo Domingo',phone:'',lat:18.4750,lng:-69.9350,desc:'Cadena dominicana favorita. Burgers, wraps y pollo frito al mejor precio local.',trend:true},
   {id:'ff06',name:'Pica Pollo',cat:'Fast Food',gama:'Accesible',addr:'Av. Tiradentes 25, Santo Domingo',phone:'',lat:18.4793,lng:-69.9270,desc:'Pollo frito crujiente con tostones o moro. Menos de 4 dolares. Lo mas autentico del pais.',trend:true},
-  {id:'ba01',name:'Room 504 (sobre La Cassina)',cat:'Bares',gama:'Alta',addr:'Av. Abraham Lincoln 1001, Piantini (2do piso)',phone:'809-563-2400',lat:18.4842,lng:-69.9396,desc:'El club lounge mas exclusivo de SD. DJs internacionales de jueves a domingo.',trend:true},
-  {id:'ba02',name:'El Buho Cafe',cat:'Bares',gama:'Media',addr:'Zona Colonial, Santo Domingo',phone:'',lat:18.4736,lng:-69.8850,desc:'Bar de personalidad propia. Cocktails artesanales y musica en vivo.',trend:false},
+  {id:'ba01',name:'Room 504 (sobre La Cassina)',cat:'Bares',gama:'Alta',addr:'Av. Abraham Lincoln 1001, Piantini (2do piso)',phone:'809-563-2400',lat:18.4842,lng:-69.9396,desc:'El club lounge mas exclusivo de SD. DJs internacionales de jueves a domingo sobre el mejor restaurante del pais.',trend:true},
+  {id:'ba02',name:'El Buho Cafe',cat:'Bares',gama:'Media',addr:'Zona Colonial, Santo Domingo',phone:'',lat:18.4736,lng:-69.8850,desc:'Bar de personalidad propia. Cocktails artesanales y musica en vivo. El dueno atiende personalmente.',trend:false},
   {id:'ve01',name:'Time Vegetariano',cat:'Vegetariana',gama:'Media',addr:'Zona Colonial (Patrimonio UNESCO)',phone:'',lat:18.4733,lng:-69.8860,desc:'El unico restaurante vegetariano destacado de SD. Opciones veganas, sin gluten y de temporada.',trend:false},
 ];
 
-let map,allRestaurants=[];
-const markerMap=new Map();
-let userLat=18.4741,userLng=-69.9307;
-let activeFilters={cat:'Todos',gama:'Todos',sort:'gama'};
+let map, allRestaurants = [];
+const markerMap = new Map();
+let userLat = 18.4741, userLng = -69.9307;
+let activeFilters = {cat:'Todos', gama:'Todos', sort:'gama'};
 
-window.addEventListener('DOMContentLoaded',()=>{
+window.addEventListener('DOMContentLoaded', () => {
   buildCategories();
-  if(!navigator.geolocation){startDefault();return;}
+  if (!navigator.geolocation) { startDefault(); return; }
   navigator.geolocation.getCurrentPosition(
-    pos=>{userLat=pos.coords.latitude;userLng=pos.coords.longitude;boot();},
-    ()=>{startDefault();document.getElementById('cityName').textContent='Santo Domingo';},
-    {enableHighAccuracy:true,timeout:12000,maximumAge:0}
+    pos => { userLat = pos.coords.latitude; userLng = pos.coords.longitude; boot(); },
+    ()  => { startDefault(); document.getElementById('cityName').textContent = 'Santo Domingo'; },
+    {enableHighAccuracy:true, timeout:12000, maximumAge:0}
   );
 });
 
-function startDefault(){ensurePlaced();initMap(userLat,userLng);mergeLoad(userLat,userLng);}
-function boot(){ensurePlaced();initMap(userLat,userLng);reverseGeocode(userLat,userLng);mergeLoad(userLat,userLng);}
+function startDefault() { ensurePlaced(); initMap(userLat, userLng); mergeLoad(userLat, userLng); }
+function boot()         { ensurePlaced(); initMap(userLat, userLng); reverseGeocode(userLat, userLng); mergeLoad(userLat, userLng); }
 
-function initMap(lat,lng){
-  const RD=L.latLngBounds(L.latLng(17.36,-72.10),L.latLng(20.10,-68.10));
-  map=L.map('map',{maxBounds:RD,maxBoundsViscosity:0.85,minZoom:8,maxZoom:19}).setView([lat,lng],14);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map);
-  const youIcon=L.divIcon({className:'',html:`<div style="width:16px;height:16px;background:#b52828;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 10px rgba(0,0,0,.45);pointer-events:none"></div>`,iconSize:[16,16],iconAnchor:[8,8]});
+function initMap(lat, lng) {
+  const RD_BOUNDS = L.latLngBounds(L.latLng(17.36,-72.10), L.latLng(20.10,-68.10));
+  map = L.map('map', {maxBounds:RD_BOUNDS, maxBoundsViscosity:0.85, minZoom:8, maxZoom:19}).setView([lat,lng], 14);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {attribution:"© OpenStreetMap", maxZoom:19}).addTo(map);
+  const youIcon = L.divIcon({className:'', html:`<div style="width:16px;height:16px;background:#b52828;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 10px rgba(0,0,0,.45);pointer-events:none"></div>`, iconSize:[16,16], iconAnchor:[8,8]});
   L.marker([lat,lng],{icon:youIcon}).addTo(map).bindPopup('<b>Tu estas aqui</b>');
   L.circle([lat,lng],{radius:RADIUS_M,color:'#b52828',fillColor:'#b52828',fillOpacity:.04,weight:1,dashArray:'5'}).addTo(map);
-  if(typeof initMobileWidget==='function')initMobileWidget();
+  if (typeof initMobileWidget === 'function') initMobileWidget();
 }
 
-async function reverseGeocode(lat,lng){
-  try{
-    const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`);
-    const d=await r.json();
-    document.getElementById('cityName').textContent=d.address.city||d.address.town||d.address.village||d.address.municipality||'RD';
-  }catch{document.getElementById('cityName').textContent='RD';}
+async function reverseGeocode(lat, lng) {
+  try {
+    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`);
+    const d = await r.json();
+    document.getElementById('cityName').textContent = d.address.city||d.address.town||d.address.village||d.address.municipality||'RD';
+  } catch { document.getElementById('cityName').textContent = 'RD'; }
 }
 
-async function mergeLoad(lat,lng){
-  document.getElementById('loadMsg').textContent='Cargando restaurantes...';
-  const dbWithDist=DB.map(r=>({...r,dist:haversine(lat,lng,r.lat,r.lng),isDB:true}));
-  let osmNew=[];
-  try{
-    const q=`[out:json][timeout:25];(node["amenity"="restaurant"](around:${RADIUS_M},${lat},${lng});node["amenity"="fast_food"](around:${RADIUS_M},${lat},${lng});node["amenity"="cafe"](around:${RADIUS_M},${lat},${lng});node["amenity"="bar"](around:${RADIUS_M},${lat},${lng}););out body;`;
-    const res=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)});
-    const data=await res.json();
-    const dbNames=new Set(DB.map(r=>r.name.toLowerCase()));
-    osmNew=data.elements.map(e=>parseOSM(e,lat,lng)).filter(e=>e&&!dbNames.has(e.name.toLowerCase()));
-  }catch(e){}
-  allRestaurants=[...dbWithDist,...osmNew];
+async function mergeLoad(lat, lng) {
+  document.getElementById('loadMsg').textContent = 'Cargando restaurantes...';
+  const dbWithDist = DB.map(r => ({...r, dist:haversine(lat,lng,r.lat,r.lng), isDB:true}));
+  let osmNew = [];
+  try {
+    const q = `[out:json][timeout:25];(node["amenity"="restaurant"](around:${RADIUS_M},${lat},${lng});node["amenity"="fast_food"](around:${RADIUS_M},${lat},${lng});node["amenity"="cafe"](around:${RADIUS_M},${lat},${lng});node["amenity"="bar"](around:${RADIUS_M},${lat},${lng}););out body;`;
+    const res = await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)});
+    const data = await res.json();
+    const dbNames = new Set(DB.map(r => r.name.toLowerCase()));
+    osmNew = data.elements.map(e => parseOSM(e,lat,lng)).filter(e => e && !dbNames.has(e.name.toLowerCase()));
+  } catch(e) {}
+  allRestaurants = [...dbWithDist, ...osmNew];
   hideLoading();
-  allRestaurants.forEach(r=>{if(!markerMap.has(r.id))createMarker(r);});
+  allRestaurants.forEach(r => { if (!markerMap.has(r.id)) createMarker(r); });
   applyFilters();
 }
 
-function parseOSM(el,lat,lng){
-  if(!el.lat||!el.lon)return null;
-  const t=el.tags||{};
-  const name=t.name||t['name:es']||'';
-  if(!name)return null;
-  const cuisine=t.cuisine||'';
-  const amenity=t.amenity||'';
-  return{id:'osm-'+el.id,name,cat:detectCat(cuisine,amenity),gama:'Accesible',
+function parseOSM(el, lat, lng) {
+  if (!el.lat || !el.lon) return null;
+  const t = el.tags || {};
+  const name = t.name || t['name:es'] || '';
+  if (!name) return null;
+  const cuisine = t.cuisine || '';
+  const amenity = t.amenity || '';
+  return {id:'osm-'+el.id, name, cat:detectCat(cuisine,amenity), gama:'Accesible',
     addr:[t['addr:street'],t['addr:housenumber']].filter(Boolean).join(' ')||'',
-    phone:t.phone||'',desc:'',trend:false,isDB:false,
-    dist:haversine(lat,lng,el.lat,el.lon),lat:el.lat,lng:el.lon,cuisine};
+    phone:t.phone||'', desc:'', trend:false, isDB:false,
+    dist:haversine(lat,lng,el.lat,el.lon), lat:el.lat, lng:el.lon, cuisine};
 }
 
-function detectCat(cuisine,amenity){
-  const c=(cuisine+' '+amenity).toLowerCase();
-  if(['dominican','caribbean','comida_criolla','local'].some(k=>c.includes(k)))return'Criolla';
-  if(['seafood','fish','mariscos'].some(k=>c.includes(k)))return'Mariscos';
-  if(['bbq','grill','steak_house','churrascaria','steak'].some(k=>c.includes(k)))return'Parrilla';
-  if(['burger'].some(k=>c.includes(k))&&amenity!=='fast_food')return'Hamburguesas';
-  if(['pizza','italian'].some(k=>c.includes(k)))return'Pizza';
-  if(['chinese','japanese','sushi','asian','thai','korean'].some(k=>c.includes(k)))return'Asiatica';
-  if(['mexican','taco'].some(k=>c.includes(k)))return'Mexicana';
-  if(['coffee_shop','specialty_coffee','coffeehouse'].some(k=>c.includes(k)))return'Cafe';
-  if(['ice_cream','frozen_yogurt','gelato'].some(k=>c.includes(k)))return'Helados';
-  if(['dessert','pastry','bakery'].some(k=>c.includes(k)))return'Postres';
-  if(['bar','pub','lounge','cocktail'].some(k=>c.includes(k)))return'Bares';
-  if(['vegan','vegetarian'].some(k=>c.includes(k)))return'Vegetariana';
-  if(amenity==='fast_food')return'Fast Food';
-  return'Internacional';
+function detectCat(cuisine, amenity) {
+  const c = (cuisine+' '+amenity).toLowerCase();
+  if (['dominican','caribbean','comida_criolla','local'].some(k=>c.includes(k))) return 'Criolla';
+  if (['seafood','fish','mariscos'].some(k=>c.includes(k))) return 'Mariscos';
+  if (['bbq','grill','steak_house','churrascaria','steak'].some(k=>c.includes(k))) return 'Parrilla';
+  if (['burger'].some(k=>c.includes(k)) && amenity!=='fast_food') return 'Hamburguesas';
+  if (['pizza','italian'].some(k=>c.includes(k))) return 'Pizza';
+  if (['chinese','japanese','sushi','asian','thai','korean'].some(k=>c.includes(k))) return 'Asiatica';
+  if (['mexican','taco'].some(k=>c.includes(k))) return 'Mexicana';
+  if (['coffee_shop','specialty_coffee','coffeehouse'].some(k=>c.includes(k))) return 'Cafe';
+  if (['ice_cream','frozen_yogurt','gelato'].some(k=>c.includes(k))) return 'Helados';
+  if (['dessert','pastry','bakery'].some(k=>c.includes(k))) return 'Postres';
+  if (['bar','pub','lounge','cocktail'].some(k=>c.includes(k))) return 'Bares';
+  if (['vegan','vegetarian'].some(k=>c.includes(k))) return 'Vegetariana';
+  if (amenity === 'fast_food') return 'Fast Food';
+  return 'Internacional';
 }
 
-function applyFilters(){
-  const query=document.getElementById('searchInput').value.trim().toLowerCase();
-  const{cat,gama,sort}=activeFilters;
-  const visible=allRestaurants.filter(r=>{
-    if(cat!=='Todos'&&r.cat!==cat)return false;
-    if(gama!=='Todos'&&r.gama!==gama)return false;
-    if(query&&!r.name.toLowerCase().includes(query)&&!(r.cat||'').toLowerCase().includes(query)&&!(r.desc||'').toLowerCase().includes(query))return false;
+function applyFilters() {
+  const query = document.getElementById('searchInput').value.trim().toLowerCase();
+  const {cat, gama, sort} = activeFilters;
+  const visible = allRestaurants.filter(r => {
+    if (cat !== 'Todos' && r.cat !== cat) return false;
+    if (gama !== 'Todos' && r.gama !== null && r.gama !== gama) return false;
+    if (query && !r.name.toLowerCase().includes(query) &&
+        !(r.cat||'').toLowerCase().includes(query) &&
+        !(r.desc||'').toLowerCase().includes(query)) return false;
     return true;
   });
-  if(sort==='gama')visible.sort((a,b)=>(GAMA_ORDER[a.gama]??2)-(GAMA_ORDER[b.gama]??2));
-  else if(sort==='dist')visible.sort((a,b)=>a.dist-b.dist);
-  else if(sort==='az')visible.sort((a,b)=>a.name.localeCompare(b.name));
+  if (sort === 'gama') visible.sort((a,b) => (a.gama!=null?GAMA_ORDER[a.gama]:3)-(b.gama!=null?GAMA_ORDER[b.gama]:3));
+  else if (sort === 'dist') visible.sort((a,b) => a.dist-b.dist);
+  else if (sort === 'az') visible.sort((a,b) => a.name.localeCompare(b.name));
   renderList(visible);
   syncMap(visible);
-  updateBadges(cat,gama);
+  updateBadges(cat, gama);
 }
 
-function renderList(items){
-  const list=document.getElementById('listEl');
-  document.getElementById('resultsCount').textContent=items.length;
-  if(!items.length){list.innerHTML=`<div class="msg"><div class="ico">&#128269;</div><h3>Sin resultados</h3><p>Prueba con otra combinacion de filtros.</p></div>`;return;}
-  list.innerHTML='';
-  items.forEach((r,i)=>{
-    const card=document.createElement('div');
-    card.className='card';
-    card.setAttribute('data-gama',r.gama||'');
-    card.style.animationDelay=`${Math.min(i*15,280)}ms`;
-    const gamaHtml=r.gama?`<span class="gama-tag gt-${r.gama.toLowerCase()}">${GAMA_LABEL[r.gama]}</span>`:'';
-    card.innerHTML=`
+function renderList(items) {
+  const list = document.getElementById('listEl');
+  document.getElementById('resultsCount').textContent = items.length;
+  if (!items.length) {
+    list.innerHTML = `<div class="msg"><div class="ico">&#128269;</div><h3>Sin resultados</h3><p>Prueba con otra combinacion de filtros.</p></div>`;
+    return;
+  }
+  list.innerHTML = '';
+  items.forEach((r,i) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.setAttribute('data-gama', r.gama||'');
+    card.style.animationDelay = `${Math.min(i*15,280)}ms`;
+    const gamaHtml = r.gama ? `<span class="gama-tag gt-${r.gama.toLowerCase()}">${GAMA_LABEL[r.gama]}</span>` : '';
+    card.innerHTML = `
       <div class="card-top"><div class="card-name">${r.name}</div>${gamaHtml}</div>
       <div class="card-meta">
         <span class="tag">${r.cat}</span>
-        ${r.cuisine?`<span class="tag">${r.cuisine}</span>`:''}
+        ${r.cuisine ? `<span class="tag">${r.cuisine}</span>` : ''}
         <span class="card-dist">${formatDist(r.dist)}</span>
       </div>
-      ${r.addr?`<div class="card-addr">${r.addr}</div>`:''}
-      ${r.phone?`<div class="card-phone">${r.phone}</div>`:''}
-      ${r.desc?`<div class="card-desc">${r.desc}</div>`:''}
-      ${r.trend?`<div class="trend">&#9733; Tendencia</div>`:''}
+      ${r.addr ? `<div class="card-addr">${r.addr}</div>` : ''}
+      ${r.phone ? `<div class="card-phone">${r.phone}</div>` : ''}
+      ${r.desc ? `<div class="card-desc">${r.desc}</div>` : ''}
+      ${r.trend ? `<div class="trend">&#9733; Tendencia</div>` : ''}
     `;
-    card.addEventListener('click',()=>focusRestaurant(r));
+    card.addEventListener('click', () => focusRestaurant(r));
     list.appendChild(card);
   });
 }
 
-function syncMap(visible){
-  if(!map)return;
-  const visibleIds=new Set(visible.map(r=>r.id));
-  markerMap.forEach((m,id)=>{
-    if(visibleIds.has(id)){if(!map.hasLayer(m))m.addTo(map);}
-    else{if(map.hasLayer(m))map.removeLayer(m);}
+function syncMap(visible) {
+  if (!map) return;
+  const visibleIds = new Set(visible.map(r => r.id));
+  markerMap.forEach((m, id) => {
+    if (visibleIds.has(id)) { if (!map.hasLayer(m)) m.addTo(map); }
+    else { if (map.hasLayer(m)) map.removeLayer(m); }
   });
 }
 
-function createMarker(r){
-  const color=GAMA_COLOR[r.gama]||GAMA_COLOR['Accesible'];
-  const size=r.gama==='Alta'?14:10;
-  const ws=Math.max(size,20);
-  const icon=L.divIcon({className:'',
-    html:`<div style="width:${ws}px;height:${ws}px;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:all"><div style="width:${size}px;height:${size}px;background:${color};border:2px solid #fff;border-radius:50%;box-shadow:0 1px 5px rgba(0,0,0,.4);pointer-events:all"></div></div>`,
-    iconSize:[ws,ws],iconAnchor:[ws/2,ws/2]});
-  const gamaLine=r.gama?`<div class="pop-gama" style="color:${color}">${GAMA_LABEL[r.gama]}</div>`:'';
-  const m=L.marker([r.lat,r.lng],{icon,riseOnHover:true})
+function createMarker(r) {
+  const color = GAMA_COLOR[r.gama] || GAMA_COLOR['Accesible'];
+  const size  = r.gama === 'Alta' ? 14 : 10;
+  const wrapSize = Math.max(size, 20);
+  const icon = L.divIcon({
+    className:'',
+    html:`<div style="width:${wrapSize}px;height:${wrapSize}px;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:all"><div style="width:${size}px;height:${size}px;background:${color};border:2px solid #fff;border-radius:50%;box-shadow:0 1px 5px rgba(0,0,0,.4);pointer-events:all"></div></div>`,
+    iconSize:[wrapSize,wrapSize], iconAnchor:[wrapSize/2,wrapSize/2]
+  });
+  const gamaLine = r.gama ? `<div class="pop-gama" style="color:${color}">${GAMA_LABEL[r.gama]}</div>` : '';
+  const m = L.marker([r.lat,r.lng],{icon,riseOnHover:true})
     .bindPopup(`<div class="pop-name">${r.name}</div><div class="pop-cat">${r.cat}</div>${gamaLine}${r.addr?`<div class="pop-addr">${r.addr}</div>`:''}`,{autoPan:true});
-  m._rid=r.id;
-  markerMap.set(r.id,m);
+  m._rid = r.id;
+  markerMap.set(r.id, m);
   return m;
 }
 
-function focusRestaurant(r){
-  const m=markerMap.get(r.id);
-  if(m&&!map.hasLayer(m))m.addTo(map);
-  map.flyTo([r.lat,r.lng],18,{duration:.7});
-  setTimeout(()=>{if(m)m.openPopup();},750);
+function focusRestaurant(r) {
+  const m = markerMap.get(r.id);
+  if (m && !map.hasLayer(m)) m.addTo(map);
+  map.flyTo([r.lat,r.lng], 18, {duration:.7});
+  setTimeout(() => { if (m) m.openPopup(); }, 750);
 }
 
-function focusFeatured(){
-  const feat=DB.find(r=>r.id==='ma01');
-  if(!feat)return;
-  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('active',b.dataset.cat==='Todos'));
-  activeFilters.cat='Todos';
+function focusFeatured() {
+  const feat = DB.find(r => r.id === 'ma01');
+  if (!feat) return;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat==='Todos'));
+  activeFilters.cat = 'Todos';
   applyFilters();
-  setTimeout(()=>focusRestaurant(feat),400);
+  setTimeout(() => focusRestaurant(feat), 400);
 }
 
-function buildCategories(){
-  const el=document.getElementById('catsEl');
-  CATS.forEach(cat=>{
-    const btn=document.createElement('button');
-    btn.className='cat-btn'+(cat==='Todos'?' active':'');
-    btn.dataset.cat=cat;btn.textContent=cat;
-    btn.addEventListener('click',()=>{
-      document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');activeFilters.cat=cat;applyFilters();
+function buildCategories() {
+  const el = document.getElementById('catsEl');
+  // Scroll horizontal con rueda del mouse
+  el.addEventListener('wheel', function(e) {
+    if (e.deltaY !== 0) {
+      e.preventDefault();
+      el.scrollLeft += e.deltaY * 1.5;
+    }
+  }, {passive: false});
+  CATS.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn' + (cat==='Todos' ? ' active' : '');
+    btn.dataset.cat = cat;
+    btn.textContent = cat;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilters.cat = cat;
+      applyFilters();
     });
     el.appendChild(btn);
   });
 }
 
-function setFilter(type,btn){
-  document.querySelectorAll('#gamaChips .chip').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');activeFilters[type]=btn.dataset.val;applyFilters();
+function setFilter(type, btn) {
+  document.querySelectorAll('#gamaChips .chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeFilters[type] = btn.dataset.val;
+  applyFilters();
 }
 
-function setSort(btn){
-  document.querySelectorAll('#sortRow .sort-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');activeFilters.sort=btn.dataset.sort;applyFilters();
+function setSort(btn) {
+  document.querySelectorAll('#sortRow .sort-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeFilters.sort = btn.dataset.sort;
+  applyFilters();
 }
 
-function toggleAdv(){
-  const el=document.getElementById('advFilters');
-  const btn=document.getElementById('ftoggleBtn');
-  const open=el.classList.contains('open');
-  el.classList.toggle('open',!open);el.classList.toggle('closed',open);
-  btn.textContent=open?'+ Filtrar':'- Cerrar';
-  btn.classList.toggle('is-open',!open);
+function toggleAdv() {
+  const el = document.getElementById('advFilters');
+  const btn = document.getElementById('ftoggleBtn');
+  const open = el.classList.contains('open');
+  el.classList.toggle('open', !open);
+  el.classList.toggle('closed', open);
+  btn.textContent = open ? '+ Filtrar' : '- Cerrar';
+  btn.classList.toggle('is-open', !open);
 }
 
-function updateBadges(cat,gama){
-  let n=0;
-  if(cat!=='Todos')n++;
-  if(gama!=='Todos')n++;
-  const el=document.getElementById('activeCt');
-  el.textContent=n;el.classList.toggle('on',n>0);
-  const parts=[];
-  if(cat!=='Todos')parts.push(cat);
-  if(gama!=='Todos')parts.push(GAMA_LABEL[gama]);
-  document.getElementById('filterSummary').textContent=parts.join(' · ');
+function updateBadges(cat, gama) {
+  let n = 0;
+  if (cat !== 'Todos') n++;
+  if (gama !== 'Todos') n++;
+  const el = document.getElementById('activeCt');
+  el.textContent = n; el.classList.toggle('on', n>0);
+  const parts = [];
+  if (cat !== 'Todos') parts.push(cat);
+  if (gama !== 'Todos') parts.push(GAMA_LABEL[gama]);
+  document.getElementById('filterSummary').textContent = parts.join(' · ');
 }
 
 function haversine(la1,lo1,la2,lo2){
@@ -641,42 +671,42 @@ function formatDist(m){return m<1000?`${Math.round(m)} m`:`${(m/1000).toFixed(1)
 function hideLoading(){document.getElementById('loading').classList.add('hidden')}
 
 (function(){
-  const BP=700,MH=220,TR=300;
+  const BREAKPOINT=700, MAP_NORMAL_H=220, TRANSITION=300;
   const mapWrap=document.getElementById('map-wrap');
   const widget=document.getElementById('mob-map-widget');
   const mapBox=document.getElementById('mapBox');
   const mapEl=document.getElementById('map');
-  let cur='normal',ready=false;
-  const mob=()=>window.innerWidth<=BP;
+  let currentState='normal', mapReady=false;
+  function isMobile(){return window.innerWidth<=BREAKPOINT}
   window.ensurePlaced=function(){
-    if(mob()){if(mapEl.parentElement!==mapBox)mapBox.insertBefore(mapEl,mapBox.firstChild);}
+    if(isMobile()){if(mapEl.parentElement!==mapBox)mapBox.insertBefore(mapEl,mapBox.firstChild);}
     else{if(mapEl.parentElement!==mapWrap)mapWrap.insertBefore(mapEl,mapWrap.firstChild);}
   };
-  function applyState(s,animate){
-    cur=s;
+  function applyMapState(state,animate){
+    currentState=state;
     if(!animate)mapBox.style.transition='none';
-    if(s==='closed'){widget.classList.remove('is-fullscreen');mapBox.style.height='0px';}
-    else if(s==='normal'){widget.classList.remove('is-fullscreen');mapBox.style.height=MH+'px';}
-    else if(s==='fullscreen'){widget.classList.add('is-fullscreen');mapBox.style.height=window.innerHeight+'px';}
+    if(state==='closed'){widget.classList.remove('is-fullscreen');mapBox.style.height='0px';}
+    else if(state==='normal'){widget.classList.remove('is-fullscreen');mapBox.style.height=MAP_NORMAL_H+'px';}
+    else if(state==='fullscreen'){widget.classList.add('is-fullscreen');mapBox.style.height=window.innerHeight+'px';}
     if(!animate){mapBox.offsetHeight;mapBox.style.transition='';}
-    document.querySelectorAll('.map-state-btn').forEach(b=>b.classList.toggle('is-active',b.dataset.state===s));
-    if(ready)setTimeout(()=>map.invalidateSize(),TR+20);
+    document.querySelectorAll('.map-state-btn').forEach(btn=>btn.classList.toggle('is-active',btn.dataset.state===state));
+    if(mapReady)setTimeout(()=>map.invalidateSize(),TRANSITION+20);
   }
-  window.setMapState=function(s){if(!mob())return;applyState(s,true);};
+  window.setMapState=function(state){if(!isMobile())return;applyMapState(state,true);};
   window.initMobileWidget=function(){
-    ready=true;
-    if(mob())applyState('normal',false);
+    mapReady=true;
+    if(isMobile())applyMapState('normal',false);
     else if(map)map.invalidateSize();
   };
-  let rt;
+  let resizeTimer;
   window.addEventListener('resize',()=>{
-    clearTimeout(rt);
-    rt=setTimeout(()=>{
-      if(mob()){
-        if(cur==='fullscreen')mapBox.style.height=window.innerHeight+'px';
-        else if(cur==='normal')mapBox.style.height=MH+'px';
+    clearTimeout(resizeTimer);
+    resizeTimer=setTimeout(()=>{
+      if(isMobile()){
+        if(currentState==='fullscreen')mapBox.style.height=window.innerHeight+'px';
+        else if(currentState==='normal')mapBox.style.height=MAP_NORMAL_H+'px';
       }
-      if(ready)map.invalidateSize();
+      if(mapReady)map.invalidateSize();
     },80);
   });
 })();
@@ -688,7 +718,7 @@ function hideLoading(){document.getElementById('loading').classList.add('hidden'
   if(!btn)return;
   btn.addEventListener('click',async function(){
     const rect=btn.getBoundingClientRect();
-    const x=rect.left+rect.width/2,y=rect.top+rect.height/2;
+    const x=rect.left+rect.width/2, y=rect.top+rect.height/2;
     const maxR=Math.hypot(Math.max(x,window.innerWidth-x),Math.max(y,window.innerHeight-y));
     function applyTheme(){
       html.classList.toggle('dark');
