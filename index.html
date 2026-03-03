@@ -192,8 +192,9 @@ html.dark #themeToggle .icon-moon{display:block}
 html.dark #loading{background:var(--bg)}
 html.dark #searchInput{color:var(--ink)}
 html.dark .list{scrollbar-color:var(--border) transparent}
-html.dark .sort-btn:not(.active){color:var(--red);border-color:var(--border)}
-html.dark .ftoggle-btn{color:var(--red);border-color:var(--border)}
+html.dark .sort-btn.active{background:transparent;color:var(--red);border-color:var(--red)}
+html.dark .ftoggle-btn{color:var(--ink2)}
+html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
 </style>
 </head>
 <body>
@@ -640,6 +641,7 @@ function toggleAdv() {
   el.classList.toggle('open', !open);
   el.classList.toggle('closed', open);
   btn.textContent = open ? '+ Filtrar' : '- Cerrar';
+  btn.classList.toggle('is-open', !open);
 }
 
 function updateBadges(cat, gama) {
