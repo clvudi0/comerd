@@ -488,7 +488,7 @@ function parseOSM(el, lat, lng) {
   if (!name) return null;
   const cuisine = t.cuisine || '';
   const amenity = t.amenity || '';
-  return {id:'osm-'+el.id, name, cat:detectCat(cuisine,amenity), gama:null,
+  return {id:'osm-'+el.id, name, cat:detectCat(cuisine,amenity), gama:(amenity==='fast_food'?'Accesible':null),
     addr:[t['addr:street'],t['addr:housenumber']].filter(Boolean).join(' ')||'',
     phone:t.phone||'', desc:'', trend:false, isDB:false,
     dist:haversine(lat,lng,el.lat,el.lon), lat:el.lat, lng:el.lon, cuisine};
