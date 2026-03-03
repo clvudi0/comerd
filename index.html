@@ -9,11 +9,10 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-/* ── TOKENS ── */
 :root{
-  --bg:#f6f1e9;--surface:#fffdf8;--s2:#ede7d8;--s3:#e0d8c8;
+  --bg:#f6f1e9;--surface:#fffdf8;--s2:#ede7d8;
   --ink:#17130d;--ink2:#5a5248;--ink3:#9a9088;
-  --red:#b52828;--gold:#9a7418;--green:#246e42;--blue:#1a5fa8;
+  --red:#b52828;--gold:#9a7418;--green:#246e42;
   --border:#d5ccb8;--r:12px;
   --shadow-sm:0 1px 4px rgba(0,0,0,.06);
   --shadow-md:0 4px 20px rgba(0,0,0,.1);
@@ -25,174 +24,176 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);displ
 button{font-family:'Outfit',sans-serif;cursor:pointer}
 input{font-family:'Outfit',sans-serif}
 
-/* ── LOADING ── */
+/* LOADING */
 #loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2rem;z-index:9999;transition:opacity .6s,visibility .6s}
 #loading.hidden{opacity:0;visibility:hidden;pointer-events:none}
-.ld-brand{font-family:'Cormorant Garamond',serif;font-size:4rem;color:var(--red);line-height:1;letter-spacing:-.03em}
+.ld-brand{font-family:'Cormorant Garamond',serif;font-size:4rem;color:var(--red);line-height:1}
 .ld-brand b{color:var(--ink);font-weight:700}
 .ld-sub{font-size:.75rem;text-transform:uppercase;letter-spacing:.18em;color:var(--ink3)}
 .ld-bar{width:160px;height:2px;background:var(--border);border-radius:2px;overflow:hidden}
-.ld-bar-fill{height:100%;width:0;background:var(--red);border-radius:2px;animation:ldbar 2s ease forwards}
+.ld-fill{height:100%;width:0;background:var(--red);animation:ldbar 2.5s ease forwards}
 @keyframes ldbar{to{width:100%}}
-@keyframes spin{to{transform:rotate(360deg)}}
 
-/* ── HEADER ── */
-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:.7rem 1.2rem;background:var(--surface);
-  border-bottom:1px solid var(--border);flex-shrink:0;
-  box-shadow:var(--shadow-sm);z-index:200;gap:1rem;flex-wrap:wrap
-}
-.hd-left{display:flex;align-items:center;gap:.8rem}
+/* HEADER */
+header{display:flex;align-items:center;justify-content:space-between;padding:.7rem 1.2rem;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;box-shadow:var(--shadow-sm);z-index:200;gap:1rem;flex-wrap:wrap}
 .brand{font-family:'Cormorant Garamond',serif;font-size:1.75rem;font-weight:700;line-height:1;color:var(--ink)}
 .brand em{color:var(--red);font-style:normal}
-.brand-tagline{font-size:.65rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-top:1px}
+.brand-sub{font-size:.65rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-top:1px}
 .loc-pill{display:flex;align-items:center;gap:.45rem;background:var(--s2);border:1px solid var(--border);border-radius:100px;padding:.38rem .9rem;font-size:.78rem;color:var(--gold);font-weight:500}
-.loc-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.8)}}
+.loc-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
 
-/* ── LAYOUT ── */
+/* LAYOUT */
 .layout{display:grid;grid-template-columns:360px 1fr;flex:1;overflow:hidden;min-height:0}
 
-/* ── SIDEBAR ── */
+/* SIDEBAR */
 .sidebar{display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--surface);overflow:hidden;min-height:0}
 
-/* ── SEARCH ── */
+/* SEARCH */
 .search-wrap{padding:.7rem;border-bottom:1px solid var(--border);position:relative;flex-shrink:0}
-.search-icon{position:absolute;left:1.55rem;top:50%;transform:translateY(-50%);color:var(--ink3);font-size:.85rem;pointer-events:none}
+.s-icon{position:absolute;left:1.55rem;top:50%;transform:translateY(-50%);color:var(--ink3);font-size:.85rem;pointer-events:none}
 #searchInput{width:100%;background:var(--s2);border:1.5px solid var(--border);border-radius:var(--r);padding:.55rem 1rem .55rem 2.2rem;font-size:.86rem;color:var(--ink);outline:none;transition:border-color .2s}
 #searchInput:focus{border-color:var(--red);background:var(--surface)}
 
-/* ── FEATURED ── */
-.featured{flex-shrink:0;margin:.7rem;border-radius:var(--r);overflow:hidden;position:relative;background:linear-gradient(135deg,#1a0a05 0%,#3d1a08 50%,#1a0a05 100%);min-height:100px;cursor:pointer;box-shadow:var(--shadow-md);transition:transform .2s}
+/* FEATURED */
+.featured{flex-shrink:0;margin:.65rem;border-radius:var(--r);overflow:hidden;position:relative;cursor:pointer;box-shadow:var(--shadow-md);transition:transform .2s;background:#1a0a05}
 .featured:hover{transform:translateY(-1px);box-shadow:var(--shadow-lg)}
-.featured-bg{position:absolute;inset:0;background:linear-gradient(135deg,rgba(181,40,40,.8) 0%,rgba(26,10,5,.95) 100%)}
-.featured-content{position:relative;z-index:1;padding:.9rem 1rem}
-.featured-label{font-size:.6rem;text-transform:uppercase;letter-spacing:.15em;color:rgba(255,255,255,.6);margin-bottom:.25rem}
-.featured-name{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;color:#fff;line-height:1.2;margin-bottom:.3rem}
-.featured-desc{font-size:.72rem;color:rgba(255,255,255,.75);line-height:1.4;margin-bottom:.5rem}
-.featured-meta{display:flex;align-items:center;gap:.5rem}
-.featured-badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:100px;padding:.18rem .6rem;font-size:.65rem;color:#fff}
-.featured-badge.gold{background:rgba(160,120,32,.4);border-color:rgba(200,170,60,.5);color:#fdd770}
+.feat-bg{position:absolute;inset:0;background:linear-gradient(135deg,rgba(181,40,40,.85) 0%,rgba(26,10,5,.96) 100%)}
+.feat-body{position:relative;z-index:1;padding:.85rem 1rem}
+.feat-label{font-size:.58rem;text-transform:uppercase;letter-spacing:.16em;color:rgba(255,255,255,.55);margin-bottom:.22rem}
+.feat-name{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:700;color:#fff;line-height:1.2;margin-bottom:.28rem}
+.feat-desc{font-size:.7rem;color:rgba(255,255,255,.72);line-height:1.4;margin-bottom:.45rem}
+.feat-tags{display:flex;gap:.4rem;flex-wrap:wrap}
+.feat-tag{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:100px;padding:.16rem .55rem;font-size:.62rem;color:#fff}
+.feat-tag.g{background:rgba(154,116,24,.4);border-color:rgba(200,170,60,.5);color:#fdd060}
 
-/* ── FILTER TABS (categories) ── */
-.cat-scroll{flex-shrink:0;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);padding:.6rem .7rem;display:flex;gap:.35rem}
+/* CATEGORIES */
+.cat-scroll{flex-shrink:0;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);padding:.55rem .65rem;display:flex;gap:.3rem}
 .cat-scroll::-webkit-scrollbar{display:none}
-.cat-btn{background:var(--s2);border:1.5px solid var(--border);border-radius:100px;padding:.28rem .75rem;font-size:.72rem;color:var(--ink2);white-space:nowrap;transition:all .18s;font-weight:400}
+.cat-btn{background:var(--s2);border:1.5px solid var(--border);border-radius:100px;padding:.25rem .72rem;font-size:.7rem;color:var(--ink2);white-space:nowrap;transition:all .17s;font-weight:400}
 .cat-btn:hover{border-color:var(--red);color:var(--red)}
 .cat-btn.active{background:var(--red);border-color:var(--red);color:#fff;font-weight:600}
 
-/* ── ADVANCED FILTERS ── */
-.adv-filters{flex-shrink:0;border-bottom:1px solid var(--border);overflow:hidden;transition:max-height .3s ease}
-.adv-filters.open{max-height:200px}
-.adv-filters.closed{max-height:0}
-.adv-inner{padding:.6rem .7rem;display:flex;flex-direction:column;gap:.5rem}
-.filter-row{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
-.fl{font-size:.63rem;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);min-width:44px}
-.chips{display:flex;gap:.28rem;flex-wrap:wrap}
-.chip{background:var(--s2);border:1px solid var(--border);border-radius:100px;padding:.2rem .62rem;font-size:.7rem;color:var(--ink2);transition:all .16s}
+/* FILTER TOGGLE BAR */
+.filter-bar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:.42rem .65rem;border-bottom:1px solid var(--border);background:var(--s2);gap:.4rem;flex-wrap:wrap}
+.fb-left{display:flex;align-items:center;gap:.4rem;font-size:.68rem;color:var(--ink2)}
+.active-ct{background:var(--red);color:#fff;border-radius:100px;padding:.08rem .42rem;font-size:.62rem;font-weight:600;display:none}
+.active-ct.on{display:inline}
+.sort-row{display:flex;gap:.28rem}
+.sort-btn,.ftoggle-btn{background:transparent;border:1px solid var(--border);border-radius:100px;padding:.2rem .62rem;font-size:.68rem;color:var(--ink2);transition:all .17s}
+.sort-btn:hover,.ftoggle-btn:hover{border-color:var(--red);color:var(--red)}
+.sort-btn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+/* ADVANCED FILTERS */
+.adv{overflow:hidden;transition:max-height .3s ease;border-bottom:1px solid var(--border);flex-shrink:0}
+.adv.open{max-height:160px}
+.adv.closed{max-height:0}
+.adv-inner{padding:.55rem .65rem;display:flex;flex-direction:column;gap:.45rem}
+.frow{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.fl{font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);min-width:44px}
+.chips{display:flex;gap:.26rem;flex-wrap:wrap}
+.chip{background:var(--s2);border:1px solid var(--border);border-radius:100px;padding:.19rem .6rem;font-size:.68rem;color:var(--ink2);transition:all .16s}
 .chip:hover{border-color:var(--red);color:var(--red)}
 .chip.active{background:var(--red);border-color:var(--red);color:#fff;font-weight:500}
-.chip.ga{--ac:var(--gold)}
 .chip.ga.active{background:var(--gold);border-color:var(--gold);color:#fff}
-.chip.gr{--ac:var(--green)}
 .chip.gr.active{background:var(--green);border-color:var(--green);color:#fff}
 
-/* FILTER TOGGLE */
-.filter-toggle-bar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:.45rem .7rem;border-bottom:1px solid var(--border);background:var(--s2)}
-.ft-left{display:flex;align-items:center;gap:.5rem;font-size:.7rem;color:var(--ink2)}
-.ft-active-count{background:var(--red);color:#fff;border-radius:100px;padding:.1rem .45rem;font-size:.65rem;font-weight:600;display:none}
-.ft-active-count.show{display:inline}
-.filter-toggle-btn{background:transparent;border:1px solid var(--border);border-radius:100px;padding:.22rem .7rem;font-size:.7rem;color:var(--ink2);transition:all .18s}
-.filter-toggle-btn:hover{border-color:var(--red);color:var(--red)}
-.sort-chips{display:flex;gap:.28rem}
-
 /* RESULTS BAR */
-.results-bar{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:.4rem .7rem;border-bottom:1px solid var(--border)}
-.rb-count{font-size:.7rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em}
-#resultsCount{color:var(--red);font-weight:600}
+.results-bar{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:.38rem .65rem;border-bottom:1px solid var(--border)}
+.rb-label{font-size:.65rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em}
+#resultsCount{color:var(--red);font-weight:700}
+#filterSummary{font-size:.62rem;color:var(--ink3)}
 
 /* LIST */
-.list{flex:1;overflow-y:auto;padding:.6rem;display:flex;flex-direction:column;gap:.45rem;scrollbar-width:thin;scrollbar-color:var(--border) transparent;min-height:0}
+.list{flex:1;overflow-y:auto;padding:.6rem;display:flex;flex-direction:column;gap:.42rem;scrollbar-width:thin;scrollbar-color:var(--border) transparent;min-height:0}
 
-/* CARDS */
+/* ── FIX 1: cards — left border must not clip name ── */
 .card{
-  background:var(--surface);border:1.5px solid var(--border);
-  border-radius:var(--r);padding:.75rem .9rem;cursor:pointer;
-  transition:all .2s;animation:fadeUp .3s ease both;
-  position:relative;overflow:hidden
+  background:var(--surface);
+  border:1.5px solid var(--border);
+  border-radius:var(--r);
+  padding:.72rem .9rem .72rem 1rem;   /* left padding gives room */
+  cursor:pointer;
+  transition:all .2s;
+  animation:fadeUp .3s ease both;
+  position:relative;
 }
-.card::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:transparent;transition:background .2s}
-.card:hover{border-color:var(--red);box-shadow:0 3px 18px rgba(181,40,40,.12);transform:translateY(-1px)}
-.card:hover::after{background:var(--red)}
-.card[data-gama="Alta"]{border-left-color:rgba(154,116,24,.4)}
-.card[data-gama="Alta"]::after{background:var(--gold)}
+/* left accent bar sits OUTSIDE the content box */
+.card::before{
+  content:'';
+  position:absolute;
+  left:0;top:4px;bottom:4px;
+  width:3px;
+  border-radius:0 2px 2px 0;
+  background:var(--gold);           /* default gold for Alta */
+  opacity:0;
+  transition:opacity .2s;
+}
+.card[data-gama="Alta"]::before{opacity:1;background:var(--gold)}
+.card[data-gama="Media"]::before{opacity:0}
+.card[data-gama="Accesible"]::before{opacity:0}
+.card:hover{border-color:var(--red);box-shadow:0 3px 18px rgba(181,40,40,.11);transform:translateY(-1px)}
+.card:hover::before{opacity:1;background:var(--red)!important}
 @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
-.card-header{display:flex;justify-content:space-between;align-items:flex-start;gap:.4rem;margin-bottom:.25rem}
-.card-name{font-weight:600;font-size:.9rem;line-height:1.25;flex:1}
-.gama-tag{font-size:.6rem;font-weight:700;padding:.15rem .48rem;border-radius:100px;white-space:nowrap;letter-spacing:.04em}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.45rem;margin-bottom:.22rem}
+.card-name{font-weight:600;font-size:.9rem;line-height:1.25;flex:1;min-width:0;word-break:break-word}
+.gama-tag{font-size:.58rem;font-weight:700;padding:.14rem .46rem;border-radius:100px;white-space:nowrap;letter-spacing:.04em;flex-shrink:0}
 .gt-alta{background:#fdf3d0;color:var(--gold);border:1px solid #e5cc70}
 .gt-media{background:#fde8e8;color:var(--red);border:1px solid #f0aaaa}
 .gt-accesible{background:#e6f4ed;color:var(--green);border:1px solid #98d4b0}
 
-.card-meta{display:flex;align-items:center;gap:.28rem;flex-wrap:wrap;margin-bottom:.2rem}
-.tag{font-size:.65rem;padding:.13rem .45rem;border-radius:100px;background:var(--s2);border:1px solid var(--border);color:var(--ink2)}
-.card-dist{font-size:.68rem;color:var(--ink3);margin-left:auto}
-.card-addr{margin-top:.18rem;font-size:.71rem;color:var(--ink3);line-height:1.4}
-.card-desc{margin-top:.35rem;font-size:.71rem;color:var(--ink2);line-height:1.45;font-style:italic;border-top:1px solid var(--s2);padding-top:.35rem}
-
-/* TRENDING BADGE */
-.trend-badge{display:inline-flex;align-items:center;gap:.2rem;background:#fff4e0;border:1px solid #f0d080;border-radius:100px;padding:.12rem .5rem;font-size:.6rem;color:#9a6010;margin-top:.25rem}
+.card-meta{display:flex;align-items:center;gap:.26rem;flex-wrap:wrap;margin-bottom:.18rem}
+.tag{font-size:.63rem;padding:.12rem .43rem;border-radius:100px;background:var(--s2);border:1px solid var(--border);color:var(--ink2)}
+.card-dist{font-size:.66rem;color:var(--ink3);margin-left:auto;white-space:nowrap}
+.card-addr,.card-phone{margin-top:.16rem;font-size:.7rem;color:var(--ink3);line-height:1.4}
+.card-desc{margin-top:.32rem;font-size:.7rem;color:var(--ink2);line-height:1.45;font-style:italic;border-top:1px solid var(--s2);padding-top:.32rem}
+.trend{display:inline-flex;align-items:center;gap:.18rem;background:#fff4e0;border:1px solid #f0d080;border-radius:100px;padding:.1rem .48rem;font-size:.58rem;color:#9a6010;margin-top:.22rem}
 
 /* MSG */
 .msg{padding:2rem 1rem;text-align:center;color:var(--ink3)}
-.msg .ico{font-size:2.2rem;margin-bottom:.6rem}
-.msg h3{font-family:'Cormorant Garamond',serif;font-size:1.25rem;color:var(--ink);margin-bottom:.35rem}
-.msg p{font-size:.78rem;line-height:1.6}
+.msg .ico{font-size:2rem;margin-bottom:.6rem}
+.msg h3{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--ink);margin-bottom:.3rem}
+.msg p{font-size:.77rem;line-height:1.6}
 
 /* MAP */
-#map{flex:1;z-index:1;min-height:0}
+#map{width:100%;height:100%}
 .leaflet-tile{filter:saturate(.85) brightness(.96)}
 .leaflet-popup-content-wrapper{border-radius:10px!important;box-shadow:var(--shadow-lg)!important;border:1px solid var(--border)!important}
-.leaflet-popup-content{font-family:'Outfit',sans-serif!important;font-size:.83rem!important;line-height:1.5!important;padding:.1rem!important}
-.pop-name{font-weight:700;color:var(--ink);margin-bottom:.15rem}
-.pop-cat{font-size:.7rem;color:var(--ink3)}
-.pop-gama{font-size:.68rem;font-weight:600;margin-top:.12rem}
-.pop-addr{font-size:.68rem;color:var(--ink3);margin-top:.1rem}
+.leaflet-popup-content{font-family:'Outfit',sans-serif!important;font-size:.82rem!important;line-height:1.5!important}
+.pop-name{font-weight:700;color:var(--ink);margin-bottom:.1rem}
+.pop-cat{font-size:.68rem;color:var(--ink3)}
+.pop-gama{font-size:.66rem;font-weight:600;margin-top:.1rem}
+.pop-addr{font-size:.66rem;color:var(--ink3);margin-top:.08rem}
 
 /* MAP LEGEND */
-.map-legend{position:absolute;bottom:24px;right:8px;z-index:500;background:rgba(255,253,248,.92);border:1px solid var(--border);border-radius:8px;padding:.5rem .7rem;font-size:.65rem;color:var(--ink2);backdrop-filter:blur(4px);box-shadow:var(--shadow-sm)}
-.legend-row{display:flex;align-items:center;gap:.4rem;margin-bottom:.2rem}
-.legend-row:last-child{margin-bottom:0}
-.legend-dot{width:10px;height:10px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3);flex-shrink:0}
+.map-legend{position:absolute;bottom:26px;right:10px;z-index:500;background:rgba(255,253,248,.94);border:1px solid var(--border);border-radius:8px;padding:.48rem .68rem;font-size:.63rem;color:var(--ink2);backdrop-filter:blur(4px);box-shadow:var(--shadow-sm)}
+.leg-row{display:flex;align-items:center;gap:.38rem;margin-bottom:.18rem}
+.leg-row:last-child{margin-bottom:0}
+.leg-dot{width:10px;height:10px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3);flex-shrink:0}
 
 /* RESPONSIVE */
 @media(max-width:700px){
   html,body{overflow:auto}
   .layout{grid-template-columns:1fr;overflow:visible}
-  #map{height:280px}
-  .sidebar{max-height:560px}
+  #map{height:280px!important}
+  .sidebar{max-height:580px}
 }
 </style>
 </head>
 <body>
 
-<!-- LOADING -->
 <div id="loading">
   <div class="ld-brand">Come<b>RD</b></div>
   <div class="ld-sub">Descubre lo mejor de Republica Dominicana</div>
-  <div class="ld-bar"><div class="ld-bar-fill"></div></div>
-  <div style="font-size:.75rem;color:var(--ink3)" id="loadMsg">Obteniendo tu ubicacion...</div>
+  <div class="ld-bar"><div class="ld-fill"></div></div>
+  <div style="font-size:.74rem;color:var(--ink3)" id="loadMsg">Obteniendo tu ubicacion...</div>
 </div>
 
-<!-- HEADER -->
 <header>
-  <div class="hd-left">
-    <div>
-      <div class="brand">Come<em>RD</em></div>
-      <div class="brand-tagline">Restaurantes · Republica Dominicana</div>
-    </div>
+  <div>
+    <div class="brand">Come<em>RD</em></div>
+    <div class="brand-sub">Restaurantes · Republica Dominicana</div>
   </div>
   <div class="loc-pill">
     <div class="loc-dot"></div>
@@ -203,50 +204,45 @@ header{
 <div class="layout">
   <aside class="sidebar">
 
-    <!-- SEARCH -->
     <div class="search-wrap">
-      <span class="search-icon">&#9906;</span>
+      <span class="s-icon">&#9906;</span>
       <input id="searchInput" type="text" placeholder="Buscar restaurante, cocina, barrio..." oninput="applyFilters()"/>
     </div>
 
-    <!-- FEATURED -->
-    <div class="featured" id="featuredCard" onclick="focusFeatured()">
-      <div class="featured-bg"></div>
-      <div class="featured-content">
-        <div class="featured-label">Destacado esta semana</div>
-        <div class="featured-name" id="featName">La Cassina</div>
-        <div class="featured-desc" id="featDesc">El restaurante #1 de RD. Cocina mediterranea premium, musica en vivo los jueves y cava de vinos de primer nivel.</div>
-        <div class="featured-meta">
-          <span class="featured-badge gold">Gama Alta</span>
-          <span class="featured-badge">Mariscos</span>
-          <span class="featured-badge">Piantini</span>
+    <div class="featured" id="featCard" onclick="focusFeatured()">
+      <div class="feat-bg"></div>
+      <div class="feat-body">
+        <div class="feat-label">Destacado esta semana</div>
+        <div class="feat-name">La Cassina</div>
+        <div class="feat-desc">El restaurante #1 de RD. Cocina mediterranea premium, techo corredizo y musica en vivo los jueves.</div>
+        <div class="feat-tags">
+          <span class="feat-tag g">Gama Alta</span>
+          <span class="feat-tag">Mariscos</span>
+          <span class="feat-tag">Piantini</span>
         </div>
       </div>
     </div>
 
-    <!-- CATEGORIES -->
     <div class="cat-scroll" id="catsEl"></div>
 
-    <!-- FILTER TOGGLE BAR -->
-    <div class="filter-toggle-bar">
-      <div class="ft-left">
-        <span>Filtros avanzados</span>
-        <span class="ft-active-count" id="activeCount">0</span>
+    <div class="filter-bar">
+      <div class="fb-left">
+        <span>Filtros</span>
+        <span class="active-ct" id="activeCt">0</span>
       </div>
-      <div style="display:flex;gap:.4rem;align-items:center">
-        <div class="sort-chips" id="sortChips">
-          <button class="chip active" data-sort="gama" onclick="setSort(this)">Mejor calidad</button>
-          <button class="chip" data-sort="dist" onclick="setSort(this)">Cercanos</button>
-          <button class="chip" data-sort="az" onclick="setSort(this)">A-Z</button>
+      <div style="display:flex;gap:.3rem;align-items:center;flex-wrap:wrap">
+        <div class="sort-row" id="sortRow">
+          <button class="sort-btn active" data-sort="gama" onclick="setSort(this)">Mejor calidad</button>
+          <button class="sort-btn" data-sort="dist" onclick="setSort(this)">Cercanos</button>
+          <button class="sort-btn" data-sort="az" onclick="setSort(this)">A-Z</button>
         </div>
-        <button class="filter-toggle-btn" id="filterToggleBtn" onclick="toggleFilters()">+ Filtrar</button>
+        <button class="ftoggle-btn" id="ftoggleBtn" onclick="toggleAdv()">+ Filtrar</button>
       </div>
     </div>
 
-    <!-- ADVANCED FILTERS (collapsible) -->
-    <div class="adv-filters closed" id="advFilters">
+    <div class="adv closed" id="advFilters">
       <div class="adv-inner">
-        <div class="filter-row">
+        <div class="frow">
           <span class="fl">Gama</span>
           <div class="chips" id="gamaChips">
             <button class="chip active" data-val="Todos" onclick="setFilter('gama',this)">Todas</button>
@@ -255,7 +251,7 @@ header{
             <button class="chip gr" data-val="Accesible" onclick="setFilter('gama',this)">Accesible</button>
           </div>
         </div>
-        <div class="filter-row">
+        <div class="frow">
           <span class="fl">Precio</span>
           <div class="chips" id="precioChips">
             <button class="chip active" data-val="Todos" onclick="setFilter('precio',this)">Todos</button>
@@ -268,13 +264,11 @@ header{
       </div>
     </div>
 
-    <!-- RESULTS BAR -->
     <div class="results-bar">
-      <span class="rb-count"><span id="resultsCount">—</span> lugares</span>
-      <span style="font-size:.65rem;color:var(--ink3)" id="filterSummary"></span>
+      <span class="rb-label"><span id="resultsCount">—</span> lugares</span>
+      <span id="filterSummary"></span>
     </div>
 
-    <!-- LIST -->
     <div class="list" id="listEl">
       <div class="msg">
         <div class="ico">&#128205;</div>
@@ -284,453 +278,419 @@ header{
     </div>
   </aside>
 
-  <!-- MAP CONTAINER -->
-  <div style="position:relative;flex:1;min-height:0">
-    <div id="map" style="width:100%;height:100%"></div>
+  <div style="position:relative;flex:1;min-height:0;overflow:hidden">
+    <div id="map"></div>
     <div class="map-legend">
-      <div class="legend-row"><div class="legend-dot" style="background:#9a7418"></div>Gama Alta</div>
-      <div class="legend-row"><div class="legend-dot" style="background:#b52828"></div>Gama Media</div>
-      <div class="legend-row"><div class="legend-dot" style="background:#246e42"></div>Accesible</div>
-      <div class="legend-row"><div class="legend-dot" style="background:#888"></div>Sin clasificar</div>
+      <div class="leg-row"><div class="leg-dot" style="background:#9a7418"></div>Gama Alta</div>
+      <div class="leg-row"><div class="leg-dot" style="background:#b52828"></div>Gama Media</div>
+      <div class="leg-row"><div class="leg-dot" style="background:#246e42"></div>Accesible</div>
+      <div class="leg-row"><div class="leg-dot" style="background:#888"></div>Sin clasificar</div>
     </div>
   </div>
 </div>
 
 <script>
-/* ════════════════════════════════════════
-   CONSTANTS
-════════════════════════════════════════ */
+/* ═══════════════ CONSTANTS ═══════════════ */
 const RADIUS_M = 6000;
-const GAMA_ORDER = {Alta:0, Media:1, Accesible:2};
-const GAMA_LABEL = {Alta:'Gama Alta', Media:'Gama Media', Accesible:'Accesible'};
-const GAMA_COLORS = {Alta:'#9a7418', Media:'#b52828', Accesible:'#246e42'};
-const PRECIO_MAP = {Alta:'$$$$', Media:'$$$', Accesible:'$$'};
-const CATS = ['Todos','Criolla','Mariscos','Parrilla','Pizza','Internacional','Asiatica','Cafe','Fast Food','Bares','Vegetariana'];
+const GAMA_ORDER  = {Alta:0, Media:1, Accesible:2};
+const GAMA_LABEL  = {Alta:'Gama Alta', Media:'Gama Media', Accesible:'Accesible'};
+const GAMA_COLOR  = {Alta:'#9a7418', Media:'#b52828', Accesible:'#246e42'};
+const PRECIO_MAP  = {Alta:'$$$$', Media:'$$$', Accesible:'$$'};
 
-/* ════════════════════════════════════════
-   DATABASE
-════════════════════════════════════════ */
+/* FIX 3 — new categories added */
+const CATS = ['Todos','Criolla','Mariscos','Parrilla','Hamburguesas','Pizza',
+              'Internacional','Asiatica','Mexicana','Cafe','Postres','Helados',
+              'Fast Food','Bares','Vegetariana'];
+
+/* ═══════════════ DATABASE ═══════════════ */
 const DB = [
-  // ── CRIOLLA Alta ──
-  {id:'cr01',name:'Pearl Urban Lounge',cat:'Criolla',gama:'Alta',addr:'Av. Independencia 254, Gazcue',phone:'809-533-2222',lat:18.4701,lng:-69.9050,desc:'Chef con reconocimiento internacional. 500+ plantas en su interior. La experiencia gastronomica mas sofisticada de RD.',trend:true},
-  {id:'cr02',name:'Ajuala',cat:'Criolla',gama:'Alta',addr:'Piantini, Santo Domingo',phone:'',lat:18.4760,lng:-69.9402,desc:'Chef Saverio Stassi. Casabe en buren de barro, corte Brangus con queso dominicano envejecido. Premiado en latinoamerica.',trend:false},
-  {id:'cr03',name:'Buche Perico',cat:'Criolla',gama:'Alta',addr:'C. El Conde #53, Zona Colonial',phone:'809-221-0506',lat:18.4740,lng:-69.8872,desc:'Jardin tropical bajo techo de cristal con cascada interior. Tuna fresco, ravioli de banana madura y cava premiada.',trend:true},
-  {id:'cr04',name:'Okra Restaurant',cat:'Criolla',gama:'Alta',addr:'C. Cesar Nicolas Penson 76, Zona Universitaria',phone:'',lat:18.4710,lng:-69.9270,desc:'Chef Francis Pena. Cocina dominicano-espanola creativa. Mencionado por World 50 Best.',trend:false},
-  {id:'cr05',name:'El Meson de la Cava',cat:'Criolla',gama:'Alta',addr:'Av. Mirador del Sur, Bella Vista',phone:'809-533-2818',lat:18.4558,lng:-69.9350,desc:'Restaurante dentro de una cueva natural de piedra caliza. Desde 1967. Cocina caribena-francesa. Experiencia unica en el mundo.',trend:true},
-  {id:'cr06',name:'Maraca',cat:'Criolla',gama:'Alta',addr:'C. Arzobispo Nouel #202, Zona Colonial',phone:'',lat:18.4741,lng:-69.8851,desc:'Murales tropicales y cocina caribena de autor. Concon de cangrejo y cocteleria signature imperdible.',trend:false},
-  {id:'cr07',name:'El Gallego',cat:'Criolla',gama:'Alta',addr:'C. Cesar Nicolas Penson, Santo Domingo',phone:'',lat:18.4712,lng:-69.9268,desc:'Cocina dominicano-espanola de autor. Fideua valenciana y postres como Oda al Cacao Dominicano.',trend:false},
-  {id:'cr08',name:'Casa Gastronomica SVII',cat:'Criolla',gama:'Alta',addr:'Av. Roberto Pastoriza 504, Quisqueya',phone:'',lat:18.4760,lng:-69.9380,desc:'Ingredientes de pequenos agricultores locales. Risotto de pato y pavlova de mango como platos estrella.',trend:false},
-  // ── CRIOLLA Media ──
-  {id:'cr09',name:'Meson de Bari',cat:'Criolla',gama:'Media',addr:'C. Hostos #302, Zona Colonial',phone:'809-687-4091',lat:18.4738,lng:-69.8858,desc:'45+ anos de historia. Sancocho, empanadas dominicanas y grandes porciones de cocina tipica.',trend:false},
-  {id:'cr10',name:'D Luis Parrillada',cat:'Criolla',gama:'Media',addr:'Av. George Washington, Malecon',phone:'809-687-8696',lat:18.4638,lng:-69.9050,desc:'Mofongo, moro y pollo guisado con vista al malecon. Favorito de locales.',trend:false},
-  // ── CRIOLLA Accesible ──
-  {id:'cr11',name:'Adrian Tropical - Malecon',cat:'Criolla',gama:'Accesible',addr:'Av. George Washington (Malecon)',phone:'809-221-1764',lat:18.4651,lng:-69.9120,desc:'El clasico popular del malecon. Tostones, mofongo y fritura. Siempre lleno los fines de semana.',trend:true},
-  {id:'cr12',name:'Adrian Tropical - 27 Feb',cat:'Criolla',gama:'Accesible',addr:'Av. 27 de Febrero esq. Nunez de Caceres',phone:'',lat:18.4795,lng:-69.9350,desc:'Sucursal de la cadena mas popular de SD. Mismo menu criollo accesible.',trend:false},
+  // ── CRIOLLA Alta
+  {id:'cr01',name:'Pearl Urban Lounge',      cat:'Criolla',      gama:'Alta',      addr:'Av. Independencia 254, Gazcue',              phone:'809-533-2222', lat:18.4701,lng:-69.9050, desc:'Chef con reconocimiento internacional. 500+ plantas en interior. La experiencia gastronomica mas sofisticada de RD.', trend:true},
+  {id:'cr02',name:'Ajuala',                  cat:'Criolla',      gama:'Alta',      addr:'Piantini, Santo Domingo',                    phone:'',             lat:18.4760,lng:-69.9402, desc:'Chef Saverio Stassi. Casabe en buren de barro, corte Brangus con queso envejecido. Premiado en latinoamerica.', trend:false},
+  {id:'cr03',name:'Buche Perico',            cat:'Criolla',      gama:'Alta',      addr:'C. El Conde #53, Zona Colonial',             phone:'809-221-0506', lat:18.4740,lng:-69.8872, desc:'Jardin tropical bajo techo de cristal con cascada. Tuna fresco, ravioli de banana madura y cava premiada.', trend:true},
+  {id:'cr04',name:'Okra Restaurant',         cat:'Criolla',      gama:'Alta',      addr:'C. Cesar Nicolas Penson 76, Zona Universitaria', phone:'',         lat:18.4710,lng:-69.9270, desc:'Chef Francis Pena. Cocina dominicano-espanola creativa. Mencionado por World 50 Best.', trend:false},
+  {id:'cr05',name:'El Meson de la Cava',     cat:'Criolla',      gama:'Alta',      addr:'Av. Mirador del Sur, Bella Vista',           phone:'809-533-2818', lat:18.4558,lng:-69.9350, desc:'Dentro de una cueva natural de piedra caliza. Desde 1967. Cocina caribena-francesa. Experiencia unica en el mundo.', trend:true},
+  {id:'cr06',name:'Maraca',                  cat:'Criolla',      gama:'Alta',      addr:'C. Arzobispo Nouel #202, Zona Colonial',     phone:'',             lat:18.4741,lng:-69.8851, desc:'Murales tropicales y cocina caribena de autor. Concon de cangrejo y cocteleria signature.', trend:false},
+  {id:'cr07',name:'El Gallego',              cat:'Criolla',      gama:'Alta',      addr:'C. Cesar Nicolas Penson, Santo Domingo',     phone:'',             lat:18.4712,lng:-69.9268, desc:'Dominicano-espanola de autor. Fideua valenciana y Oda al Cacao Dominicano como postre estrella.', trend:false},
+  {id:'cr08',name:'Casa Gastronomica SVII',  cat:'Criolla',      gama:'Alta',      addr:'Av. Roberto Pastoriza 504, Quisqueya',       phone:'',             lat:18.4760,lng:-69.9380, desc:'Ingredientes de pequenos agricultores dominicanos. Risotto de pato y pavlova de mango.', trend:false},
+  // CRIOLLA Media
+  {id:'cr09',name:'Meson de Bari',           cat:'Criolla',      gama:'Media',     addr:'C. Hostos #302, Zona Colonial',              phone:'809-687-4091', lat:18.4738,lng:-69.8858, desc:'45+ anos de historia. Sancocho, empanadas y grandes porciones de cocina tipica dominicana.', trend:false},
+  {id:'cr10',name:'D Luis Parrillada',       cat:'Criolla',      gama:'Media',     addr:'Av. George Washington, Malecon',             phone:'809-687-8696', lat:18.4638,lng:-69.9050, desc:'Mofongo, moro y pollo guisado con vista al malecon. Favorito de los locales.', trend:false},
+  // CRIOLLA Accesible
+  {id:'cr11',name:'Adrian Tropical - Malecon', cat:'Criolla',    gama:'Accesible', addr:'Av. George Washington (Malecon)',            phone:'809-221-1764', lat:18.4651,lng:-69.9120, desc:'El clasico popular del malecon. Tostones, mofongo y fritura. Siempre lleno los fines de semana.', trend:true},
+  {id:'cr12',name:'Adrian Tropical - 27 Feb', cat:'Criolla',     gama:'Accesible', addr:'Av. 27 de Febrero esq. Nunez de Caceres',   phone:'',             lat:18.4795,lng:-69.9350, desc:'Sucursal de la cadena mas popular de SD. Menu criollo accesible.', trend:false},
 
-  // ── MARISCOS Alta ──
-  {id:'ma01',name:'La Cassina',cat:'Mariscos',gama:'Alta',addr:'Av. Abraham Lincoln 1001, Piantini',phone:'809-563-2400',lat:18.4841,lng:-69.9395,desc:'El restaurante #1 de RD. Cocina mediterranea premium, techo corredizo y musica en vivo los jueves. La cava de vinos es la mejor del pais.',trend:true},
-  {id:'ma02',name:'Nipau',cat:'Mariscos',gama:'Alta',addr:'C. Gustavo Mejia Ricart, Piantini',phone:'',lat:18.4748,lng:-69.9390,desc:'Fusion mediterranea exclusiva. Mariscos de primera en ambiente moderno. Perfecto para ocasiones especiales.',trend:false},
-  // ── MARISCOS Media ──
-  {id:'ma03',name:'Muelle 47 - Galeria 360',cat:'Mariscos',gama:'Media',addr:'Galeria 360, Av. Winston Churchill',phone:'809-562-4747',lat:18.4780,lng:-69.9480,desc:'Mariscos frescos en ambiente moderno. Muy popular para almuerzos de negocios.',trend:false},
-  {id:'ma04',name:'Muelle 47 - J. Embajador',cat:'Mariscos',gama:'Media',addr:'Plaza Jardines del Embajador',phone:'',lat:18.4598,lng:-69.9410,desc:'Calidad constante y ambiente relajado. Una de las cadenas de mariscos mas confiables.',trend:false},
-  {id:'ma05',name:'Boca Marina',cat:'Mariscos',gama:'Media',addr:'C. Duarte 12-A, Boca Chica',phone:'',lat:18.4502,lng:-69.6060,desc:'Mariscos a orillas del mar en Boca Chica. La langosta a la parrilla es el plato estrella.',trend:false},
-  // ── MARISCOS Accesible ──
-  {id:'ma06',name:'La Casita de Papi',cat:'Mariscos',gama:'Accesible',addr:'Av. Charles Sumner #19, Gazcue',phone:'809-682-2194',lat:18.4695,lng:-69.9035,desc:'Mariscos criollos frescos a precios justos. El clasico del dominicano del dia a dia.',trend:false},
+  // ── MARISCOS Alta
+  {id:'ma01',name:'La Cassina',              cat:'Mariscos',     gama:'Alta',      addr:'Av. Abraham Lincoln 1001, Piantini',         phone:'809-563-2400', lat:18.4841,lng:-69.9395, desc:'El restaurante #1 de RD. Cocina mediterranea premium, techo corredizo y musica en vivo los jueves. La mejor cava de vinos del pais.', trend:true},
+  {id:'ma02',name:'Nipau',                   cat:'Mariscos',     gama:'Alta',      addr:'C. Gustavo Mejia Ricart, Piantini',          phone:'',             lat:18.4748,lng:-69.9390, desc:'Fusion mediterranea exclusiva. Mariscos de primera en ambiente moderno. Perfecto para ocasiones especiales.', trend:false},
+  // MARISCOS Media
+  {id:'ma03',name:'Muelle 47 - Galeria 360', cat:'Mariscos',    gama:'Media',     addr:'Galeria 360, Av. Winston Churchill',          phone:'809-562-4747', lat:18.4780,lng:-69.9480, desc:'Mariscos frescos en ambiente moderno. Muy popular para almuerzos de negocios.', trend:false},
+  {id:'ma04',name:'Muelle 47 - J. Embajador',cat:'Mariscos',    gama:'Media',     addr:'Plaza Jardines del Embajador',                phone:'',             lat:18.4598,lng:-69.9410, desc:'Calidad constante y ambiente relajado. Una de las cadenas mas confiables de mariscos.', trend:false},
+  {id:'ma05',name:'Boca Marina',             cat:'Mariscos',     gama:'Media',     addr:'C. Duarte 12-A, Boca Chica',                 phone:'',             lat:18.4502,lng:-69.6060, desc:'Mariscos a orillas del mar en Boca Chica. La langosta a la parrilla es el plato estrella.', trend:false},
+  // MARISCOS Accesible
+  {id:'ma06',name:'La Casita de Papi',       cat:'Mariscos',     gama:'Accesible', addr:'Av. Charles Sumner #19, Gazcue',             phone:'809-682-2194', lat:18.4695,lng:-69.9035, desc:'Mariscos criollos frescos a precios justos. El clasico del dominicano del dia a dia.', trend:false},
 
-  // ── PARRILLA Alta ──
-  {id:'pa01',name:'Victoria by Porterhouse',cat:'Parrilla',gama:'Alta',addr:'Av. Abraham Lincoln, Piantini',phone:'',lat:18.4838,lng:-69.9392,desc:'El steakhouse mas fino de SD. Cortes premium importados, sommelier y ambiente upscale exclusivo.',trend:true},
-  {id:'pa02',name:"Sophia's Bar Grill (SBG)",cat:'Parrilla',gama:'Alta',addr:'Paseo de los Locutores #9, Piantini',phone:'809-732-1511',lat:18.4812,lng:-69.9348,desc:'Chef Joaquin Renovales. Punto de encuentro de empresarios y figuras publicas. Churrasco, pato y calamares de autor.',trend:false},
-  {id:'pa03',name:'Patagonia Steakhouse',cat:'Parrilla',gama:'Alta',addr:'Av. Winston Churchill, Piantini',phone:'',lat:18.4773,lng:-69.9464,desc:'Cortes argentinos en terraza elegante. Recomendado ano tras ano por criticos gastronomicos.',trend:false},
-  // ── PARRILLA Media ──
-  {id:'pa04',name:'Casa Vera',cat:'Parrilla',gama:'Media',addr:'Piantini, Santo Domingo',phone:'',lat:18.4754,lng:-69.9400,desc:'Parrilla y cocina criolla. El favorito para cenas de navidad y reuniones familiares grandes.',trend:false},
-  {id:'pa05',name:'Roust Churrasqueria',cat:'Parrilla',gama:'Media',addr:'Av. Roberto Pastoriza, Santo Domingo',phone:'',lat:18.4730,lng:-69.9310,desc:'Churrasco y mariscos en porciones generosas. Excelente relacion precio-calidad.',trend:false},
-  {id:'pa06',name:'BURRA - Burger & Birra',cat:'Parrilla',gama:'Media',addr:'Av. Tiradentes 25, Santo Domingo',phone:'',lat:18.4791,lng:-69.9269,desc:'Hamburguesas artesanales de media libra con cervezas craft. Ambiente moderno y muy animado.',trend:true},
+  // ── PARRILLA Alta
+  {id:'pa01',name:'Victoria by Porterhouse', cat:'Parrilla',     gama:'Alta',      addr:'Av. Abraham Lincoln, Piantini',              phone:'',             lat:18.4838,lng:-69.9392, desc:'El steakhouse mas fino de SD. Cortes premium importados, sommelier y ambiente upscale exclusivo.', trend:true},
+  {id:'pa02',name:"Sophia's Bar Grill (SBG)",cat:'Parrilla',     gama:'Alta',      addr:'Paseo de los Locutores #9, Piantini',        phone:'809-732-1511', lat:18.4812,lng:-69.9348, desc:'Chef Joaquin Renovales. Punto de encuentro de empresarios. Churrasco, pato y calamares de autor.', trend:false},
+  {id:'pa03',name:'Patagonia Steakhouse',    cat:'Parrilla',     gama:'Alta',      addr:'Av. Winston Churchill, Piantini',            phone:'',             lat:18.4773,lng:-69.9464, desc:'Cortes argentinos en terraza elegante. Recomendado cada ano por criticos gastronomicos.', trend:false},
+  // PARRILLA Media
+  {id:'pa04',name:'Casa Vera',               cat:'Parrilla',     gama:'Media',     addr:'Piantini, Santo Domingo',                    phone:'',             lat:18.4754,lng:-69.9400, desc:'Parrilla y cocina criolla. El favorito para cenas navideñas y reuniones familiares.', trend:false},
+  {id:'pa05',name:'Roust Churrasqueria',     cat:'Parrilla',     gama:'Media',     addr:'Av. Roberto Pastoriza, Santo Domingo',       phone:'',             lat:18.4730,lng:-69.9310, desc:'Churrasco y mariscos en porciones generosas. Excelente relacion precio-calidad.', trend:false},
 
-  // ── PIZZA / ITALIANA Alta ──
-  {id:'pi01',name:'Bottega Fratelli',cat:'Pizza',gama:'Alta',addr:'Av. Simon Bolivar 219, Gazcue',phone:'809-682-9951',lat:18.4698,lng:-69.9008,desc:'Tercera generacion familia Vesuvio (desde 1954). Italiana moderna en ambiente elegante con musica en vivo.',trend:false},
-  {id:'pi02',name:'San Marzano',cat:'Pizza',gama:'Alta',addr:'C. Pablo Casals, Piantini',phone:'',lat:18.4762,lng:-69.9402,desc:'Cocina mediterranea-italiana premium con ingredientes importados directamente de Italia.',trend:false},
-  {id:'pi03',name:'Laurel Restaurante',cat:'Pizza',gama:'Alta',addr:'C. Pablo Casals #35, Piantini',phone:'809-732-6058',lat:18.4759,lng:-69.9398,desc:'Considerado uno de los mejores de SD. Salmon con jengibre, Penne Casa Laurel, pizza artesanal y servicio impecable.',trend:true},
-  // ── PIZZA Media ──
-  {id:'pi04',name:'Il Bacaretto',cat:'Pizza',gama:'Media',addr:'Av. Simon Bolivar 219, Gazcue',phone:'809-682-9951',lat:18.4699,lng:-69.9010,desc:'Chef Michele Luchetta recorre las mesas personalmente. Mozzarella al Forno y Bigoli Cacio e Pepe son sus platos estrella.',trend:false},
-  {id:'pi05',name:'Trattoria Angiolino',cat:'Pizza',gama:'Media',addr:'Santo Domingo',phone:'',lat:18.4750,lng:-69.9350,desc:'Chef David Pezzotti. Autentica italiana artesanal desde 2009. Platos de creacion propia exclusivos.',trend:false},
-  // ── PIZZA Accesible ──
-  {id:'pi06',name:'Pizza Hut - Gazcue',cat:'Pizza',gama:'Accesible',addr:'Plaza El Faro, Av. Maximo Gomez 2',phone:'',lat:18.4685,lng:-69.8998,desc:'18 ubicaciones en SD. Delivery, carry-out y dine-in. El clasico familiar de siempre.',trend:false},
-  {id:'pi07',name:'Dominos Pizza - Lincoln',cat:'Pizza',gama:'Accesible',addr:'Av. Abraham Lincoln, Piantini',phone:'',lat:18.4820,lng:-69.9388,desc:'Delivery rapido garantizado. 18 ubicaciones en Santo Domingo.',trend:false},
-  {id:'pi08',name:"Papa John's - Bella Vista",cat:'Pizza',gama:'Accesible',addr:'Bella Vista, Santo Domingo',phone:'',lat:18.4598,lng:-69.9400,desc:'Pizza americana express. La garlic sauce para dipear es obligatoria.',trend:false},
+  // ── HAMBURGUESAS (nueva categoria) Alta/Media
+  {id:'hm01',name:'BURRA - Burger & Birra',  cat:'Hamburguesas', gama:'Alta',      addr:'Av. Tiradentes 25, Santo Domingo',           phone:'',             lat:18.4791,lng:-69.9269, desc:'Hamburguesas artesanales de media libra con carne de res importada y cervezas craft. El burger bar mas trendy de SD.', trend:true},
+  {id:'hm02',name:'Smashed Burgers SD',      cat:'Hamburguesas', gama:'Media',     addr:'Piantini, Santo Domingo',                    phone:'',             lat:18.4762,lng:-69.9395, desc:'Smash burgers estilo americano con doble patty, queso american y salsas de autor. Muy popular entre jovenes.', trend:true},
+  {id:'hm03',name:'The Burger Shack',        cat:'Hamburguesas', gama:'Media',     addr:'Zona Colonial, Santo Domingo',               phone:'',             lat:18.4745,lng:-69.8860, desc:'Burgers gourmet en ambiente casual. Opciones de pollo, res y plant-based.', trend:false},
+  {id:'hm04',name:'Buen Provecho Burgers',   cat:'Hamburguesas', gama:'Accesible', addr:'Varias ubicaciones, Santo Domingo',          phone:'',             lat:18.4720,lng:-69.9200, desc:'Cadena local de burgers accesibles. Populares y sabrosas sin gastar mucho.', trend:false},
 
-  // ── INTERNACIONAL Alta ──
-  {id:'in01',name:"Pat'e Palo European Brasserie",cat:'Internacional',gama:'Alta',addr:'La Atarazana 25, Zona Colonial',phone:'809-687-8089',lat:18.4731,lng:-69.8812,desc:'El mas exitoso y tradicional de RD. Menu mediterraneo en terraza frente a Plaza Espana. Brunch, almuerzo y cena. Experiencia unica en la Zona Colonial.',trend:true},
-  {id:'in02',name:'Don Pepe',cat:'Internacional',gama:'Alta',addr:'C. Porfirio Herrera 31, Piantini',phone:'',lat:18.4762,lng:-69.9398,desc:'30+ anos. Paella del mar, cochinillo asado al horno y chuletones Angus. El lujoso de cabecera de Piantini.',trend:false},
-  {id:'in03',name:'Teresa Restaurant',cat:'Internacional',gama:'Alta',addr:'Piantini, Santo Domingo',phone:'',lat:18.4755,lng:-69.9405,desc:'Cocina internacional premium en Piantini. Ambiente refinado con valet parking y cava de vinos selecta.',trend:false},
-  {id:'in04',name:'Verema 23',cat:'Internacional',gama:'Alta',addr:'Santo Domingo',phone:'',lat:18.4770,lng:-69.9410,desc:'Manana: specialty coffee y desayunos artesanales. Noche: bistro con vinos y sala de cigarros privada.',trend:false},
-  {id:'in05',name:'Zola',cat:'Internacional',gama:'Alta',addr:'Piantini, Santo Domingo',phone:'',lat:18.4758,lng:-69.9395,desc:'Fusion caribena-italiana del norte recomendada por medios internacionales. Una experiencia memorable.',trend:false},
-  // ── INTERNACIONAL Media ──
-  {id:'in06',name:"Chili's - Sambil",cat:'Internacional',gama:'Media',addr:'Plaza Sambil, Av. John F. Kennedy',phone:'',lat:18.4769,lng:-69.9618,desc:'Tex-mex animado. Nachos, costillas BBQ y fajitas. Ideal para grupos y cumpleanos.',trend:false},
-  {id:'in07',name:"TGI Friday's",cat:'Internacional',gama:'Media',addr:'Santo Domingo',phone:'',lat:18.4780,lng:-69.9460,desc:'Cadena americana con menu variado. Burgers, pastas y postres. Ambiente festivo.',trend:false},
-  {id:'in08',name:'Outback Steakhouse',cat:'Internacional',gama:'Media',addr:'Piantini, Santo Domingo',phone:'',lat:18.4752,lng:-69.9398,desc:"Estilo australiano. Bloomin' Onion y costillas BBQ son los platos estrella.",trend:false},
+  // ── PIZZA / ITALIANA Alta
+  {id:'pi01',name:'Bottega Fratelli',        cat:'Pizza',        gama:'Alta',      addr:'Av. Simon Bolivar 219, Gazcue',              phone:'809-682-9951', lat:18.4698,lng:-69.9008, desc:'Tercera generacion familia Vesuvio (desde 1954). Italiana moderna en ambiente elegante con musica en vivo.', trend:false},
+  {id:'pi02',name:'San Marzano',             cat:'Pizza',        gama:'Alta',      addr:'C. Pablo Casals, Piantini',                  phone:'',             lat:18.4762,lng:-69.9402, desc:'Cocina mediterranea-italiana premium. Ingredientes importados directamente de Italia.', trend:false},
+  {id:'pi03',name:'Laurel Restaurante',      cat:'Pizza',        gama:'Alta',      addr:'C. Pablo Casals #35, Piantini',              phone:'809-732-6058', lat:18.4759,lng:-69.9398, desc:'Uno de los mejores de SD. Salmon con jengibre, Penne Casa Laurel y pizza artesanal impecable.', trend:true},
+  // PIZZA Media
+  {id:'pi04',name:'Il Bacaretto',            cat:'Pizza',        gama:'Media',     addr:'Av. Simon Bolivar 219, Gazcue',              phone:'809-682-9951', lat:18.4699,lng:-69.9010, desc:'Chef Michele Luchetta recorre las mesas personalmente. Mozzarella al Forno y Bigoli Cacio e Pepe son los favoritos.', trend:false},
+  {id:'pi05',name:'Trattoria Angiolino',     cat:'Pizza',        gama:'Media',     addr:'Santo Domingo',                              phone:'',             lat:18.4750,lng:-69.9350, desc:'Italiana artesanal autentica desde 2009. Platos de creacion propia del chef David Pezzotti.', trend:false},
+  // PIZZA Accesible
+  {id:'pi06',name:'Pizza Hut - Gazcue',      cat:'Pizza',        gama:'Accesible', addr:'Plaza El Faro, Av. Maximo Gomez 2',          phone:'',             lat:18.4685,lng:-69.8998, desc:'18 ubicaciones en SD. Delivery, carry-out y dine-in.', trend:false},
+  {id:'pi07',name:'Dominos Pizza - Lincoln', cat:'Pizza',        gama:'Accesible', addr:'Av. Abraham Lincoln, Piantini',              phone:'',             lat:18.4820,lng:-69.9388, desc:'Delivery rapido garantizado. 18 ubicaciones en SD.', trend:false},
 
-  // ── ASIATICA Alta ──
-  {id:'as01',name:'Lila Modern Cuisine',cat:'Asiatica',gama:'Alta',addr:'Santo Domingo Norte',phone:'',lat:18.5050,lng:-69.9200,desc:'Fusion asiatica-dominicana contemporanea. Tiradito de pulpo, hamachi con ponzu. Cocteleria de autor.',trend:true},
-  {id:'as02',name:'El Samurai',cat:'Asiatica',gama:'Alta',addr:'C. del Seminario #57, Gazcue',phone:'809-682-6640',lat:18.4693,lng:-69.8985,desc:'20+ anos con cuatro chefs procedentes de Japon. El mejor sushi y sashimi autentico de SD.',trend:false},
-  // ── ASIATICA Media ──
-  {id:'as03',name:'Yokomo',cat:'Asiatica',gama:'Media',addr:'Santo Domingo',phone:'',lat:18.4760,lng:-69.9300,desc:'Sushi fusion con giro dominicano. Creativo, accesible y muy popular entre jovenes.',trend:false},
+  // ── INTERNACIONAL Alta
+  {id:'in01',name:"Pat'e Palo European Brasserie", cat:'Internacional', gama:'Alta', addr:'La Atarazana 25, Zona Colonial', phone:'809-687-8089', lat:18.4731,lng:-69.8812, desc:'El mas exitoso y tradicional de RD. Menu mediterraneo en terraza frente a Plaza Espana.', trend:true},
+  {id:'in02',name:'Don Pepe',                cat:'Internacional', gama:'Alta',     addr:'C. Porfirio Herrera 31, Piantini',           phone:'',             lat:18.4762,lng:-69.9398, desc:'30+ anos. Paella del mar, cochinillo asado y chuletones Angus. El lujoso de Piantini.', trend:false},
+  {id:'in03',name:'Teresa Restaurant',       cat:'Internacional', gama:'Alta',     addr:'Piantini, Santo Domingo',                    phone:'',             lat:18.4755,lng:-69.9405, desc:'Cocina internacional premium. Ambiente refinado con valet parking y cava de vinos selecta.', trend:false},
+  {id:'in04',name:'Verema 23',               cat:'Internacional', gama:'Alta',     addr:'Santo Domingo',                              phone:'',             lat:18.4770,lng:-69.9410, desc:'Manana: specialty coffee y desayunos artesanales. Noche: bistro con vinos y sala de cigarros privada.', trend:false},
+  {id:'in05',name:'Zola',                    cat:'Internacional', gama:'Alta',     addr:'Piantini, Santo Domingo',                    phone:'',             lat:18.4758,lng:-69.9395, desc:'Fusion caribena-italiana recomendada por medios internacionales. Una experiencia memorable.', trend:false},
+  // INTERNACIONAL Media
+  {id:'in06',name:"Chili's - Sambil",        cat:'Internacional', gama:'Media',    addr:'Plaza Sambil, Av. John F. Kennedy',          phone:'',             lat:18.4769,lng:-69.9618, desc:'Tex-mex animado. Nachos, costillas BBQ y fajitas. Ideal para grupos y cumpleanos.', trend:false},
+  {id:'in07',name:"TGI Friday's",            cat:'Internacional', gama:'Media',    addr:'Santo Domingo',                              phone:'',             lat:18.4780,lng:-69.9460, desc:'Cadena americana. Burgers, pastas y postres. Ambiente festivo.', trend:false},
+  {id:'in08',name:'Outback Steakhouse',      cat:'Internacional', gama:'Media',    addr:'Piantini, Santo Domingo',                    phone:'',             lat:18.4752,lng:-69.9398, desc:"Estilo australiano. Bloomin' Onion y costillas BBQ como platos estrella.", trend:false},
 
-  // ── CAFE Media ──
-  {id:'cf01',name:'Flor de Cafe - Piantini',cat:'Cafe',gama:'Media',addr:'Av. Abraham Lincoln, Piantini',phone:'',lat:18.4749,lng:-69.9413,desc:'La cafeteria de especialidad mas querida de SD. Cafe de origen dominicano y postres artesanales imperdibles.',trend:true},
-  {id:'cf02',name:'Flor de Cafe - Renacimiento',cat:'Cafe',gama:'Media',addr:'Roberto Pastoriza #401 esq. Av. Lincoln',phone:'',lat:18.4731,lng:-69.9380,desc:'Sucursal de Flor de Cafe. Ambiente tranquilo ideal para trabajar o reuniones informales.',trend:false},
-  {id:'cf03',name:'Flor de Cafe - Rafael Sancio',cat:'Cafe',gama:'Media',addr:'C. Rafael Sancio #5 esq. Leonardo Da Vinci',phone:'',lat:18.4703,lng:-69.9300,desc:'Tercera sucursal. El cafe de origen dominicano y las tostadas artesanales son los favoritos.',trend:false},
-  {id:'cf04',name:'Casa Barista & Co. - Piantini',cat:'Cafe',gama:'Media',addr:'C. Victor Garrido Puello #16, Plaza LMP',phone:'809-692-4995',lat:18.4756,lng:-69.9396,desc:'Specialty coffee de tercera ola. Baristas certificados, metodos de filtracion y origenes de autor.',trend:true},
-  {id:'cf05',name:'Casa Barista & Co. - Colonial',cat:'Cafe',gama:'Media',addr:'C. Arzobispo Merino 268, Zona Colonial',phone:'829-247-0142',lat:18.4739,lng:-69.8835,desc:'Terraza con vista al casco historico. El specialty coffee de la Zona Colonial.',trend:false},
-  {id:'cf06',name:'Affogato Cafe',cat:'Cafe',gama:'Media',addr:'C. Arzobispo Nouel #251, Zona Colonial',phone:'809-688-7676',lat:18.4734,lng:-69.8845,desc:'El mas fotografiado de la Zona Colonial. Especialidad en affogato y postres helados de autor.',trend:true},
-  {id:'cf07',name:'CAFFETAL La Bottega Del Caffe',cat:'Cafe',gama:'Media',addr:'C. Armando Rodriguez, Villa Consuelo',phone:'809-692-6830',lat:18.4762,lng:-69.9011,desc:'Estilo italiano autentico. Espresso, cappuccino y cornetti hechos por baristas apasionados.',trend:false},
-  {id:'cf08',name:'Storia Caffe',cat:'Cafe',gama:'Media',addr:'Plaza Galerias del Paseo, Paseo de los Locutores',phone:'',lat:18.4815,lng:-69.9350,desc:'Postres sofisticados y cafe de especialidad en ambiente romantico. El favorito para citas.',trend:false},
-  {id:'cf09',name:'Mr & Mrs Coffee',cat:'Cafe',gama:'Media',addr:'Av. Gustavo Mejia Ricart 133, Piantini',phone:'829-630-8467',lat:18.4744,lng:-69.9397,desc:'Cafeteria estilo europeo. Lattes artesanales y pasteleria de calidad en Piantini.',trend:false},
-  // ── CAFE Accesible ──
-  {id:'cf10',name:'Santo Domingo Cafe - Agora',cat:'Cafe',gama:'Accesible',addr:'Agora Mall, 3er Nivel, Av. Abraham Lincoln',phone:'',lat:18.4824,lng:-69.9380,desc:'Cafeteria en mall. Comodo para pausas entre compras con menu accesible.',trend:false},
-  {id:'cf11',name:'Santo Domingo Cafe - Acropolis',cat:'Cafe',gama:'Accesible',addr:'Acropolis Center, Av. Winston Churchill',phone:'',lat:18.4617,lng:-69.9451,desc:'Sucursal en Acropolis. Menu de cafe y postres clasicos a buen precio.',trend:false},
-  {id:'cf12',name:'Santo Domingo Cafe - Sambil',cat:'Cafe',gama:'Accesible',addr:'Plaza Sambil, 2do Nivel',phone:'',lat:18.4769,lng:-69.9618,desc:'Punto de encuentro dentro del Sambil.',trend:false},
-  {id:'cf13',name:'Santo Domingo Cafe - P. Chiquito',cat:'Cafe',gama:'Accesible',addr:'Av. Sarasota, Patio Chiquito',phone:'',lat:18.4570,lng:-69.9420,desc:'Popular entre jovenes del sector sur.',trend:false},
-  {id:'cf14',name:'Corner Cafe',cat:'Cafe',gama:'Accesible',addr:'Zona Colonial, Santo Domingo',phone:'',lat:18.4742,lng:-69.8855,desc:'Cafeteria de barrio. Ideal para desayuno rapido en la Zona Colonial.',trend:false},
+  // ── ASIATICA Alta
+  {id:'as01',name:'Lila Modern Cuisine',     cat:'Asiatica',     gama:'Alta',      addr:'Santo Domingo Norte',                        phone:'',             lat:18.5050,lng:-69.9200, desc:'Fusion asiatica-dominicana contemporanea. Tiradito de pulpo y hamachi ponzu. Cocteleria de autor.', trend:true},
+  {id:'as02',name:'El Samurai',              cat:'Asiatica',     gama:'Alta',      addr:'C. del Seminario #57, Gazcue',               phone:'809-682-6640', lat:18.4693,lng:-69.8985, desc:'20+ anos con cuatro chefs de Japon. El mejor sushi y sashimi autentico de SD.', trend:false},
+  // ASIATICA Media
+  {id:'as03',name:'Yokomo',                  cat:'Asiatica',     gama:'Media',     addr:'Santo Domingo',                              phone:'',             lat:18.4760,lng:-69.9300, desc:'Sushi fusion con giro dominicano. Creativo, accesible y muy popular entre jovenes.', trend:false},
 
-  // ── FAST FOOD Accesible ──
-  {id:'ff01',name:"McDonald's - Tiradentes",cat:'Fast Food',gama:'Accesible',addr:'Av. Tiradentes 22, Santo Domingo',phone:'',lat:18.4791,lng:-69.9263,desc:'Con drive-thru. Desayunos con burritos, huevos y tocino. El clasico americano.',trend:false},
-  {id:'ff02',name:'Burger King - W. Churchill',cat:'Fast Food',gama:'Accesible',addr:'Av. Winston Churchill 80, Santo Domingo',phone:'',lat:18.4770,lng:-69.9461,desc:'Una de las mas populares de RD. Whopper y chicken sandwich son los favoritos nacionales.',trend:false},
-  {id:'ff03',name:'KFC - Piantini',cat:'Fast Food',gama:'Accesible',addr:'Piantini, Santo Domingo',phone:'',lat:18.4755,lng:-69.9402,desc:'18 ubicaciones en SD. Pollo crujiente con la receta original del Coronel. Un clasico.',trend:false},
-  {id:'ff04',name:"Wendy's - Abraham Lincoln",cat:'Fast Food',gama:'Accesible',addr:'Av. Abraham Lincoln, Santo Domingo',phone:'',lat:18.4830,lng:-69.9390,desc:"12 ubicaciones en SD. El Frosty y el Dave's Single son los mas pedidos.",trend:false},
-  {id:'ff05',name:'Taco Bell - Piantini',cat:'Fast Food',gama:'Accesible',addr:'Piantini, Santo Domingo',phone:'',lat:18.4762,lng:-69.9400,desc:'Comida mexicana rapida con drive-thru. Mexican Pizza y Taco Bell fries.',trend:false},
-  {id:'ff06',name:'Pollos Victorina',cat:'Fast Food',gama:'Accesible',addr:'Varias ubicaciones, Santo Domingo',phone:'',lat:18.4750,lng:-69.9350,desc:'Cadena dominicana favorita. Burgers, wraps y pollo frito al mejor precio local.',trend:true},
-  {id:'ff07',name:'Pica Pollo',cat:'Fast Food',gama:'Accesible',addr:'Av. Tiradentes 25, Santo Domingo',phone:'',lat:18.4793,lng:-69.9270,desc:'Pollo frito crujiente con tostones o moro. Menos de 4 dolares. Lo mas autentico del pais.',trend:true},
+  // ── MEXICANA (nueva categoria)
+  {id:'mx01',name:'El Burrito Mexicano',     cat:'Mexicana',     gama:'Media',     addr:'Piantini, Santo Domingo',                    phone:'',             lat:18.4758,lng:-69.9392, desc:'Tacos, burritos y enchiladas autenticos preparados por chef mexicano. El favorito de los amantes de la cocina mexicana en SD.', trend:true},
+  {id:'mx02',name:'Taco Loco',              cat:'Mexicana',     gama:'Accesible', addr:'Av. 27 de Febrero, Santo Domingo',            phone:'',             lat:18.4790,lng:-69.9340, desc:'Tacos callejeros estilo Ciudad de Mexico. Economico y delicioso. Con opciones vegetarianas.', trend:false},
+  {id:'mx03',name:'Taco Bell - Piantini',    cat:'Mexicana',     gama:'Accesible', addr:'Piantini, Santo Domingo',                    phone:'',             lat:18.4762,lng:-69.9400, desc:'Comida mexicana rapida con drive-thru. Mexican Pizza, burritos y nachos clasicos.', trend:false},
 
-  // ── BARES ──
-  {id:'ba01',name:'Room 504 (sobre La Cassina)',cat:'Bares',gama:'Alta',addr:'Av. Abraham Lincoln 1001, Piantini (2do piso)',phone:'809-563-2400',lat:18.4842,lng:-69.9396,desc:'El club lounge mas exclusivo de SD. DJs internacionales de jueves a domingo sobre el mejor restaurante del pais.',trend:true},
-  {id:'ba02',name:'El Buho Cafe',cat:'Bares',gama:'Media',addr:'Zona Colonial, Santo Domingo',phone:'',lat:18.4736,lng:-69.8850,desc:'Bar de personalidad propia. Cocktails artesanales y musica en vivo. El dueno atiende personalmente.',trend:false},
+  // ── CAFE Media
+  {id:'cf01',name:'Flor de Cafe - Piantini', cat:'Cafe',         gama:'Media',     addr:'Av. Abraham Lincoln, Piantini',              phone:'',             lat:18.4749,lng:-69.9413, desc:'La cafeteria de especialidad mas querida de SD. Cafe de origen dominicano y postres artesanales.', trend:true},
+  {id:'cf02',name:'Flor de Cafe - Renacimiento', cat:'Cafe',     gama:'Media',     addr:'Roberto Pastoriza #401 esq. Av. Lincoln',    phone:'',             lat:18.4731,lng:-69.9380, desc:'Sucursal tranquila. Ideal para trabajar o reuniones informales.', trend:false},
+  {id:'cf03',name:'Flor de Cafe - Rafael Sancio', cat:'Cafe',    gama:'Media',     addr:'C. Rafael Sancio #5 esq. Leonardo Da Vinci', phone:'',             lat:18.4703,lng:-69.9300, desc:'Tercera sucursal con el mismo cafe de origen dominicano y tostadas artesanales.', trend:false},
+  {id:'cf04',name:'Casa Barista & Co. - Piantini', cat:'Cafe',   gama:'Media',     addr:'C. Victor Garrido Puello #16, Plaza LMP',    phone:'809-692-4995', lat:18.4756,lng:-69.9396, desc:'Specialty coffee de tercera ola. Baristas certificados, metodos de filtracion y origenes de autor.', trend:true},
+  {id:'cf05',name:'Casa Barista & Co. - Colonial', cat:'Cafe',   gama:'Media',     addr:'C. Arzobispo Merino 268, Zona Colonial',     phone:'829-247-0142', lat:18.4739,lng:-69.8835, desc:'Terraza con vista al casco historico. El specialty coffee de la Zona Colonial.', trend:false},
+  {id:'cf06',name:'Affogato Cafe',           cat:'Cafe',         gama:'Media',     addr:'C. Arzobispo Nouel #251, Zona Colonial',     phone:'809-688-7676', lat:18.4734,lng:-69.8845, desc:'El mas fotografiado de la Zona Colonial. Especialidad en affogato y postres helados de autor.', trend:true},
+  {id:'cf07',name:'CAFFETAL La Bottega Del Caffe', cat:'Cafe',   gama:'Media',     addr:'C. Armando Rodriguez, Villa Consuelo',       phone:'809-692-6830', lat:18.4762,lng:-69.9011, desc:'Estilo italiano. Espresso, cappuccino y cornetti hechos por baristas apasionados.', trend:false},
+  {id:'cf08',name:'Storia Caffe',            cat:'Cafe',         gama:'Media',     addr:'Plaza Galerias del Paseo, Paseo de los Locutores', phone:'',         lat:18.4815,lng:-69.9350, desc:'Postres sofisticados y cafe de especialidad. Ambiente romantico ideal para citas.', trend:false},
+  {id:'cf09',name:'Mr & Mrs Coffee',         cat:'Cafe',         gama:'Media',     addr:'Av. Gustavo Mejia Ricart 133, Piantini',     phone:'829-630-8467', lat:18.4744,lng:-69.9397, desc:'Estilo europeo. Lattes artesanales y pasteleria de calidad en Piantini.', trend:false},
+  // CAFE Accesible
+  {id:'cf10',name:'Santo Domingo Cafe - Agora', cat:'Cafe',      gama:'Accesible', addr:'Agora Mall, 3er Nivel, Av. Abraham Lincoln', phone:'',             lat:18.4824,lng:-69.9380, desc:'Cafeteria en mall accesible para pausas entre compras.', trend:false},
+  {id:'cf11',name:'Santo Domingo Cafe - Acropolis', cat:'Cafe',  gama:'Accesible', addr:'Acropolis Center, Av. Winston Churchill',    phone:'',             lat:18.4617,lng:-69.9451, desc:'Menu de cafe y postres clasicos a buen precio.', trend:false},
+  {id:'cf12',name:'Santo Domingo Cafe - Sambil', cat:'Cafe',     gama:'Accesible', addr:'Plaza Sambil, 2do Nivel',                    phone:'',             lat:18.4769,lng:-69.9618, desc:'Punto de encuentro dentro del Sambil.', trend:false},
+  {id:'cf13',name:'Corner Cafe',             cat:'Cafe',         gama:'Accesible', addr:'Zona Colonial, Santo Domingo',               phone:'',             lat:18.4742,lng:-69.8855, desc:'Cafeteria de barrio. Ideal para desayuno rapido en la Zona Colonial.', trend:false},
 
-  // ── VEGETARIANA ──
-  {id:'ve01',name:'Time Vegetariano',cat:'Vegetariana',gama:'Media',addr:'Zona Colonial (Patrimonio UNESCO)',phone:'',lat:18.4733,lng:-69.8860,desc:'El unico restaurante vegetariano destacado de SD. Opciones veganas, sin gluten y de temporada.',trend:false},
+  // ── POSTRES (nueva categoria — sin helados)
+  {id:'po01',name:'Dulceria Oriol',          cat:'Postres',      gama:'Alta',      addr:'C. Roberto Pastoriza, Piantini',             phone:'',             lat:18.4763,lng:-69.9385, desc:'La pasteleria fina mas elegante de SD. Macarons, tartas artesanales y pasteles de bodas de lujo. Ingredientes importados de Francia.', trend:true},
+  {id:'po02',name:'Sweet Lab',               cat:'Postres',      gama:'Media',     addr:'Piantini, Santo Domingo',                    phone:'',             lat:18.4755,lng:-69.9392, desc:'Crepes, waffles y postres artesanales modernos. Muy popular en Instagram. El sitio de moda para los jovenes.', trend:true},
+  {id:'po03',name:'La Cremerie',             cat:'Postres',      gama:'Media',     addr:'Zona Colonial, Santo Domingo',               phone:'',             lat:18.4738,lng:-69.8858, desc:'Postres franceses y dominicanos en la Zona Colonial. Croissants frescos cada manana.', trend:false},
+  {id:'po04',name:'Pasteleria Haagen',       cat:'Postres',      gama:'Media',     addr:'Varias ubicaciones, Santo Domingo',          phone:'',             lat:18.4748,lng:-69.9380, desc:'Cadena de pastelerias con tortas, queques y postres dominicanos clasicos para toda ocasion.', trend:false},
+  {id:'po05',name:'Bon - Reposteria',        cat:'Postres',      gama:'Accesible', addr:'Varias ubicaciones, Santo Domingo',          phone:'',             lat:18.4730,lng:-69.9295, desc:'La reposteria mas popular y accesible de RD. Presencia en toda la ciudad.', trend:false},
+
+  // ── HELADOS (nueva categoria separada)
+  {id:'he01',name:'Casa Gelato',             cat:'Helados',      gama:'Alta',      addr:'Av. Abraham Lincoln, Piantini',              phone:'',             lat:18.4836,lng:-69.9388, desc:'Gelato artesanal italiano preparado diariamente con frutas tropicales dominicanas. El mas premium del pais.', trend:true},
+  {id:'he02',name:'Bon Glace',               cat:'Helados',      gama:'Media',     addr:'Varias ubicaciones, Santo Domingo',          phone:'',             lat:18.4750,lng:-69.9355, desc:'La heladeria mas querida de RD. Sabores dominicanos unicos como tamarindo, guanabana y chinola.', trend:true},
+  {id:'he03',name:'Helados Buen Sabor',      cat:'Helados',      gama:'Accesible', addr:'Varias ubicaciones, Santo Domingo',          phone:'',             lat:18.4725,lng:-69.9220, desc:'Paletas, helados y raspaduras dominicanas. El clasico de barrio que nunca falla.', trend:false},
+  {id:'he04',name:'Cold Stone Creamery - Agora', cat:'Helados',  gama:'Media',     addr:'Agora Mall, Av. Abraham Lincoln',            phone:'',             lat:18.4823,lng:-69.9382, desc:'Helados americanos personalizados mezclados en piedra fria. Mix-ins creativos y sabores premium.', trend:false},
+  {id:'he05',name:'Menchie\'s Frozen Yogurt',cat:'Helados',      gama:'Media',     addr:'Acropolis Center, Av. Winston Churchill',    phone:'',             lat:18.4618,lng:-69.9452, desc:'Frozen yogurt self-service con toppings ilimitados. La opcion saludable y divertida.', trend:false},
+
+  // ── FAST FOOD Accesible
+  {id:'ff01',name:"McDonald's - Tiradentes", cat:'Fast Food',    gama:'Accesible', addr:'Av. Tiradentes 22, Santo Domingo',           phone:'',             lat:18.4791,lng:-69.9263, desc:'Con drive-thru. Desayunos con burritos, huevos y tocino. El clasico americano.', trend:false},
+  {id:'ff02',name:'Burger King - W. Churchill', cat:'Fast Food', gama:'Accesible', addr:'Av. Winston Churchill 80, Santo Domingo',    phone:'',             lat:18.4770,lng:-69.9461, desc:'Una de las mas populares de RD. Whopper y chicken sandwich son los favoritos.', trend:false},
+  {id:'ff03',name:'KFC - Piantini',          cat:'Fast Food',    gama:'Accesible', addr:'Piantini, Santo Domingo',                    phone:'',             lat:18.4755,lng:-69.9402, desc:'18 ubicaciones en SD. Pollo crujiente con la receta original del Coronel.', trend:false},
+  {id:'ff04',name:"Wendy's - Abraham Lincoln", cat:'Fast Food',  gama:'Accesible', addr:'Av. Abraham Lincoln, Santo Domingo',         phone:'',             lat:18.4830,lng:-69.9390, desc:"12 ubicaciones en SD. El Frosty y el Dave's Single son los mas pedidos.", trend:false},
+  {id:'ff05',name:'Pollos Victorina',        cat:'Fast Food',    gama:'Accesible', addr:'Varias ubicaciones, Santo Domingo',          phone:'',             lat:18.4750,lng:-69.9350, desc:'Cadena dominicana favorita. Burgers, wraps y pollo frito al mejor precio local.', trend:true},
+  {id:'ff06',name:'Pica Pollo',              cat:'Fast Food',    gama:'Accesible', addr:'Av. Tiradentes 25, Santo Domingo',           phone:'',             lat:18.4793,lng:-69.9270, desc:'Pollo frito crujiente con tostones o moro. Menos de 4 dolares. Lo mas autentico del pais.', trend:true},
+
+  // ── BARES
+  {id:'ba01',name:'Room 504 (sobre La Cassina)', cat:'Bares',   gama:'Alta',      addr:'Av. Abraham Lincoln 1001, Piantini (2do piso)', phone:'809-563-2400', lat:18.4842,lng:-69.9396, desc:'El club lounge mas exclusivo de SD. DJs internacionales de jueves a domingo sobre el mejor restaurante del pais.', trend:true},
+  {id:'ba02',name:'El Buho Cafe',            cat:'Bares',        gama:'Media',     addr:'Zona Colonial, Santo Domingo',               phone:'',             lat:18.4736,lng:-69.8850, desc:'Bar de personalidad propia. Cocktails artesanales y musica en vivo. El dueno atiende personalmente.', trend:false},
+
+  // ── VEGETARIANA
+  {id:'ve01',name:'Time Vegetariano',        cat:'Vegetariana',  gama:'Media',     addr:'Zona Colonial (Patrimonio UNESCO)',           phone:'',             lat:18.4733,lng:-69.8860, desc:'El unico restaurante vegetariano destacado de SD. Opciones veganas, sin gluten y de temporada.', trend:false},
 ];
 
-/* ════════════════════════════════════════
-   STATE
-════════════════════════════════════════ */
-let map, allRestaurants=[], currentVisible=[];
-let markers=new Map(); // id -> leaflet marker
-let userLat=18.4741, userLng=-69.9307; // default Santo Domingo
-let activeFilters={cat:'Todos', gama:'Todos', precio:'Todos', sort:'gama'};
+/* ═══════════════ STATE ═══════════════ */
+let map, allRestaurants = [];
+const markerMap = new Map(); // id -> L.marker (persists across filter changes)
+let userLat = 18.4741, userLng = -69.9307;
+let activeFilters = {cat:'Todos', gama:'Todos', precio:'Todos', sort:'gama'};
 
-/* ════════════════════════════════════════
-   BOOT
-════════════════════════════════════════ */
-window.addEventListener('DOMContentLoaded',()=>{
+/* ═══════════════ BOOT ═══════════════ */
+window.addEventListener('DOMContentLoaded', () => {
   buildCategories();
-  if(!navigator.geolocation){startWithDefault();return;}
-  navigator.geolocation.getCurrentPosition(pos=>{
-    userLat=pos.coords.latitude;
-    userLng=pos.coords.longitude;
-    initMap(userLat,userLng);
-    reverseGeocode(userLat,userLng);
-    mergeAndLoad(userLat,userLng);
-  }, err=>{
-    startWithDefault();
-    const msgs={1:'Permiso denegado. Mostrando Santo Domingo.',2:'Posicion no disponible.',3:'Tiempo agotado.'};
-    document.getElementById('cityName').textContent='Santo Domingo';
-  }, {enableHighAccuracy:true,timeout:12000,maximumAge:0});
+  if (!navigator.geolocation) { startDefault(); return; }
+  navigator.geolocation.getCurrentPosition(
+    pos => { userLat = pos.coords.latitude; userLng = pos.coords.longitude; boot(); },
+    ()  => { startDefault(); document.getElementById('cityName').textContent = 'Santo Domingo'; },
+    {enableHighAccuracy:true, timeout:12000, maximumAge:0}
+  );
 });
 
-function startWithDefault(){
-  initMap(userLat,userLng);
-  mergeAndLoad(userLat,userLng);
-}
+function startDefault() { initMap(userLat, userLng); mergeLoad(userLat, userLng); }
+function boot() { initMap(userLat, userLng); reverseGeocode(userLat, userLng); mergeLoad(userLat, userLng); }
 
-/* ════════════════════════════════════════
-   MAP INIT
-════════════════════════════════════════ */
-function initMap(lat,lng){
-  map=L.map('map').setView([lat,lng],14);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    attribution:'© <a href="https://osm.org/copyright">OpenStreetMap</a>',maxZoom:19
+/* ═══════════════ MAP ═══════════════ */
+function initMap(lat, lng) {
+  map = L.map('map').setView([lat, lng], 14);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution:'© <a href="https://osm.org/copyright">OpenStreetMap</a>', maxZoom:19
   }).addTo(map);
-  const youIcon=L.divIcon({className:'',
+  const youIcon = L.divIcon({className:'',
     html:`<div style="width:16px;height:16px;background:#b52828;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 10px rgba(0,0,0,.45)"></div>`,
-    iconSize:[16,16],iconAnchor:[8,8]});
+    iconSize:[16,16], iconAnchor:[8,8]});
   L.marker([lat,lng],{icon:youIcon}).addTo(map).bindPopup('<b>Tu estas aqui</b>');
   L.circle([lat,lng],{radius:RADIUS_M,color:'#b52828',fillColor:'#b52828',fillOpacity:.04,weight:1,dashArray:'5'}).addTo(map);
 }
 
-async function reverseGeocode(lat,lng){
-  try{
-    const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`);
-    const d=await r.json();
-    const city=d.address.city||d.address.town||d.address.village||d.address.municipality||'RD';
-    document.getElementById('cityName').textContent=city;
-  }catch{document.getElementById('cityName').textContent='RD';}
+async function reverseGeocode(lat, lng) {
+  try {
+    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`);
+    const d = await r.json();
+    document.getElementById('cityName').textContent = d.address.city||d.address.town||d.address.village||d.address.municipality||'RD';
+  } catch { document.getElementById('cityName').textContent = 'RD'; }
 }
 
-/* ════════════════════════════════════════
-   FETCH + MERGE
-════════════════════════════════════════ */
-async function mergeAndLoad(lat,lng){
-  document.getElementById('loadMsg').textContent='Cargando restaurantes...';
-  // Add distances to DB
-  const dbWithDist=DB.map(r=>({...r,dist:haversine(lat,lng,r.lat,r.lng),isDB:true}));
-  // Try OSM
-  let osmNew=[];
-  try{
-    const q=`[out:json][timeout:25];(node["amenity"="restaurant"](around:${RADIUS_M},${lat},${lng});node["amenity"="fast_food"](around:${RADIUS_M},${lat},${lng});node["amenity"="cafe"](around:${RADIUS_M},${lat},${lng});node["amenity"="bar"](around:${RADIUS_M},${lat},${lng}););out body;`;
-    const res=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)});
-    const data=await res.json();
-    const dbNames=new Set(DB.map(r=>r.name.toLowerCase()));
-    osmNew=data.elements.map(e=>parseOSM(e,lat,lng)).filter(e=>e&&!dbNames.has(e.name.toLowerCase()));
-  }catch(e){}
-  allRestaurants=[...dbWithDist,...osmNew];
+/* ═══════════════ LOAD ═══════════════ */
+async function mergeLoad(lat, lng) {
+  document.getElementById('loadMsg').textContent = 'Cargando restaurantes...';
+  const dbWithDist = DB.map(r => ({...r, dist:haversine(lat,lng,r.lat,r.lng), isDB:true}));
+  let osmNew = [];
+  try {
+    const q = `[out:json][timeout:25];(node["amenity"="restaurant"](around:${RADIUS_M},${lat},${lng});node["amenity"="fast_food"](around:${RADIUS_M},${lat},${lng});node["amenity"="cafe"](around:${RADIUS_M},${lat},${lng});node["amenity"="bar"](around:${RADIUS_M},${lat},${lng}););out body;`;
+    const res = await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)});
+    const data = await res.json();
+    const dbNames = new Set(DB.map(r => r.name.toLowerCase()));
+    osmNew = data.elements.map(e => parseOSM(e, lat, lng)).filter(e => e && !dbNames.has(e.name.toLowerCase()));
+  } catch(e) {}
+  allRestaurants = [...dbWithDist, ...osmNew];
   hideLoading();
+  // Pre-create ALL markers (hidden initially)
+  allRestaurants.forEach(r => { if (!markerMap.has(r.id)) createMarker(r); });
   applyFilters();
 }
 
-function parseOSM(el,lat,lng){
-  if(!el.lat||!el.lon)return null;
-  const t=el.tags||{};
-  const name=t.name||t['name:es']||'';
-  if(!name)return null;
-  const cuisine=t.cuisine||'';
-  const amenity=t.amenity||'';
-  return{
-    id:'osm-'+el.id,name,cat:detectCat(cuisine,amenity),
-    gama:null,addr:[t['addr:street'],t['addr:housenumber']].filter(Boolean).join(' ')||'',
-    phone:t.phone||'',desc:'',trend:false,isDB:false,
-    dist:haversine(lat,lng,el.lat,el.lon),lat:el.lat,lng:el.lon,cuisine
+function parseOSM(el, lat, lng) {
+  if (!el.lat || !el.lon) return null;
+  const t = el.tags || {};
+  const name = t.name || t['name:es'] || '';
+  if (!name) return null;
+  const cuisine = t.cuisine || '';
+  const amenity = t.amenity || '';
+  return {
+    id:'osm-'+el.id, name, cat:detectCat(cuisine, amenity),
+    gama:null, addr:[t['addr:street'],t['addr:housenumber']].filter(Boolean).join(' ')||'',
+    phone:t.phone||'', desc:'', trend:false, isDB:false,
+    dist:haversine(lat,lng,el.lat,el.lon), lat:el.lat, lng:el.lon, cuisine
   };
 }
 
-function detectCat(cuisine,amenity){
-  const c=(cuisine+' '+amenity).toLowerCase();
-  if(['dominican','caribbean','comida_criolla','local'].some(k=>c.includes(k)))return'Criolla';
-  if(['seafood','fish','mariscos'].some(k=>c.includes(k)))return'Mariscos';
-  if(['bbq','grill','steak_house','churrascaria','steak'].some(k=>c.includes(k)))return'Parrilla';
-  if(['pizza','italian'].some(k=>c.includes(k)))return'Pizza';
-  if(['chinese','japanese','sushi','asian','thai','korean'].some(k=>c.includes(k)))return'Asiatica';
-  if(['coffee_shop','specialty_coffee','coffeehouse'].some(k=>c.includes(k)))return'Cafe';
-  if(['bar','pub','lounge','cocktail'].some(k=>c.includes(k)))return'Bares';
-  if(['vegan','vegetarian'].some(k=>c.includes(k)))return'Vegetariana';
-  if(amenity==='fast_food')return'Fast Food';
-  return'Internacional';
+function detectCat(cuisine, amenity) {
+  const c = (cuisine+' '+amenity).toLowerCase();
+  if (['dominican','caribbean','comida_criolla','local'].some(k=>c.includes(k))) return 'Criolla';
+  if (['seafood','fish','mariscos'].some(k=>c.includes(k))) return 'Mariscos';
+  if (['bbq','grill','steak_house','churrascaria','steak'].some(k=>c.includes(k))) return 'Parrilla';
+  if (['burger'].some(k=>c.includes(k)) && amenity!=='fast_food') return 'Hamburguesas';
+  if (['pizza','italian'].some(k=>c.includes(k))) return 'Pizza';
+  if (['chinese','japanese','sushi','asian','thai','korean'].some(k=>c.includes(k))) return 'Asiatica';
+  if (['mexican','taco'].some(k=>c.includes(k))) return 'Mexicana';
+  if (['coffee_shop','specialty_coffee','coffeehouse'].some(k=>c.includes(k))) return 'Cafe';
+  if (['ice_cream','frozen_yogurt','gelato'].some(k=>c.includes(k))) return 'Helados';
+  if (['dessert','pastry','bakery'].some(k=>c.includes(k))) return 'Postres';
+  if (['bar','pub','lounge','cocktail'].some(k=>c.includes(k))) return 'Bares';
+  if (['vegan','vegetarian'].some(k=>c.includes(k))) return 'Vegetariana';
+  if (amenity === 'fast_food') return 'Fast Food';
+  return 'Internacional';
 }
 
-/* ════════════════════════════════════════
-   APPLY FILTERS — single source of truth
-   Updates BOTH list and map together
-════════════════════════════════════════ */
-function applyFilters(){
-  const query=document.getElementById('searchInput').value.trim().toLowerCase();
-  const{cat,gama,precio,sort}=activeFilters;
+/* ═══════════════ APPLY FILTERS — single source of truth ═══════════════ */
+function applyFilters() {
+  const query = document.getElementById('searchInput').value.trim().toLowerCase();
+  const {cat, gama, precio, sort} = activeFilters;
 
-  let items=allRestaurants.filter(r=>{
-    if(cat!=='Todos'&&r.cat!==cat)return false;
-    if(gama!=='Todos'&&r.gama!==gama)return false;
-    if(precio!=='Todos'){
-      const rp=r.gama?PRECIO_MAP[r.gama]||'$$':'$$';
-      if(rp!==precio)return false;
+  const visible = allRestaurants.filter(r => {
+    if (cat !== 'Todos' && r.cat !== cat) return false;
+    if (gama !== 'Todos' && r.gama !== gama) return false;
+    if (precio !== 'Todos') {
+      const rp = r.gama ? (PRECIO_MAP[r.gama]||'$$') : '$$';
+      if (rp !== precio) return false;
     }
-    if(query&&!r.name.toLowerCase().includes(query)&&!(r.cat||'').toLowerCase().includes(query)&&!(r.desc||'').toLowerCase().includes(query))return false;
+    if (query && !r.name.toLowerCase().includes(query) &&
+        !(r.cat||'').toLowerCase().includes(query) &&
+        !(r.desc||'').toLowerCase().includes(query)) return false;
     return true;
   });
 
-  // Sort
-  if(sort==='gama'){
-    items.sort((a,b)=>{
-      const ga=a.gama!=null?GAMA_ORDER[a.gama]:3;
-      const gb=b.gama!=null?GAMA_ORDER[b.gama]:3;
-      return ga-gb;
-    });
-  }else if(sort==='dist'){
-    items.sort((a,b)=>a.dist-b.dist);
-  }else if(sort==='az'){
-    items.sort((a,b)=>a.name.localeCompare(b.name));
+  if (sort === 'gama') {
+    visible.sort((a,b) => (a.gama!=null?GAMA_ORDER[a.gama]:3) - (b.gama!=null?GAMA_ORDER[b.gama]:3));
+  } else if (sort === 'dist') {
+    visible.sort((a,b) => a.dist - b.dist);
+  } else if (sort === 'az') {
+    visible.sort((a,b) => a.name.localeCompare(b.name));
   }
 
-  currentVisible=items;
-
-  // UPDATE LIST
-  renderList(items);
-
-  // UPDATE MAP — show only filtered items
-  syncMapMarkers(items);
-
-  // Update active filter count
-  updateFilterBadge();
-  updateFilterSummary(cat,gama,items.length);
+  renderList(visible);
+  syncMap(visible);  // ← map always matches list exactly
+  updateBadges(cat, gama);
 }
 
-/* ════════════════════════════════════════
-   RENDER LIST
-════════════════════════════════════════ */
-function renderList(items){
-  const list=document.getElementById('listEl');
-  document.getElementById('resultsCount').textContent=items.length;
-
-  if(!items.length){
-    list.innerHTML=`<div class="msg"><div class="ico">&#128269;</div><h3>Sin resultados</h3><p>Prueba con otra combinacion de filtros.</p></div>`;
+/* ═══════════════ RENDER LIST ═══════════════ */
+function renderList(items) {
+  const list = document.getElementById('listEl');
+  document.getElementById('resultsCount').textContent = items.length;
+  if (!items.length) {
+    list.innerHTML = `<div class="msg"><div class="ico">&#128269;</div><h3>Sin resultados</h3><p>Prueba con otra combinacion de filtros.</p></div>`;
     return;
   }
-  list.innerHTML='';
-  items.forEach((r,i)=>{
-    const card=document.createElement('div');
-    card.className='card';
-    card.setAttribute('data-gama',r.gama||'');
-    card.style.animationDelay=`${Math.min(i*18,300)}ms`;
-
-    const gamaHtml=r.gama
-      ?`<span class="gama-tag gt-${r.gama.toLowerCase()}">${GAMA_LABEL[r.gama]}</span>`
-      :'';
-    const trendHtml=r.trend?`<div class="trend-badge">&#9733; Tendencia</div>`:'';
-
-    card.innerHTML=`
-      <div class="card-header">
+  list.innerHTML = '';
+  items.forEach((r,i) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.setAttribute('data-gama', r.gama||'');
+    card.style.animationDelay = `${Math.min(i*15,280)}ms`;
+    const gamaHtml = r.gama
+      ? `<span class="gama-tag gt-${r.gama.toLowerCase()}">${GAMA_LABEL[r.gama]}</span>`
+      : '';
+    card.innerHTML = `
+      <div class="card-top">
         <div class="card-name">${r.name}</div>
         ${gamaHtml}
       </div>
       <div class="card-meta">
         <span class="tag">${r.cat}</span>
-        ${r.cuisine?`<span class="tag">${r.cuisine}</span>`:''}
+        ${r.cuisine ? `<span class="tag">${r.cuisine}</span>` : ''}
         <span class="card-dist">${formatDist(r.dist)}</span>
       </div>
-      ${r.addr?`<div class="card-addr">${r.addr}</div>`:''}
-      ${r.phone?`<div class="card-addr">${r.phone}</div>`:''}
-      ${r.desc?`<div class="card-desc">${r.desc}</div>`:''}
-      ${trendHtml}
+      ${r.addr ? `<div class="card-addr">${r.addr}</div>` : ''}
+      ${r.phone ? `<div class="card-phone">${r.phone}</div>` : ''}
+      ${r.desc ? `<div class="card-desc">${r.desc}</div>` : ''}
+      ${r.trend ? `<div class="trend">&#9733; Tendencia</div>` : ''}
     `;
-    card.addEventListener('click',()=>focusRestaurant(r));
+    card.addEventListener('click', () => focusRestaurant(r));
     list.appendChild(card);
   });
 }
 
-/* ════════════════════════════════════════
-   MAP SYNC — this is the key function
-   Shows ONLY the filtered restaurants
-════════════════════════════════════════ */
-function syncMapMarkers(visibleItems){
-  if(!map)return;
-  const visibleIds=new Set(visibleItems.map(r=>r.id));
-
-  // Show/hide existing markers
-  markers.forEach((m,id)=>{
-    if(visibleIds.has(id)){
-      if(!map.hasLayer(m))m.addTo(map);
-    }else{
-      if(map.hasLayer(m))map.removeLayer(m);
-    }
-  });
-
-  // Add markers for new items not yet created
-  visibleItems.forEach(r=>{
-    if(!markers.has(r.id)){
-      const m=createMarker(r);
-      markers.set(r.id,m);
-    }else{
-      const m=markers.get(r.id);
-      if(!map.hasLayer(m))m.addTo(map);
-    }
+/* ═══════════════ MAP SYNC ═══════════════
+   Show ONLY filtered items, hide the rest.
+   Markers are reused — never recreated.
+═══════════════════════════════════════ */
+function syncMap(visible) {
+  if (!map) return;
+  const visSet = new Set(visible.map(r => r.id));
+  // Hide all
+  markerMap.forEach((m, id) => { if (map.hasLayer(m)) map.removeLayer(m); });
+  // Show only filtered
+  visible.forEach(r => {
+    const m = markerMap.get(r.id);
+    if (m) m.addTo(map);
   });
 }
 
-function createMarker(r){
-  const color=r.gama?GAMA_COLORS[r.gama]:'#888';
-  const size=r.gama==='Alta'?14:10;
-  const icon=L.divIcon({
-    className:'',
-    html:`<div style="width:${size}px;height:${size}px;background:${color};border:2px solid #fff;border-radius:50%;box-shadow:0 1px 5px rgba(0,0,0,.4);cursor:pointer"></div>`,
-    iconSize:[size,size],iconAnchor:[size/2,size/2]
+function createMarker(r) {
+  const color = r.gama ? GAMA_COLOR[r.gama] : '#888888';
+  const size  = r.gama === 'Alta' ? 14 : 10;
+  const icon  = L.divIcon({
+    className: '',
+    html: `<div style="width:${size}px;height:${size}px;background:${color};border:2px solid #fff;border-radius:50%;box-shadow:0 1px 5px rgba(0,0,0,.4);cursor:pointer"></div>`,
+    iconSize: [size,size], iconAnchor: [size/2,size/2]
   });
-  const gamaLine=r.gama?`<div class="pop-gama" style="color:${color}">${GAMA_LABEL[r.gama]}</div>`:'';
-  const m=L.marker([r.lat,r.lng],{icon,riseOnHover:true})
-    .bindPopup(`<div class="pop-name">${r.name}</div><div class="pop-cat">${r.cat}</div>${gamaLine}${r.addr?`<div class="pop-addr">${r.addr}</div>`:''}`,{autoPan:true});
-  m._rid=r.id;
-  m.addTo(map);
+  const gamaLine = r.gama ? `<div class="pop-gama" style="color:${color}">${GAMA_LABEL[r.gama]}</div>` : '';
+  const m = L.marker([r.lat, r.lng], {icon, riseOnHover:true})
+    .bindPopup(`<div class="pop-name">${r.name}</div><div class="pop-cat">${r.cat}</div>${gamaLine}${r.addr?`<div class="pop-addr">${r.addr}</div>`:''}`, {autoPan:true});
+  m._rid = r.id;
+  markerMap.set(r.id, m);
+  // Don't add to map yet — syncMap controls visibility
   return m;
 }
 
-function focusRestaurant(r){
-  map.flyTo([r.lat,r.lng],18,{duration:.7});
-  setTimeout(()=>{
-    const m=markers.get(r.id);
-    if(m)m.openPopup();
-  },750);
+function focusRestaurant(r) {
+  // Ensure marker is visible first
+  const m = markerMap.get(r.id);
+  if (m && !map.hasLayer(m)) m.addTo(map);
+  map.flyTo([r.lat, r.lng], 18, {duration:.7});
+  setTimeout(() => { if (m) m.openPopup(); }, 750);
 }
 
-function focusFeatured(){
-  const feat=DB.find(r=>r.id==='ma01');
-  if(feat){
-    activeFilters.cat='Todos';
-    document.querySelectorAll('#catsEl .cat-btn').forEach(b=>{b.classList.toggle('active',b.dataset.cat==='Todos')});
-    applyFilters();
-    setTimeout(()=>focusRestaurant(feat),400);
-  }
+function focusFeatured() {
+  const feat = DB.find(r => r.id === 'ma01');
+  if (!feat) return;
+  // Reset to Todos
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat==='Todos'));
+  activeFilters.cat = 'Todos';
+  applyFilters();
+  setTimeout(() => focusRestaurant(feat), 400);
 }
 
-/* ════════════════════════════════════════
-   FILTER CONTROLS
-════════════════════════════════════════ */
-function buildCategories(){
-  const el=document.getElementById('catsEl');
-  CATS.forEach(cat=>{
-    const btn=document.createElement('button');
-    btn.className='cat-btn'+(cat==='Todos'?' active':'');
-    btn.dataset.cat=cat;
-    btn.textContent=cat;
-    btn.addEventListener('click',()=>{
-      document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+/* ═══════════════ FILTER CONTROLS ═══════════════ */
+function buildCategories() {
+  const el = document.getElementById('catsEl');
+  CATS.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn' + (cat==='Todos' ? ' active' : '');
+    btn.dataset.cat = cat;
+    btn.textContent = cat;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      activeFilters.cat=cat;
+      activeFilters.cat = cat;
       applyFilters();
     });
     el.appendChild(btn);
   });
 }
 
-function setFilter(type,btn){
-  const group=type==='gama'?'gamaChips':'precioChips';
-  document.querySelectorAll(`#${group} .chip`).forEach(b=>b.classList.remove('active'));
+function setFilter(type, btn) {
+  const groupId = type==='gama' ? 'gamaChips' : 'precioChips';
+  document.querySelectorAll(`#${groupId} .chip`).forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  activeFilters[type]=btn.dataset.val;
+  activeFilters[type] = btn.dataset.val;
   applyFilters();
 }
 
-function setSort(btn){
-  document.querySelectorAll('#sortChips .chip').forEach(b=>b.classList.remove('active'));
+function setSort(btn) {
+  document.querySelectorAll('#sortRow .sort-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  activeFilters.sort=btn.dataset.sort;
+  activeFilters.sort = btn.dataset.sort;
   applyFilters();
 }
 
-function toggleFilters(){
-  const el=document.getElementById('advFilters');
-  const btn=document.getElementById('filterToggleBtn');
-  const isOpen=el.classList.contains('open');
-  el.classList.toggle('open',!isOpen);
-  el.classList.toggle('closed',isOpen);
-  btn.textContent=isOpen?'+ Filtrar':'- Cerrar';
+function toggleAdv() {
+  const el = document.getElementById('advFilters');
+  const btn = document.getElementById('ftoggleBtn');
+  const open = el.classList.contains('open');
+  el.classList.toggle('open', !open);
+  el.classList.toggle('closed', open);
+  btn.textContent = open ? '+ Filtrar' : '- Cerrar';
 }
 
-function updateFilterBadge(){
-  let count=0;
-  if(activeFilters.cat!=='Todos')count++;
-  if(activeFilters.gama!=='Todos')count++;
-  if(activeFilters.precio!=='Todos')count++;
-  const el=document.getElementById('activeCount');
-  el.textContent=count;
-  el.classList.toggle('show',count>0);
+function updateBadges(cat, gama) {
+  let n = 0;
+  if (cat!=='Todos') n++;
+  if (gama!=='Todos') n++;
+  if (activeFilters.precio!=='Todos') n++;
+  const el = document.getElementById('activeCt');
+  el.textContent = n; el.classList.toggle('on', n>0);
+  const parts = [];
+  if (cat!=='Todos') parts.push(cat);
+  if (gama!=='Todos') parts.push(GAMA_LABEL[gama]);
+  document.getElementById('filterSummary').textContent = parts.join(' · ');
 }
 
-function updateFilterSummary(cat,gama,count){
-  const el=document.getElementById('filterSummary');
-  const parts=[];
-  if(cat!=='Todos')parts.push(cat);
-  if(gama!=='Todos')parts.push(GAMA_LABEL[gama]);
-  el.textContent=parts.length?parts.join(' · '):'';
-}
-
-/* ════════════════════════════════════════
-   UTILS
-════════════════════════════════════════ */
+/* ═══════════════ UTILS ═══════════════ */
 function haversine(la1,lo1,la2,lo2){
   const R=6371000,r=Math.PI/180,dLat=(la2-la1)*r,dLon=(lo2-lo1)*r;
   const a=Math.sin(dLat/2)**2+Math.cos(la1*r)*Math.cos(la2*r)*Math.sin(dLon/2)**2;
