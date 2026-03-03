@@ -464,6 +464,24 @@ function initMap(lat, lng) {
   const youIcon = L.divIcon({className:'', html:`<div style="width:16px;height:16px;background:#b52828;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 10px rgba(0,0,0,.45);pointer-events:none"></div>`, iconSize:[16,16], iconAnchor:[8,8]});
   L.marker([lat,lng],{icon:youIcon}).addTo(map).bindPopup('<b>Tu estas aqui</b>');
   window.radiusCircle = L.circle([lat,lng],{radius:RADIUS_M,color:'#b52828',fillColor:'#b52828',fillOpacity:.04,weight:1,dashArray:'5'}).addTo(map);
+
+  // Init slider now that circle exists
+  (function(){
+    const slider = document.getElementById('radiusSlider');
+    const label  = document.getElementById('radiusVal');
+    function fmtR(m){ return m>=1000?(m/1000).toFixed(1).replace('.0','')+' km':m+' m'; }
+    slider.addEventListener('input', function(){
+      RADIUS_M = parseInt(this.value);
+      label.textContent = fmtR(RADIUS_M);
+      window.radiusCircle.setRadius(RADIUS_M);
+    });
+    slider.addEventListener('change', function(){
+      RADIUS_M = parseInt(this.value);
+      label.textContent = fmtR(RADIUS_M);
+      mergeLoad(userLat, userLng);
+    });
+  })();
+
   if (typeof initMobileWidget === 'function') initMobileWidget();
 }
 
@@ -683,25 +701,6 @@ function haversine(la1,lo1,la2,lo2){
 function formatDist(m){return m<1000?`${Math.round(m)} m`:`${(m/1000).toFixed(1)} km`}
 function hideLoading(){document.getElementById('loading').classList.add('hidden')}
 
-// ── RADIUS SLIDER ──
-(function(){
-  const slider = document.getElementById('radiusSlider');
-  const label  = document.getElementById('radiusVal');
-  function fmtR(m){ return m >= 1000 ? (m/1000).toFixed(1).replace('.0','') + ' km' : m + ' m'; }
-  slider.addEventListener('input', function(){
-    RADIUS_M = parseInt(this.value);
-    label.textContent = fmtR(RADIUS_M);
-    if(window.radiusCircle) window.radiusCircle.setRadius(RADIUS_M);
-  });
-  slider.addEventListener('change', function(){
-    RADIUS_M = parseInt(this.value);
-    label.textContent = fmtR(RADIUS_M);
-    // Re-run load with new radius if map is ready
-    if(typeof map !== 'undefined' && map){
-      mergeLoad(userLat, userLng);
-    }
-  });
-})();
 
 (function(){
   const BREAKPOINT=700, MAP_NORMAL_H=220, TRANSITION=300;
