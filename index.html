@@ -642,6 +642,19 @@ function createMarker(r) {
   const m = L.marker([r.lat,r.lng],{icon,riseOnHover:true})
     .bindPopup(`<div class="pop-name">${r.name}</div><div class="pop-cat">${r.cat}</div>${gamaLine}${r.addr?`<div class="pop-addr">${r.addr}</div>`:''}`,{autoPan:true});
   m._rid = r.id;
+  m.on('click', function() {
+    if (_activeDot) {
+      _activeDot.style.transform = 'scale(1)';
+      _activeDot.style.boxShadow = '0 1px 4px rgba(0,0,0,.35)';
+    }
+    const el = m.getElement();
+    const dot = el && el.querySelector('.mdot');
+    if (dot) {
+      dot.style.transform = 'scale(3)';
+      dot.style.boxShadow = '0 2px 10px rgba(0,0,0,.5)';
+      _activeDot = dot;
+    }
+  });
   markerMap.set(r.id, m);
   return m;
 }
