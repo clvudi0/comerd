@@ -618,7 +618,7 @@ function renderList(items) {
     const card = document.createElement('div');
     card.className = 'card';
     card.setAttribute('data-gama', r.gama||'');
-    card.style.animationDelay = `${Math.min(i*15,280)}ms`;
+    card.style.animationDelay = `${Math.min(i*10,150)}ms`;
     const gamaHtml = r.gama ? `<span class="gama-tag gt-${r.gama.toLowerCase()}">${GAMA_LABEL[r.gama]}</span>` : '';
     card.innerHTML = `
       <div class="card-top"><div class="card-name">${r.name}</div>${gamaHtml}</div>
@@ -642,10 +642,10 @@ function syncMap(visible) {
   if (!map) return;
   const visibleIds = new Set(visible.map(r => r.id));
   markerMap.forEach((m, id) => {
-    if (!map.hasLayer(m)) m.addTo(map);
-    const show = visibleIds.has(id);
-    m.setStyle({ fillOpacity: show ? 1 : 0, opacity: show ? 1 : 0 });
-    m.options.interactive = show;
+    const shouldShow = visibleIds.has(id);
+    const isOnMap = map.hasLayer(m);
+    if (shouldShow && !isOnMap) m.addTo(map);
+    else if (!shouldShow && isOnMap) map.removeLayer(m);
   });
 }
 
@@ -679,7 +679,7 @@ function createMarker(r) {
     _activeMarker = m;
   });
   markerMap.set(r.id, m);
-  if (map) m.addTo(map);
+  if (map && !map.hasLayer(m)) m.addTo(map);
   return m;
 }
 
