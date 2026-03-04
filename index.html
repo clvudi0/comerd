@@ -523,13 +523,21 @@ function initMap(lat, lng) {
   L.marker([lat,lng],{icon:youIcon}).addTo(map).bindPopup('<b>Tu estas aqui</b>');
   window.radiusCircle = L.circle([lat,lng],{radius:RADIUS_M,color:'#b52828',fillColor:'#b52828',fillOpacity:.04,weight:1,dashArray:'5'}).addTo(map);
 
-  // Reset active dot when clicking empty map area
+  // Reset active marker when clicking empty map area
   map.on('click', function() {
-    if (_activeDot) {
-      _activeDot.style.transform = 'scale(1)';
-      _activeDot.style.boxShadow = '0 1px 4px rgba(0,0,0,.35)';
-      _activeDot = null;
+    if (_activeMarker) {
+      _activeMarker.setRadius(dotRadiusForZoom(map.getZoom()));
+      _activeMarker.setStyle({weight:1.5});
+      _activeMarker = null;
     }
+  });
+
+  // Scale all markers on zoom
+  map.on('zoomend', function() {
+    const r = dotRadiusForZoom(map.getZoom());
+    markerMap.forEach((m) => {
+      if (m !== _activeMarker) m.setRadius(r);
+    });
   });
 
   // Init slider now that circle exists
@@ -675,54 +683,56 @@ function syncMap(visible) {
   });
 }
 
+function dotRadiusForZoom(z) {
+  if (z <= 10) return 3;
+  if (z >= 17) return 11;
+  return 3 + Math.round((z - 10) * (8 / 7));
+}
+
 function createMarker(r) {
   const color = GAMA_COLOR[r.gama] || GAMA_COLOR['Accesible'];
-  const size = 6;
-  const ws = 24;
-  const icon = L.divIcon({
-    className:'',
-    html:`<div style="width:${ws}px;height:${ws}px;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:all"><div class="mdot" style="width:${size}px;height:${size}px;background:${color};border:1.5px solid rgba(255,255,255,.9);border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.35);pointer-events:all;transition:transform .2s,box-shadow .2s"></div></div>`,
-    iconSize:[ws,ws], iconAnchor:[ws/2,ws/2]
-  });
+  const z = map ? map.getZoom() : 14;
   const gamaLine = r.gama ? `<div class="pop-gama" style="color:${color}">${GAMA_LABEL[r.gama]}</div>` : '';
-  const m = L.marker([r.lat,r.lng],{icon,riseOnHover:true})
-    .bindPopup(`<div class="pop-name">${r.name}</div><div class="pop-cat">${r.cat}</div>${gamaLine}${r.addr?`<div class="pop-addr">${r.addr}</div>`:''}`,{autoPan:true});
+  const m = L.circleMarker([r.lat, r.lng], {
+    radius: dotRadiusForZoom(z),
+    color: 'rgba(255,255,255,0.9)',
+    weight: 1.5,
+    fillColor: color,
+    fillOpacity: 1,
+    bubblingMouseEvents: false
+  }).bindPopup(`<div class="pop-name">${r.name}</div><div class="pop-cat">${r.cat}</div>${gamaLine}${r.addr?`<div class="pop-addr">${r.addr}</div>`:''}`, {autoPan:true});
   m._rid = r.id;
   m.on('click', function() {
-    if (_activeDot) {
-      _activeDot.style.transform = 'scale(1)';
-      _activeDot.style.boxShadow = '0 1px 4px rgba(0,0,0,.35)';
+    if (_activeMarker && _activeMarker !== m) {
+      _activeMarker.setRadius(dotRadiusForZoom(map.getZoom()));
+      _activeMarker.setStyle({weight:1.5});
     }
-    const el = m.getElement();
-    const dot = el && el.querySelector('.mdot');
-    if (dot) {
-      dot.style.transform = 'scale(3)';
-      dot.style.boxShadow = '0 2px 10px rgba(0,0,0,.5)';
-      _activeDot = dot;
-    }
+    const base = dotRadiusForZoom(map.getZoom());
+    m.setRadius(Math.round(base * 2.2));
+    m.setStyle({weight:2.5});
+    _activeMarker = m;
   });
   markerMap.set(r.id, m);
   return m;
 }
 
-let _activeDot = null;
+let _activeMarker = null;
 function focusRestaurant(r) {
-  if (_activeDot) {
-    _activeDot.style.transform = 'scale(1)';
-    _activeDot.style.boxShadow = '0 1px 4px rgba(0,0,0,.35)';
+  if (_activeMarker) {
+    _activeMarker.setRadius(dotRadiusForZoom(map.getZoom()));
+    _activeMarker.setStyle({weight:1.5});
+    _activeMarker = null;
   }
   const m = markerMap.get(r.id);
   if (m && !map.hasLayer(m)) m.addTo(map);
-  map.flyTo([r.lat,r.lng], 18, {duration:.7});
+  map.flyTo([r.lat, r.lng], 18, {duration:.7});
   setTimeout(() => {
     if (m) {
       m.openPopup();
-      const el = m.getElement(); const dot = el && el.querySelector('.mdot');
-      if (dot) {
-        dot.style.transform = 'scale(3)';
-        dot.style.boxShadow = '0 2px 10px rgba(0,0,0,.5)';
-        _activeDot = dot;
-      }
+      const base = dotRadiusForZoom(map.getZoom());
+      m.setRadius(Math.round(base * 2.2));
+      m.setStyle({weight:2.5});
+      _activeMarker = m;
     }
   }, 750);
 }
