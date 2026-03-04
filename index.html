@@ -582,7 +582,8 @@ async function mergeLoad(lat, lng) {
   allRestaurants = [...dbWithDist, ...osmNew];
   hideLoading();
   allRestaurants.forEach(r => { if (!markerMap.has(r.id)) createMarker(r); });
-  applyFilters();
+  // Forzar que todos los markers estén listos antes de filtrar
+  requestAnimationFrame(() => applyFilters());
 }
 
 function parseOSM(el, lat, lng) {
@@ -624,8 +625,11 @@ function debounceFilter(){ clearTimeout(_filterTimer); _filterTimer = setTimeout
 function applyFilters() {
   const query = document.getElementById('searchInput').value.trim().toLowerCase();
   const {cat, gama, sort} = activeFilters;
+  // Recalcular dist en tiempo real para que el slider refleje posición actual
   const visible = allRestaurants.filter(r => {
-    if (r.dist > RADIUS_M) return false;
+    const dist = haversine(userLat, userLng, r.lat, r.lng);
+    r.dist = dist;
+    if (dist > RADIUS_M) return false;
     if (cat !== 'Todos' && r.cat !== cat) return false;
     if (gama !== 'Todos' && r.gama !== null && r.gama !== gama) return false;
     if (query && !r.name.toLowerCase().includes(query) &&
@@ -684,9 +688,9 @@ function syncMap(visible) {
 }
 
 function dotRadiusForZoom(z) {
-  if (z <= 10) return 3;
-  if (z >= 17) return 11;
-  return 3 + Math.round((z - 10) * (8 / 7));
+  if (z <= 11) return 3;
+  if (z >= 17) return 7;
+  return 3 + Math.round((z - 11) * (4 / 6));
 }
 
 function createMarker(r) {
