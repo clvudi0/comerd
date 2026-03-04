@@ -509,15 +509,23 @@ window.addEventListener('DOMContentLoaded', () => {
   window._sortBtns = Array.from(document.querySelectorAll('#sortRow .sort-btn'));
   window._gamaChips = Array.from(document.querySelectorAll('#gamaChips .chip'));
   window._catBtns = Array.from(document.querySelectorAll('.cat-btn'));
-  if (!navigator.geolocation) {
-    _pendingBoot = () => startDefault();
-  } else {
+
+  // Default fallback — will be overridden if geolocation succeeds
+  _pendingBoot = () => { startDefault(); document.getElementById('cityName').textContent = 'Santo Domingo'; };
+
+  if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
-      pos => { userLat = pos.coords.latitude; userLng = pos.coords.longitude; _pendingBoot = () => boot(); _tryBoot(); },
-      ()   => { _pendingBoot = () => { startDefault(); document.getElementById('cityName').textContent = 'Santo Domingo'; }; _tryBoot(); },
+      pos => {
+        userLat = pos.coords.latitude;
+        userLng = pos.coords.longitude;
+        _pendingBoot = () => boot();
+        _tryBoot();
+      },
+      () => { _tryBoot(); }, // use fallback already set
       {enableHighAccuracy:true, timeout:12000, maximumAge:0}
     );
   }
+
   _domReady = true;
   _tryBoot();
 });
@@ -526,6 +534,9 @@ function startDefault() { ensurePlaced(); initMap(userLat, userLng); mergeLoad(u
 function boot()         { ensurePlaced(); initMap(userLat, userLng); reverseGeocode(userLat, userLng); mergeLoad(userLat, userLng); }
 
 function initMap(lat, lng) {
+  // Ensure #map is in the right container before Google Maps measures it
+  if (typeof ensurePlaced === 'function') ensurePlaced();
+
   map = new google.maps.Map(document.getElementById('map'), {
     center: { lat, lng },
     zoom: 14,
@@ -581,6 +592,8 @@ function initMap(lat, lng) {
   })();
 
   if (typeof initMobileWidget === 'function') initMobileWidget();
+  // Force Google Maps to re-measure the container after everything is placed
+  setTimeout(() => { if (map) { google.maps.event.trigger(map, 'resize'); map.setCenter({lat, lng}); } }, 200);
 }
 
 async function reverseGeocode(lat, lng) {
