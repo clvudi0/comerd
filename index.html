@@ -642,8 +642,10 @@ function syncMap(visible) {
   if (!map) return;
   const visibleIds = new Set(visible.map(r => r.id));
   markerMap.forEach((m, id) => {
-    if (visibleIds.has(id)) { if (!map.hasLayer(m)) m.addTo(map); }
-    else { if (map.hasLayer(m)) map.removeLayer(m); }
+    if (!map.hasLayer(m)) m.addTo(map);
+    const show = visibleIds.has(id);
+    m.setStyle({ fillOpacity: show ? 1 : 0, opacity: show ? 1 : 0 });
+    m.options.interactive = show;
   });
 }
 
@@ -677,6 +679,7 @@ function createMarker(r) {
     _activeMarker = m;
   });
   markerMap.set(r.id, m);
+  if (map) m.addTo(map);
   return m;
 }
 
@@ -688,7 +691,7 @@ function focusRestaurant(r) {
     _activeMarker = null;
   }
   const m = markerMap.get(r.id);
-  if (m && !map.hasLayer(m)) m.addTo(map);
+  if (m) m.setStyle({ fillOpacity: 1, opacity: 1 });
   map.flyTo([r.lat, r.lng], 18, {duration:.7});
   setTimeout(() => {
     if (m) {
