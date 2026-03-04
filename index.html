@@ -33,7 +33,6 @@
   --shadow-sm:0 1px 4px rgba(0,0,0,.06);
   --shadow-md:0 4px 20px rgba(0,0,0,.1);
   --shadow-lg:0 8px 40px rgba(0,0,0,.14);
-  --map-h:220px;
   --map-transition:.3s cubic-bezier(.4,0,.2,1);
 }
 html.dark{
@@ -50,7 +49,7 @@ html.dark{
 .chip{transition:all .16s}
 .card{transition:border-color .2s,box-shadow .2s,transform .2s}
 .card::before{transition:opacity .2s,background .2s}
-.mdot{transition:transform .2s,box-shadow .2s}
+
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;height:100vh;overflow:hidden;}
 button{font-family:'Outfit',sans-serif;cursor:pointer}
@@ -80,7 +79,6 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
 #searchInput:focus{border-color:var(--red);background:var(--surface)}
 .featured{flex-shrink:0;margin:.65rem;border-radius:var(--r);overflow:hidden;position:relative;cursor:pointer;box-shadow:var(--shadow-md);transition:transform .2s;background:#1a0a05}
 .featured:hover{transform:translateY(-1px);box-shadow:var(--shadow-lg)}
-.feat-bg{position:absolute;inset:0;background:linear-gradient(135deg,rgba(181,40,40,.85) 0%,rgba(26,10,5,.96) 100%)}
 .feat-body{position:relative;z-index:1;padding:.85rem 1rem}
 .feat-label{font-size:.58rem;text-transform:uppercase;letter-spacing:.16em;color:rgba(255,255,255,.55);margin-bottom:.22rem}
 .feat-name{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:700;color:#fff;line-height:1.2;margin-bottom:.28rem}
@@ -301,8 +299,7 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
     </div>
 
     <div class="featured" id="featCard" onclick="focusFeatured()">
-      <div class="feat-bg"></div>
-      <div class="feat-body">
+    <div class="feat-body">
         <div class="feat-label">Destacado esta semana</div>
         <div class="feat-name">La Cassina</div>
         <div class="feat-desc">El restaurante #1 de RD. Cocina mediterranea premium, techo corredizo y musica en vivo los jueves.</div>
@@ -615,9 +612,6 @@ function detectCat(cuisine, amenity) {
 let _filterTimer;
 function debounceFilter(){ clearTimeout(_filterTimer); _filterTimer = setTimeout(applyFilters, 120); }
 
-// Cache frequent DOM refs
-const _listEl = ()=>document.getElementById('listEl');
-const _countEl = ()=>document.getElementById('resultsCount');
 
 function applyFilters() {
   const query = document.getElementById('searchInput').value.trim().toLowerCase();
@@ -853,7 +847,6 @@ function hideLoading(){document.getElementById('loading').classList.add('hidden'
 })();
 
 (function(){
-  const DURATION=350; // kept for reference
   const checkbox=document.getElementById('themeToggle');
   const html=document.documentElement;
   if(!checkbox)return;
