@@ -184,18 +184,6 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
   .map-ctrl-left{display:flex;align-items:center;gap:.32rem;font-size:.72rem;font-weight:600;color:var(--ink2)}
   .map-ctrl-left svg{flex-shrink:0}
   .map-ctrl-right{display:flex;gap:.26rem;align-items:center}
-  /* ── Map Toggle Buttons ── */
-  .map-toggle-group{display:flex;gap:6px;align-items:center}
-  .map-toggle{margin:2px;display:inline-block;box-shadow:inset 0 0 14px 2px rgba(0,0,0,.22),inset 0 2px 1px 1px rgba(255,255,255,.85),inset 0 -2px 1px 0 rgba(0,0,0,.2);border-radius:6px;background:#ccd0d4;position:relative;height:44px;width:44px;cursor:pointer}
-  .map-toggle:before{box-shadow:0 0 7px 3.5px #fff;border-radius:50%;background:#fff;position:absolute;margin-left:-20px;margin-top:-20px;opacity:.18;content:"";height:40px;width:40px;left:50%;top:50%}
-  .map-toggle .button{filter:blur(.5px);transition:all 300ms cubic-bezier(.23,1,.32,1);box-shadow:0 6px 10px -2px rgba(0,0,0,.45),inset 0 -2px 2px -1px rgba(0,0,0,.2),0 -4px 6px -1px rgba(255,255,255,.55),inset 0 2px 2px -1px rgba(255,255,255,.2),inset 0 0 3px 1px rgba(255,255,255,.75),inset 0 8px 12px 0 rgba(255,255,255,.18);border-radius:50%;position:absolute;background:#ccd0d4;margin-left:-19px;margin-top:-19px;display:block;height:38px;width:38px;left:50%;top:50%}
-  .map-toggle .label{transition:color 300ms ease-out,font-size 200ms ease-out;text-shadow:1px 1px 2px #ccd0d4,0 0 0 rgba(0,0,0,.8),1px 1px 3px #fff;line-height:44px;text-align:center;position:absolute;font-weight:700;font-size:20px;display:block;opacity:.9;height:100%;width:100%;color:rgba(0,0,0,.4);pointer-events:none}
-  .map-toggle input{opacity:0;position:absolute;cursor:pointer;z-index:1;height:100%;width:100%;left:0;top:0}
-  .map-toggle input:active~.button{box-shadow:0 6px 10px -2px rgba(0,0,0,.35),inset 0 -4px 12px 1px rgba(255,255,255,.85),0 -4px 6px -1px rgba(255,255,255,.55),inset 0 4px 10px 0 rgba(0,0,0,.35),inset 0 0 5px 1px rgba(255,255,255,.55)}
-  .map-toggle input:active~.label{font-size:18px;color:rgba(0,0,0,.45)}
-  .map-toggle input:checked~.button{box-shadow:0 6px 10px -2px rgba(0,0,0,.35),inset 0 -4px 10px -1px rgba(255,255,255,.85),0 -4px 6px -1px rgba(255,255,255,.55),inset 0 4px 8px 0 rgba(0,0,0,.18),inset 0 0 3px 1px rgba(255,255,255,.55)}
-  .map-toggle input:checked~.label{font-size:18px;color:rgba(0,0,0,.4)}
-  .map-toggle.is-active{box-shadow:inset 0 0 14px 2px rgba(181,40,40,.35),inset 0 2px 1px 1px rgba(255,255,255,.7),inset 0 -2px 1px 0 rgba(0,0,0,.2);background:#d4c2c2}
   .map-state-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:.22rem .6rem;font-size:.67rem;font-weight:500;color:var(--ink2);transition:background .15s,border-color .15s,color .15s;white-space:nowrap;line-height:1.3}
   .map-state-btn:hover{border-color:var(--red);color:var(--red)}
   .map-state-btn[data-state="normal"].is-active{background:var(--red);border-color:var(--red);color:#fff}
@@ -297,18 +285,9 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
           Mapa
         </div>
         <div class="map-ctrl-right">
-          <div class="map-toggle-group">
-            <div class="map-toggle" id="toggleExpand" title="Expandir mapa">
-              <input type="checkbox" id="chkExpand" onchange="handleMapToggle('fullscreen', this)"/>
-              <span class="button"></span>
-              <span class="label">+</span>
-            </div>
-            <div class="map-toggle" id="toggleClose" title="Cerrar mapa">
-              <input type="checkbox" id="chkClose" onchange="handleMapToggle('closed', this)"/>
-              <span class="button"></span>
-              <span class="label">–</span>
-            </div>
-          </div>
+          <button class="map-state-btn" data-state="normal" onclick="setMapState('normal')">&#9974; Normal</button>
+          <button class="map-state-btn" data-state="fullscreen" onclick="setMapState('fullscreen')">&#x26F6; Expandir</button>
+          <button class="map-state-btn" data-state="closed" onclick="setMapState('closed')">&#x2715; Cerrar</button>
         </div>
       </div>
       <div class="map-box" id="mapBox">
@@ -492,7 +471,7 @@ const DB = [
   {id:'ff01j',name:"McDonald's - Venezuela",cat:'Fast Food',gama:'Accesible',addr:'Av. Venezuela 104, Santo Domingo Este',phone:'',lat:18.4820,lng:-69.8650,desc:'Sucursal en Av. Venezuela, Santo Domingo Este.',trend:false},
   {id:'ff01k',name:"McDonald's - Santo Domingo Este",cat:'Fast Food',gama:'Accesible',addr:'Calle A, Santo Domingo Este',phone:'',lat:18.4870,lng:-69.8550,desc:'Sucursal Santo Domingo Este.',trend:false},
   {id:'ff02',name:'Burger King - W. Churchill',cat:'Fast Food',gama:'Accesible',addr:'Av. Winston Churchill 80, Santo Domingo',phone:'',lat:18.4770,lng:-69.9461,desc:'Una de las mas populares de RD. Whopper y chicken sandwich son los favoritos.',trend:false},
-  {id:'ff03a',name:'KFC - Prolongacion Independencia',cat:'Fast Food',gama:'Accesible',addr:'Prolongacion Av. Independencia KM 9.5, Santo Domingo 11101',phone:'809-508-0000',lat:18.4315,lng:-69.9711,desc:'Pollo crujiente con la receta original del Coronel.',trend:false},
+  {id:'ff03a',name:'KFC - Prolongacion Independencia',cat:'Fast Food',gama:'Accesible',addr:'Prolongacion Av. Independencia KM 9.5, Santo Domingo 11101',phone:'809-508-0000',lat:18.4302,lng:-69.9728,desc:'Pollo crujiente con la receta original del Coronel.',trend:false},
   {id:'ff03b',name:'KFC - Independencia II',cat:'Fast Food',gama:'Accesible',addr:'Av. Independencia 1455, Santo Domingo',phone:'809-508-0000',lat:18.4681,lng:-69.9282,desc:'Sucursal Av. Independencia 1455.',trend:false},
   {id:'ff03c',name:'KFC - Tiradentes',cat:'Fast Food',gama:'Accesible',addr:'Av. Tiradentes esq. Max Henriquez Urena, Santo Domingo',phone:'809-508-0000',lat:18.4792,lng:-69.9258,desc:'Sucursal Tiradentes.',trend:false},
   {id:'ff03d',name:'KFC - Churchill',cat:'Fast Food',gama:'Accesible',addr:'Av. Winston Churchill esq. Roberto Pastoriza, Santo Domingo',phone:'809-508-0000',lat:18.4773,lng:-69.9468,desc:'Sucursal Churchill.',trend:false},
@@ -851,22 +830,10 @@ function hideLoading(){document.getElementById('loading').classList.add('hidden'
     else if(state==='normal'){widget.classList.remove('is-fullscreen');mapBox.style.height=MAP_NORMAL_H+'px';}
     else if(state==='fullscreen'){widget.classList.add('is-fullscreen');mapBox.style.height=window.innerHeight+'px';}
     if(!animate){mapBox.offsetHeight;mapBox.style.transition='';}
-    // Sincronizar toggles visuales
-    var chkExpand=document.getElementById('chkExpand');
-    var chkClose=document.getElementById('chkClose');
-    var tgExpand=document.getElementById('toggleExpand');
-    var tgClose=document.getElementById('toggleClose');
-    if(chkExpand){chkExpand.checked=(state==='fullscreen');tgExpand.classList.toggle('is-active',state==='fullscreen');}
-    if(chkClose){chkClose.checked=(state==='closed');tgClose.classList.toggle('is-active',state==='closed');}
+    document.querySelectorAll('.map-state-btn').forEach(btn=>btn.classList.toggle('is-active',btn.dataset.state===state));
     if(mapReady)setTimeout(()=>map.invalidateSize(),TRANSITION+20);
   }
   window.setMapState=function(state){if(!isMobile())return;applyMapState(state,true);};
-  window.handleMapToggle=function(targetState,chk){
-    if(!isMobile())return;
-    // Si se activa el mismo estado que ya estaba, volver a normal
-    var newState=(currentState===targetState)?'normal':targetState;
-    applyMapState(newState,true);
-  };
   window.initMobileWidget=function(){
     mapReady=true;
     if(isMobile())applyMapState('normal',false);
