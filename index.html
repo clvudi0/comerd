@@ -596,17 +596,66 @@ async function reverseGeocode(lat, lng) {
   } catch { document.getElementById('cityName').textContent = 'RD'; }
 }
 
-async function mergeLoad(lat, lng) {
-  document.getElementById('loadMsg').textContent = 'Cargando restaurantes...';
-  if (allRestaurants.length === 0) {
-    DB.forEach(r => {
-      const entry = {...r, dist:haversine(lat,lng,r.lat,r.lng)};
-      allRestaurants.push(entry);
-      createMarker(entry);
+// Cache de coordenadas geocodificadas (persiste en sessionStorage)
+const GEO_CACHE_KEY = 'comeRD_geoCache_v1';
+function loadGeoCache() {
+  try { return JSON.parse(sessionStorage.getItem(GEO_CACHE_KEY) || '{}'); } catch { return {}; }
+}
+function saveGeoCache(cache) {
+  try { sessionStorage.setItem(GEO_CACHE_KEY, JSON.stringify(cache)); } catch {}
+}
+
+async function geocodeRestaurant(r, geocoder, cache) {
+  if (cache[r.id]) {
+    return {...r, lat: cache[r.id].lat, lng: cache[r.id].lng};
+  }
+  const query = r.addr ? `${r.name}, ${r.addr}, Santo Domingo, Dominican Republic`
+                        : `${r.name}, Santo Domingo, Dominican Republic`;
+  return new Promise(resolve => {
+    geocoder.geocode({address: query, region: 'do'}, (results, status) => {
+      if (status === 'OK' && results[0]) {
+        const loc = results[0].geometry.location;
+        const coords = {lat: loc.lat(), lng: loc.lng()};
+        cache[r.id] = coords;
+        resolve({...r, lat: coords.lat, lng: coords.lng});
+      } else {
+        // Fallback a coordenadas originales si falla
+        resolve(r);
+      }
     });
+  });
+}
+
+async function mergeLoad(lat, lng) {
+  document.getElementById('loadMsg').textContent = 'Localizando restaurantes...';
+
+  if (allRestaurants.length === 0) {
+    const cache = loadGeoCache();
+    const geocoder = new google.maps.Geocoder();
+    const total = DB.length;
+    let done = 0;
+
+    // Geocodifica en lotes de 5 para no saturar la API
+    const BATCH = 5;
+    for (let i = 0; i < DB.length; i += BATCH) {
+      const batch = DB.slice(i, i + BATCH);
+      const geocoded = await Promise.all(batch.map(r => geocodeRestaurant(r, geocoder, cache)));
+      geocoded.forEach(r => {
+        const entry = {...r, dist: haversine(lat, lng, r.lat, r.lng)};
+        allRestaurants.push(entry);
+        createMarker(entry);
+        done++;
+      });
+      document.getElementById('loadMsg').textContent = `Localizando... ${done}/${total}`;
+      requestAnimationFrame(() => applyFilters());
+      // Pausa breve entre lotes para respetar rate limit
+      if (i + BATCH < DB.length) await new Promise(res => setTimeout(res, 200));
+    }
+    saveGeoCache(cache);
   } else {
     allRestaurants.forEach(r => { r.dist = haversine(lat, lng, r.lat, r.lng); });
   }
+
   hideLoading();
   requestAnimationFrame(() => applyFilters());
 }
