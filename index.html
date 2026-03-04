@@ -550,9 +550,6 @@ function initMap(lat, lng) {
       label.textContent = fmtR(RADIUS_M);
       window.radiusCircle.setRadius(RADIUS_M);
       applyFilters();
-      // Debounce OSM reload - only fetch after user stops dragging 600ms
-      clearTimeout(_osmTimer);
-      _osmTimer = setTimeout(() => mergeLoad(userLat, userLng), 600);
     });
   })();
 
@@ -569,68 +566,15 @@ async function reverseGeocode(lat, lng) {
 
 async function mergeLoad(lat, lng) {
   document.getElementById('loadMsg').textContent = 'Cargando restaurantes...';
-
-  // DB siempre se carga completa — nunca cambia
-  if (allRestaurants.filter(r => r.isDB).length === 0) {
-    const dbWithDist = DB.map(r => ({...r, dist:haversine(lat,lng,r.lat,r.lng), isDB:true}));
-    dbWithDist.forEach(r => {
-      allRestaurants.push(r);
-      if (!markerMap.has(r.id)) createMarker(r);
+  if (allRestaurants.length === 0) {
+    DB.forEach(r => {
+      const entry = {...r, dist:haversine(lat,lng,r.lat,r.lng), isDB:true};
+      allRestaurants.push(entry);
+      createMarker(entry);
     });
   }
-
   hideLoading();
   requestAnimationFrame(() => applyFilters());
-
-  // OSM se carga aparte y solo agrega lo que no existe
-  try {
-    const q = `[out:json][timeout:25];(node["amenity"="restaurant"](around:${RADIUS_M},${lat},${lng});node["amenity"="fast_food"](around:${RADIUS_M},${lat},${lng});node["amenity"="cafe"](around:${RADIUS_M},${lat},${lng});node["amenity"="bar"](around:${RADIUS_M},${lat},${lng}););out body;`;
-    const res = await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)});
-    const data = await res.json();
-    const dbNames = new Set(DB.map(r => r.name.toLowerCase()));
-    const existingIds = new Set(allRestaurants.map(r => r.id));
-    const osmNew = data.elements
-      .map(e => parseOSM(e,lat,lng))
-      .filter(e => e && !dbNames.has(e.name.toLowerCase()) && !existingIds.has('osm-'+e.id));
-    if (osmNew.length > 0) {
-      osmNew.forEach(r => {
-        allRestaurants.push(r);
-        if (!markerMap.has(r.id)) createMarker(r);
-      });
-      requestAnimationFrame(() => applyFilters());
-    }
-  } catch(e) {}
-}
-
-function parseOSM(el, lat, lng) {
-  if (!el.lat || !el.lon) return null;
-  const t = el.tags || {};
-  const name = t.name || t['name:es'] || '';
-  if (!name) return null;
-  const cuisine = t.cuisine || '';
-  const amenity = t.amenity || '';
-  return {id:'osm-'+el.id, name, cat:detectCat(cuisine,amenity), gama:'Accesible',
-    addr:[t['addr:street'],t['addr:housenumber']].filter(Boolean).join(' ')||'',
-    phone:t.phone||'', desc:'', trend:false, isDB:false,
-    dist:haversine(lat,lng,el.lat,el.lon), lat:el.lat, lng:el.lon, cuisine};
-}
-
-function detectCat(cuisine, amenity) {
-  const c = (cuisine+' '+amenity).toLowerCase();
-  if (['dominican','caribbean','comida_criolla','local'].some(k=>c.includes(k))) return 'Criolla';
-  if (['seafood','fish','mariscos'].some(k=>c.includes(k))) return 'Mariscos';
-  if (['bbq','grill','steak_house','churrascaria','steak'].some(k=>c.includes(k))) return 'Parrilla';
-  if (['burger'].some(k=>c.includes(k)) && amenity!=='fast_food') return 'Hamburguesas';
-  if (['pizza','italian'].some(k=>c.includes(k))) return 'Pizza';
-  if (['chinese','japanese','sushi','asian','thai','korean'].some(k=>c.includes(k))) return 'Asiatica';
-  if (['mexican','taco'].some(k=>c.includes(k))) return 'Mexicana';
-  if (['coffee_shop','specialty_coffee','coffeehouse'].some(k=>c.includes(k))) return 'Cafe';
-  if (['ice_cream','frozen_yogurt','gelato'].some(k=>c.includes(k))) return 'Helados';
-  if (['dessert','pastry','bakery'].some(k=>c.includes(k))) return 'Postres';
-  if (['bar','pub','lounge','cocktail'].some(k=>c.includes(k))) return 'Bares';
-  if (['vegan','vegetarian'].some(k=>c.includes(k))) return 'Vegetariana';
-  if (amenity === 'fast_food') return 'Fast Food';
-  return 'Internacional';
 }
 
 // Debounce search input
