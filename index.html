@@ -570,20 +570,37 @@ async function reverseGeocode(lat, lng) {
 
 async function mergeLoad(lat, lng) {
   document.getElementById('loadMsg').textContent = 'Cargando restaurantes...';
-  const dbWithDist = DB.map(r => ({...r, dist:haversine(lat,lng,r.lat,r.lng), isDB:true}));
-  let osmNew = [];
+
+  // DB siempre se carga completa — nunca cambia
+  if (allRestaurants.filter(r => r.isDB).length === 0) {
+    const dbWithDist = DB.map(r => ({...r, dist:haversine(lat,lng,r.lat,r.lng), isDB:true}));
+    dbWithDist.forEach(r => {
+      allRestaurants.push(r);
+      if (!markerMap.has(r.id)) createMarker(r);
+    });
+  }
+
+  hideLoading();
+  requestAnimationFrame(() => applyFilters());
+
+  // OSM se carga aparte y solo agrega lo que no existe
   try {
     const q = `[out:json][timeout:25];(node["amenity"="restaurant"](around:${RADIUS_M},${lat},${lng});node["amenity"="fast_food"](around:${RADIUS_M},${lat},${lng});node["amenity"="cafe"](around:${RADIUS_M},${lat},${lng});node["amenity"="bar"](around:${RADIUS_M},${lat},${lng}););out body;`;
     const res = await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)});
     const data = await res.json();
     const dbNames = new Set(DB.map(r => r.name.toLowerCase()));
-    osmNew = data.elements.map(e => parseOSM(e,lat,lng)).filter(e => e && !dbNames.has(e.name.toLowerCase()));
+    const existingIds = new Set(allRestaurants.map(r => r.id));
+    const osmNew = data.elements
+      .map(e => parseOSM(e,lat,lng))
+      .filter(e => e && !dbNames.has(e.name.toLowerCase()) && !existingIds.has('osm-'+e.id));
+    if (osmNew.length > 0) {
+      osmNew.forEach(r => {
+        allRestaurants.push(r);
+        if (!markerMap.has(r.id)) createMarker(r);
+      });
+      requestAnimationFrame(() => applyFilters());
+    }
   } catch(e) {}
-  allRestaurants = [...dbWithDist, ...osmNew];
-  hideLoading();
-  allRestaurants.forEach(r => { if (!markerMap.has(r.id)) createMarker(r); });
-  // Forzar que todos los markers estén listos antes de filtrar
-  requestAnimationFrame(() => applyFilters());
 }
 
 function parseOSM(el, lat, lng) {
