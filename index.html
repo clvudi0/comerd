@@ -298,7 +298,7 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
       </div>
     </div>
 
-    <div class="featured" id="featCard" onclick="focusFeatured()">
+    <div class="featured" id="featCard" onclick="focusFeatured()" style="display:none">
     <div class="feat-body">
         <div class="feat-label">Destacado esta semana</div>
         <div class="feat-name">La Cassina</div>
@@ -382,115 +382,9 @@ const CATS = ['Todos','Criolla','Mariscos','Parrilla','Hamburguesas','Pizza',
               'Internacional','Asiatica','Mexicana','Cafe','Postres','Helados',
               'Fast Food','Bares','Vegetariana'];
 
-const DB = [
-  {id:'cr01',name:'Pearl Urban Lounge',cat:'Criolla',gama:'Alta',addr:'Av. Independencia 254, Gazcue',phone:'809-533-2222',lat:18.4701,lng:-69.9050,desc:'Chef con reconocimiento internacional. 500+ plantas en interior. La experiencia gastronomica mas sofisticada de RD.',trend:true},
-  {id:'cr02',name:'Ajuala',cat:'Criolla',gama:'Alta',addr:'Piantini, Santo Domingo',phone:'',lat:18.4760,lng:-69.9402,desc:'Chef Saverio Stassi. Casabe en buren de barro, corte Brangus con queso envejecido. Premiado en latinoamerica.',trend:false},
-  {id:'cr03',name:'Buche Perico',cat:'Criolla',gama:'Alta',addr:'C. El Conde #53, Zona Colonial',phone:'809-221-0506',lat:18.4740,lng:-69.8872,desc:'Jardin tropical bajo techo de cristal con cascada. Tuna fresco, ravioli de banana madura y cava premiada.',trend:true},
-  {id:'cr04',name:'Okra Restaurant',cat:'Criolla',gama:'Alta',addr:'C. Cesar Nicolas Penson 76, Zona Universitaria',phone:'',lat:18.4710,lng:-69.9270,desc:'Chef Francis Pena. Cocina dominicano-espanola creativa. Mencionado por World 50 Best.',trend:false},
-  {id:'cr05',name:'El Meson de la Cava',cat:'Criolla',gama:'Alta',addr:'Av. Mirador del Sur, Bella Vista',phone:'809-533-2818',lat:18.4558,lng:-69.9350,desc:'Dentro de una cueva natural de piedra caliza. Desde 1967. Cocina caribena-francesa. Experiencia unica en el mundo.',trend:true},
-  {id:'cr06',name:'Maraca',cat:'Criolla',gama:'Alta',addr:'C. Arzobispo Nouel #202, Zona Colonial',phone:'',lat:18.4741,lng:-69.8851,desc:'Murales tropicales y cocina caribena de autor. Concon de cangrejo y cocteleria signature.',trend:false},
-  {id:'cr07',name:'El Gallego',cat:'Criolla',gama:'Alta',addr:'C. Cesar Nicolas Penson, Santo Domingo',phone:'',lat:18.4712,lng:-69.9268,desc:'Dominicano-espanola de autor. Fideua valenciana y Oda al Cacao Dominicano como postre estrella.',trend:false},
-  {id:'cr08',name:'Casa Gastronomica SVII',cat:'Criolla',gama:'Alta',addr:'Av. Roberto Pastoriza 504, Quisqueya',phone:'',lat:18.4760,lng:-69.9380,desc:'Ingredientes de pequenos agricultores dominicanos. Risotto de pato y pavlova de mango.',trend:false},
-  {id:'cr09',name:'Meson de Bari',cat:'Criolla',gama:'Media',addr:'C. Hostos #302, Zona Colonial',phone:'809-687-4091',lat:18.4738,lng:-69.8858,desc:'45+ anos de historia. Sancocho, empanadas y grandes porciones de cocina tipica dominicana.',trend:false},
-  {id:'cr10',name:'D Luis Parrillada',cat:'Criolla',gama:'Media',addr:'Av. George Washington, Malecon',phone:'809-687-8696',lat:18.4638,lng:-69.9050,desc:'Mofongo, moro y pollo guisado con vista al malecon. Favorito de los locales.',trend:false},
-  {id:'cr11',name:'Adrian Tropical - Malecon',cat:'Criolla',gama:'Accesible',addr:'Av. George Washington (Malecon)',phone:'809-221-1764',lat:18.4651,lng:-69.9120,desc:'El clasico popular del malecon. Tostones, mofongo y fritura. Siempre lleno los fines de semana.',trend:true},
-  {id:'cr12',name:'Adrian Tropical - 27 Feb',cat:'Criolla',gama:'Accesible',addr:'Av. 27 de Febrero esq. Nunez de Caceres',phone:'',lat:18.4795,lng:-69.9350,desc:'Sucursal de la cadena mas popular de SD. Menu criollo accesible.',trend:false},
-  {id:'ma01',name:'La Cassina',cat:'Mariscos',gama:'Alta',addr:'Av. Abraham Lincoln 1001, Piantini',phone:'809-563-2400',lat:18.4841,lng:-69.9395,desc:'El restaurante #1 de RD. Cocina mediterranea premium, techo corredizo y musica en vivo los jueves. La mejor cava de vinos del pais.',trend:true},
-  {id:'ma02',name:'Nipau',cat:'Mariscos',gama:'Alta',addr:'C. Gustavo Mejia Ricart, Piantini',phone:'',lat:18.4748,lng:-69.9390,desc:'Fusion mediterranea exclusiva. Mariscos de primera en ambiente moderno. Perfecto para ocasiones especiales.',trend:false},
-  {id:'ma03',name:'Muelle 47 - Galeria 360',cat:'Mariscos',gama:'Media',addr:'Galeria 360, Av. Winston Churchill',phone:'809-562-4747',lat:18.4780,lng:-69.9480,desc:'Mariscos frescos en ambiente moderno. Muy popular para almuerzos de negocios.',trend:false},
-  {id:'ma04',name:'Muelle 47 - J. Embajador',cat:'Mariscos',gama:'Media',addr:'Plaza Jardines del Embajador',phone:'',lat:18.4598,lng:-69.9410,desc:'Calidad constante y ambiente relajado. Una de las cadenas mas confiables de mariscos.',trend:false},
-  {id:'ma05',name:'Boca Marina',cat:'Mariscos',gama:'Media',addr:'C. Duarte 12-A, Boca Chica',phone:'',lat:18.4502,lng:-69.6060,desc:'Mariscos a orillas del mar en Boca Chica. La langosta a la parrilla es el plato estrella.',trend:false},
-  {id:'ma06',name:'La Casita de Papi',cat:'Mariscos',gama:'Accesible',addr:'Av. Charles Sumner #19, Gazcue',phone:'809-682-2194',lat:18.4695,lng:-69.9035,desc:'Mariscos criollos frescos a precios justos. El clasico del dominicano del dia a dia.',trend:false},
-  {id:'pa01',name:'Victoria by Porterhouse',cat:'Parrilla',gama:'Alta',addr:'Av. Abraham Lincoln, Piantini',phone:'',lat:18.4838,lng:-69.9392,desc:'El steakhouse mas fino de SD. Cortes premium importados, sommelier y ambiente upscale exclusivo.',trend:true},
-  {id:'pa02',name:"Sophia's Bar Grill (SBG)",cat:'Parrilla',gama:'Alta',addr:'Paseo de los Locutores #9, Piantini',phone:'809-732-1511',lat:18.4812,lng:-69.9348,desc:'Chef Joaquin Renovales. Punto de encuentro de empresarios. Churrasco, pato y calamares de autor.',trend:false},
-  {id:'pa03',name:'Patagonia Steakhouse',cat:'Parrilla',gama:'Alta',addr:'Av. Winston Churchill, Piantini',phone:'',lat:18.4773,lng:-69.9464,desc:'Cortes argentinos en terraza elegante. Recomendado cada ano por criticos gastronomicos.',trend:false},
-  {id:'pa04',name:'Casa Vera',cat:'Parrilla',gama:'Media',addr:'Piantini, Santo Domingo',phone:'',lat:18.4754,lng:-69.9400,desc:'Parrilla y cocina criolla. El favorito para cenas navidenas y reuniones familiares.',trend:false},
-  {id:'pa06',name:'Turo',cat:'Parrilla',gama:'Alta',addr:'C. Andres Julio Aybar 25, Piantini, Santo Domingo',phone:'809-784-5211',lat:18.472144,lng:-69.935828,desc:'Cortes premium en Piantini. Churrasco, ribeye y mollejitas de ternera en pan brioche. Valet parking y ambiente sofisticado. 4.6 estrellas.',trend:true},
-  {id:'pa05',name:'Roust Churrasqueria',cat:'Parrilla',gama:'Media',addr:'Av. Roberto Pastoriza, Santo Domingo',phone:'',lat:18.4730,lng:-69.9310,desc:'Churrasco y mariscos en porciones generosas. Excelente relacion precio-calidad.',trend:false},
-  {id:'hm01',name:'BURRA - Burger & Birra',cat:'Hamburguesas',gama:'Alta',addr:'Av. Tiradentes 25, Santo Domingo',phone:'',lat:18.4791,lng:-69.9269,desc:'Hamburguesas artesanales de media libra con carne de res importada y cervezas craft. El burger bar mas trendy de SD.',trend:true},
-  {id:'hm02',name:'Smashed Burgers SD',cat:'Hamburguesas',gama:'Media',addr:'Piantini, Santo Domingo',phone:'',lat:18.4762,lng:-69.9395,desc:'Smash burgers estilo americano con doble patty, queso american y salsas de autor. Muy popular entre jovenes.',trend:true},
-  {id:'hm03',name:'The Burger Shack',cat:'Hamburguesas',gama:'Media',addr:'Zona Colonial, Santo Domingo',phone:'',lat:18.4745,lng:-69.8860,desc:'Burgers gourmet en ambiente casual. Opciones de pollo, res y plant-based.',trend:false},
-  {id:'hm04',name:'Buen Provecho Burgers',cat:'Hamburguesas',gama:'Accesible',addr:'Varias ubicaciones, Santo Domingo',phone:'',lat:18.4720,lng:-69.9200,desc:'Cadena local de burgers accesibles. Populares y sabrosas sin gastar mucho.',trend:false},
-  {id:'pi01',name:'Bottega Fratelli',cat:'Pizza',gama:'Alta',addr:'Av. Simon Bolivar 219, Gazcue',phone:'809-682-9951',lat:18.4698,lng:-69.9008,desc:'Tercera generacion familia Vesuvio (desde 1954). Italiana moderna en ambiente elegante con musica en vivo.',trend:false},
-  {id:'pi02',name:'San Marzano',cat:'Pizza',gama:'Alta',addr:'C. Pablo Casals, Piantini',phone:'',lat:18.4762,lng:-69.9402,desc:'Cocina mediterranea-italiana premium. Ingredientes importados directamente de Italia.',trend:false},
-  {id:'pi03',name:'Laurel Restaurante',cat:'Pizza',gama:'Alta',addr:'C. Pablo Casals #35, Piantini',phone:'809-732-6058',lat:18.4759,lng:-69.9398,desc:'Uno de los mejores de SD. Salmon con jengibre, Penne Casa Laurel y pizza artesanal impecable.',trend:true},
-  {id:'pi04',name:'Il Bacaretto',cat:'Pizza',gama:'Media',addr:'Av. Simon Bolivar 219, Gazcue',phone:'809-682-9951',lat:18.4699,lng:-69.9010,desc:'Chef Michele Luchetta recorre las mesas personalmente. Mozzarella al Forno y Bigoli Cacio e Pepe son los favoritos.',trend:false},
-  {id:'pi05',name:'Trattoria Angiolino',cat:'Pizza',gama:'Media',addr:'Santo Domingo',phone:'',lat:18.4750,lng:-69.9350,desc:'Italiana artesanal autentica desde 2009. Platos de creacion propia del chef David Pezzotti.',trend:false},
-  {id:'pi06',name:'Pizza Hut - Gazcue',cat:'Pizza',gama:'Accesible',addr:'Plaza El Faro, Av. Maximo Gomez 2',phone:'',lat:18.4685,lng:-69.8998,desc:'18 ubicaciones en SD. Delivery, carry-out y dine-in.',trend:false},
-  {id:'pi07',name:'Dominos Pizza - Lincoln',cat:'Pizza',gama:'Accesible',addr:'Av. Abraham Lincoln, Piantini',phone:'',lat:18.4820,lng:-69.9388,desc:'Delivery rapido garantizado. 18 ubicaciones en SD.',trend:false},
-  {id:'in01',name:"Pat'e Palo European Brasserie",cat:'Internacional',gama:'Alta',addr:'La Atarazana 25, Zona Colonial',phone:'809-687-8089',lat:18.4731,lng:-69.8812,desc:'El mas exitoso y tradicional de RD. Menu mediterraneo en terraza frente a Plaza Espana.',trend:true},
-  {id:'in02',name:'Don Pepe',cat:'Internacional',gama:'Alta',addr:'C. Porfirio Herrera 31, Piantini',phone:'',lat:18.4762,lng:-69.9398,desc:'30+ anos. Paella del mar, cochinillo asado y chuletones Angus. El lujoso de Piantini.',trend:false},
-  {id:'in03',name:'Teresa Restaurant',cat:'Internacional',gama:'Alta',addr:'Piantini, Santo Domingo',phone:'',lat:18.4755,lng:-69.9405,desc:'Cocina internacional premium. Ambiente refinado con valet parking y cava de vinos selecta.',trend:false},
-  {id:'in04',name:'Verema 23',cat:'Internacional',gama:'Alta',addr:'Santo Domingo',phone:'',lat:18.4770,lng:-69.9410,desc:'Manana: specialty coffee y desayunos artesanales. Noche: bistro con vinos y sala de cigarros privada.',trend:false},
-  {id:'in05',name:'Zola',cat:'Internacional',gama:'Alta',addr:'Piantini, Santo Domingo',phone:'',lat:18.4758,lng:-69.9395,desc:'Fusion caribena-italiana recomendada por medios internacionales. Una experiencia memorable.',trend:false},
-  {id:'in06',name:"Chili's - Sambil",cat:'Internacional',gama:'Media',addr:'Plaza Sambil, Av. John F. Kennedy',phone:'',lat:18.4769,lng:-69.9618,desc:'Tex-mex animado. Nachos, costillas BBQ y fajitas. Ideal para grupos y cumpleanos.',trend:false},
-  {id:'in07',name:"TGI Friday's",cat:'Internacional',gama:'Media',addr:'Santo Domingo',phone:'',lat:18.4780,lng:-69.9460,desc:'Cadena americana. Burgers, pastas y postres. Ambiente festivo.',trend:false},
-  {id:'in08',name:'Outback Steakhouse',cat:'Internacional',gama:'Media',addr:'Piantini, Santo Domingo',phone:'',lat:18.4752,lng:-69.9398,desc:"Estilo australiano. Bloomin' Onion y costillas BBQ como platos estrella.",trend:false},
-  {id:'as01',name:'Lila Modern Cuisine',cat:'Asiatica',gama:'Alta',addr:'Santo Domingo Norte',phone:'',lat:18.5050,lng:-69.9200,desc:'Fusion asiatica-dominicana contemporanea. Tiradito de pulpo y hamachi ponzu. Cocteleria de autor.',trend:true},
-  {id:'as02',name:'El Samurai',cat:'Asiatica',gama:'Alta',addr:'C. del Seminario #57, Gazcue',phone:'809-682-6640',lat:18.4693,lng:-69.8985,desc:'20+ anos con cuatro chefs de Japon. El mejor sushi y sashimi autentico de SD.',trend:false},
-  {id:'as03',name:'Yokomo',cat:'Asiatica',gama:'Media',addr:'Santo Domingo',phone:'',lat:18.4760,lng:-69.9300,desc:'Sushi fusion con giro dominicano. Creativo, accesible y muy popular entre jovenes.',trend:false},
-  {id:'mx01',name:'El Burrito Mexicano',cat:'Mexicana',gama:'Media',addr:'Piantini, Santo Domingo',phone:'',lat:18.4758,lng:-69.9392,desc:'Tacos, burritos y enchiladas autenticos preparados por chef mexicano. El favorito de los amantes de la cocina mexicana en SD.',trend:true},
-  {id:'mx02',name:'Taco Loco',cat:'Mexicana',gama:'Accesible',addr:'Av. 27 de Febrero, Santo Domingo',phone:'',lat:18.4790,lng:-69.9340,desc:'Tacos callejeros estilo Ciudad de Mexico. Economico y delicioso. Con opciones vegetarianas.',trend:false},
-  {id:'mx03',name:'Taco Bell - Piantini',cat:'Mexicana',gama:'Accesible',addr:'Piantini, Santo Domingo',phone:'',lat:18.4762,lng:-69.9400,desc:'Comida mexicana rapida con drive-thru. Mexican Pizza, burritos y nachos clasicos.',trend:false},
-  {id:'cf01',name:'Flor de Cafe - Piantini',cat:'Cafe',gama:'Media',addr:'Av. Abraham Lincoln, Piantini',phone:'',lat:18.4749,lng:-69.9413,desc:'La cafeteria de especialidad mas querida de SD. Cafe de origen dominicano y postres artesanales.',trend:true},
-  {id:'cf02',name:'Flor de Cafe - Renacimiento',cat:'Cafe',gama:'Media',addr:'Roberto Pastoriza #401 esq. Av. Lincoln',phone:'',lat:18.4731,lng:-69.9380,desc:'Sucursal tranquila. Ideal para trabajar o reuniones informales.',trend:false},
-  {id:'cf03',name:'Flor de Cafe - Rafael Sancio',cat:'Cafe',gama:'Media',addr:'C. Rafael Sancio #5 esq. Leonardo Da Vinci',phone:'',lat:18.4703,lng:-69.9300,desc:'Tercera sucursal con el mismo cafe de origen dominicano y tostadas artesanales.',trend:false},
-  {id:'cf04',name:'Casa Barista & Co. - Piantini',cat:'Cafe',gama:'Media',addr:'C. Victor Garrido Puello #16, Plaza LMP',phone:'809-692-4995',lat:18.4756,lng:-69.9396,desc:'Specialty coffee de tercera ola. Baristas certificados, metodos de filtracion y origenes de autor.',trend:true},
-  {id:'cf05',name:'Casa Barista & Co. - Colonial',cat:'Cafe',gama:'Media',addr:'C. Arzobispo Merino 268, Zona Colonial',phone:'829-247-0142',lat:18.4739,lng:-69.8835,desc:'Terraza con vista al casco historico. El specialty coffee de la Zona Colonial.',trend:false},
-  {id:'cf06',name:'Affogato Cafe',cat:'Cafe',gama:'Media',addr:'C. Arzobispo Nouel #251, Zona Colonial',phone:'809-688-7676',lat:18.4734,lng:-69.8845,desc:'El mas fotografiado de la Zona Colonial. Especialidad en affogato y postres helados de autor.',trend:true},
-  {id:'cf07',name:'CAFFETAL La Bottega Del Caffe',cat:'Cafe',gama:'Media',addr:'C. Armando Rodriguez, Villa Consuelo',phone:'809-692-6830',lat:18.4762,lng:-69.9011,desc:'Estilo italiano. Espresso, cappuccino y cornetti hechos por baristas apasionados.',trend:false},
-  {id:'cf08',name:'Storia Caffe',cat:'Cafe',gama:'Media',addr:'Plaza Galerias del Paseo, Paseo de los Locutores',phone:'',lat:18.4815,lng:-69.9350,desc:'Postres sofisticados y cafe de especialidad. Ambiente romantico ideal para citas.',trend:false},
-  {id:'cf09',name:'Mr & Mrs Coffee',cat:'Cafe',gama:'Media',addr:'Av. Gustavo Mejia Ricart 133, Piantini',phone:'829-630-8467',lat:18.4744,lng:-69.9397,desc:'Estilo europeo. Lattes artesanales y pasteleria de calidad en Piantini.',trend:false},
-  {id:'cf10',name:'Santo Domingo Cafe - Agora',cat:'Cafe',gama:'Accesible',addr:'Agora Mall, 3er Nivel, Av. Abraham Lincoln',phone:'',lat:18.4824,lng:-69.9380,desc:'Cafeteria en mall accesible para pausas entre compras.',trend:false},
-  {id:'cf11',name:'Santo Domingo Cafe - Acropolis',cat:'Cafe',gama:'Accesible',addr:'Acropolis Center, Av. Winston Churchill',phone:'',lat:18.4617,lng:-69.9451,desc:'Menu de cafe y postres clasicos a buen precio.',trend:false},
-  {id:'cf12',name:'Santo Domingo Cafe - Sambil',cat:'Cafe',gama:'Accesible',addr:'Plaza Sambil, 2do Nivel',phone:'',lat:18.4769,lng:-69.9618,desc:'Punto de encuentro dentro del Sambil.',trend:false},
-  {id:'cf13',name:'Corner Cafe',cat:'Cafe',gama:'Accesible',addr:'Zona Colonial, Santo Domingo',phone:'',lat:18.4742,lng:-69.8855,desc:'Cafeteria de barrio. Ideal para desayuno rapido en la Zona Colonial.',trend:false},
-  {id:'po01',name:'Dulceria Oriol',cat:'Postres',gama:'Alta',addr:'C. Roberto Pastoriza, Piantini',phone:'',lat:18.4763,lng:-69.9385,desc:'La pasteleria fina mas elegante de SD. Macarons, tartas artesanales y pasteles de bodas de lujo. Ingredientes importados de Francia.',trend:true},
-  {id:'po02',name:'Sweet Lab',cat:'Postres',gama:'Media',addr:'Piantini, Santo Domingo',phone:'',lat:18.4755,lng:-69.9392,desc:'Crepes, waffles y postres artesanales modernos. Muy popular en Instagram. El sitio de moda para los jovenes.',trend:true},
-  {id:'po03',name:'La Cremerie',cat:'Postres',gama:'Media',addr:'Zona Colonial, Santo Domingo',phone:'',lat:18.4738,lng:-69.8858,desc:'Postres franceses y dominicanos en la Zona Colonial. Croissants frescos cada manana.',trend:false},
-  {id:'po04',name:'Pasteleria Haagen',cat:'Postres',gama:'Media',addr:'Varias ubicaciones, Santo Domingo',phone:'',lat:18.4748,lng:-69.9380,desc:'Cadena de pastelerias con tortas, queques y postres dominicanos clasicos para toda ocasion.',trend:false},
-  {id:'po05',name:'Bon - Reposteria',cat:'Postres',gama:'Accesible',addr:'Varias ubicaciones, Santo Domingo',phone:'',lat:18.4730,lng:-69.9295,desc:'La reposteria mas popular y accesible de RD. Presencia en toda la ciudad.',trend:false},
-  {id:'he01',name:'Casa Gelato',cat:'Helados',gama:'Alta',addr:'Av. Abraham Lincoln, Piantini',phone:'',lat:18.4836,lng:-69.9388,desc:'Gelato artesanal italiano preparado diariamente con frutas tropicales dominicanas. El mas premium del pais.',trend:true},
-  {id:'he02',name:'Bon Glace',cat:'Helados',gama:'Media',addr:'Varias ubicaciones, Santo Domingo',phone:'',lat:18.4750,lng:-69.9355,desc:'La heladeria mas querida de RD. Sabores dominicanos unicos como tamarindo, guanabana y chinola.',trend:true},
-  {id:'he06',name:'Heladerias Bon',cat:'Helados',gama:'Accesible',addr:'Varias ubicaciones, Santo Domingo',phone:'',lat:18.4748,lng:-69.9350,desc:'La cadena de heladerias mas popular y accesible de RD. Sabores clasicos dominicanos en toda la ciudad.',trend:false},
-  {id:'he03',name:'Helados Buen Sabor',cat:'Helados',gama:'Accesible',addr:'Varias ubicaciones, Santo Domingo',phone:'',lat:18.4725,lng:-69.9220,desc:'Paletas, helados y raspaduras dominicanas. El clasico de barrio que nunca falla.',trend:false},
-  {id:'he04',name:'Cold Stone Creamery - Agora',cat:'Helados',gama:'Media',addr:'Agora Mall, Av. Abraham Lincoln',phone:'',lat:18.4823,lng:-69.9382,desc:'Helados americanos personalizados mezclados en piedra fria. Mix-ins creativos y sabores premium.',trend:false},
-  {id:'he05',name:"Menchie's Frozen Yogurt",cat:'Helados',gama:'Media',addr:'Acropolis Center, Av. Winston Churchill',phone:'',lat:18.4618,lng:-69.9452,desc:'Frozen yogurt self-service con toppings ilimitados. La opcion saludable y divertida.',trend:false},
-  {id:'ff01',name:"McDonald's - Tiradentes",cat:'Fast Food',gama:'Accesible',addr:'Av. Tiradentes 22, Santo Domingo',phone:'',lat:18.4791,lng:-69.9263,desc:'Con drive-thru. El clasico americano.',trend:false},
-  {id:'ff01b',name:"McDonald's - W. Churchill",cat:'Fast Food',gama:'Accesible',addr:'Av. Winston Churchill, Santo Domingo',phone:'809-508-1399',lat:18.4772,lng:-69.9468,desc:'Sucursal en Av. Winston Churchill con drive-thru.',trend:false},
-  {id:'ff01c',name:"McDonald's - Abraham Lincoln",cat:'Fast Food',gama:'Accesible',addr:'Av. Abraham Lincoln 504, Santo Domingo',phone:'',lat:18.4820,lng:-69.9390,desc:'Sucursal en Av. Abraham Lincoln.',trend:false},
-  {id:'ff01d',name:"McDonald's - Agora Mall",cat:'Fast Food',gama:'Accesible',addr:'Agora Mall, Av. Abraham Lincoln, Santo Domingo',phone:'',lat:18.4825,lng:-69.9378,desc:'Dentro de Agora Mall.',trend:false},
-  {id:'ff01e',name:"McDonald's - Maximo Gomez",cat:'Fast Food',gama:'Accesible',addr:'Av. Maximo Gomez esq. Av. Jose Contreras, Santo Domingo',phone:'',lat:18.4683,lng:-69.9000,desc:'Sucursal Maximo Gomez con drive-thru.',trend:false},
-  {id:'ff01f',name:"McDonald's - Nunez de Caceres",cat:'Fast Food',gama:'Accesible',addr:'Av. Nunez de Caceres esq. Francisco Prats Ramirez, Santo Domingo',phone:'',lat:18.4798,lng:-69.9530,desc:'Sucursal Nunez de Caceres.',trend:false},
-  {id:'ff01g',name:"McDonald's - Los Proceres",cat:'Fast Food',gama:'Accesible',addr:'Av. de los Proceres, al lado de Diamond Mall, Santo Domingo',phone:'',lat:18.5010,lng:-69.9320,desc:'Junto a Diamond Mall en Los Proceres.',trend:false},
-  {id:'ff01h',name:"McDonald's - Luperon",cat:'Fast Food',gama:'Accesible',addr:'Av. Luperon esq. Calle Libertad, Santo Domingo',phone:'',lat:18.4760,lng:-69.9780,desc:'Sucursal Luperon con drive-thru.',trend:false},
-  {id:'ff01i',name:"McDonald's - Republica de Colombia",cat:'Fast Food',gama:'Accesible',addr:'Av. Republica de Colombia, Santo Domingo Este',phone:'',lat:18.4850,lng:-69.8720,desc:'Sucursal en Av. Republica de Colombia.',trend:false},
-  {id:'ff01j',name:"McDonald's - Venezuela",cat:'Fast Food',gama:'Accesible',addr:'Av. Venezuela 104, Santo Domingo Este',phone:'',lat:18.4820,lng:-69.8650,desc:'Sucursal en Av. Venezuela, Santo Domingo Este.',trend:false},
-  {id:'ff01k',name:"McDonald's - Santo Domingo Este",cat:'Fast Food',gama:'Accesible',addr:'Calle A, Santo Domingo Este',phone:'',lat:18.4870,lng:-69.8550,desc:'Sucursal Santo Domingo Este.',trend:false},
-  {id:'ff02',name:'Burger King - W. Churchill',cat:'Fast Food',gama:'Accesible',addr:'Av. Winston Churchill 80, Santo Domingo',phone:'',lat:18.4770,lng:-69.9461,desc:'Una de las mas populares de RD. Whopper y chicken sandwich son los favoritos.',trend:false},
-  {id:'ff03a',name:'KFC - Independencia',cat:'Fast Food',gama:'Accesible',addr:'Prolongacion Av. Independencia KM 9.5, Santo Domingo 11101',phone:'809-508-0000',lat:18.43085,lng:-69.97076,desc:'Pollo crujiente con la receta original del Coronel.',trend:false},
-  {id:'ff03c',name:'KFC - Tiradentes',cat:'Fast Food',gama:'Accesible',addr:'Av. Tiradentes esq. Max Henriquez Urena, Santo Domingo',phone:'809-508-0000',lat:18.4792,lng:-69.9258,desc:'Sucursal Tiradentes.',trend:false},
-  {id:'ff03d',name:'KFC - Churchill',cat:'Fast Food',gama:'Accesible',addr:'Av. Winston Churchill esq. Roberto Pastoriza, Santo Domingo',phone:'809-508-0000',lat:18.4773,lng:-69.9468,desc:'Sucursal Churchill.',trend:false},
-  {id:'ff03e',name:'KFC - JFK',cat:'Fast Food',gama:'Accesible',addr:'Av. John F. Kennedy esq. Juan Thomas Mejia, Santo Domingo',phone:'809-508-0000',lat:18.4769,lng:-69.9580,desc:'Sucursal JFK.',trend:false},
-  {id:'ff03f',name:'KFC - Sambil',cat:'Fast Food',gama:'Accesible',addr:'Av. John F. Kennedy, Sambil, Santo Domingo',phone:'809-508-0000',lat:18.4760,lng:-69.9618,desc:'Dentro del Sambil.',trend:false},
-  {id:'ff03g',name:'KFC - Agora Mall',cat:'Fast Food',gama:'Accesible',addr:'Av. J.F. Kennedy esq. Lincoln, Agora Mall 4to Nivel, Santo Domingo',phone:'809-508-0000',lat:18.4826,lng:-69.9380,desc:'Dentro de Agora Mall.',trend:false},
-  {id:'ff03h',name:'KFC - Galeria 360',cat:'Fast Food',gama:'Accesible',addr:'Av. J.F. Kennedy, Plaza Galeria 360, Santo Domingo',phone:'809-508-0000',lat:18.4780,lng:-69.9500,desc:'Dentro de Galeria 360.',trend:false},
-  {id:'ff03i',name:'KFC - Maximo Gomez',cat:'Fast Food',gama:'Accesible',addr:'Av. Maximo Gomez, Santo Domingo',phone:'809-508-0000',lat:18.4683,lng:-69.8998,desc:'Sucursal Maximo Gomez.',trend:false},
-  {id:'ff03j',name:'KFC - Downtown',cat:'Fast Food',gama:'Accesible',addr:'Av. Nunez de Caceres, Downtown Center, Santo Domingo',phone:'809-508-0000',lat:18.4790,lng:-69.9530,desc:'Sucursal Downtown Center.',trend:false},
-  {id:'ff03k',name:'KFC - Proceres',cat:'Fast Food',gama:'Accesible',addr:'Av. de los Proceres esq. Erik Leonard Ekman, Santo Domingo',phone:'809-508-0000',lat:18.5010,lng:-69.9315,desc:'Sucursal Los Proceres.',trend:false},
-  {id:'ff03l',name:'KFC - Bella Vista',cat:'Fast Food',gama:'Accesible',addr:'Av. Romulo Betancourt esq. Dr. Fernando A. Defillo, Santo Domingo',phone:'809-508-0000',lat:18.4580,lng:-69.9420,desc:'Sucursal Bella Vista.',trend:false},
-  {id:'ff03m',name:'KFC - Charles Sumner',cat:'Fast Food',gama:'Accesible',addr:'Av. Charles Sumner, Texaco Los Prados, Santo Domingo',phone:'809-508-0000',lat:18.4900,lng:-69.9280,desc:'Sucursal Charles Sumner.',trend:false},
-  {id:'ff03n',name:'KFC - Patio Colombia',cat:'Fast Food',gama:'Accesible',addr:'Av. Republica de Colombia, Santo Domingo Este',phone:'809-508-0000',lat:18.4848,lng:-69.8720,desc:'Sucursal Patio Colombia.',trend:false},
-  {id:'ff03o',name:'KFC - Luperon',cat:'Fast Food',gama:'Accesible',addr:'Av. Luperon, Santo Domingo',phone:'809-508-0000',lat:18.4755,lng:-69.9780,desc:'Sucursal Jumbo Luperon.',trend:false},
-  {id:'ff03p',name:'KFC - Zona Colonial',cat:'Fast Food',gama:'Accesible',addr:'Av. 19 de Marzo con Calle El Conde, Zona Colonial',phone:'809-508-0000',lat:18.4738,lng:-69.8918,desc:'Sucursal Zona Colonial.',trend:false},
-  {id:'ff03q',name:'KFC - Carrefour',cat:'Fast Food',gama:'Accesible',addr:'Autopista Duarte Km 10.5, Plaza Duarte Carrefour, Santo Domingo',phone:'809-508-0000',lat:18.5180,lng:-69.9890,desc:'Sucursal Carrefour.',trend:false},
-  {id:'ff04',name:"Wendy's - Abraham Lincoln",cat:'Fast Food',gama:'Accesible',addr:'Av. Abraham Lincoln, Santo Domingo',phone:'',lat:18.4830,lng:-69.9390,desc:"12 ubicaciones en SD. El Frosty y el Dave's Single son los mas pedidos.",trend:false},
-  {id:'ff05',name:'Pollos Victorina',cat:'Fast Food',gama:'Accesible',addr:'Varias ubicaciones, Santo Domingo',phone:'',lat:18.4750,lng:-69.9350,desc:'Cadena dominicana favorita. Burgers, wraps y pollo frito al mejor precio local.',trend:true},
-  {id:'ff06',name:'Pica Pollo',cat:'Fast Food',gama:'Accesible',addr:'Av. Tiradentes 25, Santo Domingo',phone:'',lat:18.4793,lng:-69.9270,desc:'Pollo frito crujiente con tostones o moro. Menos de 4 dolares. Lo mas autentico del pais.',trend:true},
-  {id:'ba01',name:'Room 504 (sobre La Cassina)',cat:'Bares',gama:'Alta',addr:'Av. Abraham Lincoln 1001, Piantini (2do piso)',phone:'809-563-2400',lat:18.4842,lng:-69.9396,desc:'El club lounge mas exclusivo de SD. DJs internacionales de jueves a domingo sobre el mejor restaurante del pais.',trend:true},
-  {id:'ba02',name:'El Buho Cafe',cat:'Bares',gama:'Media',addr:'Zona Colonial, Santo Domingo',phone:'',lat:18.4736,lng:-69.8850,desc:'Bar de personalidad propia. Cocktails artesanales y musica en vivo. El dueno atiende personalmente.',trend:false},
-  {id:'ve01',name:'Time Vegetariano',cat:'Vegetariana',gama:'Media',addr:'Zona Colonial (Patrimonio UNESCO)',phone:'',lat:18.4733,lng:-69.8860,desc:'El unico restaurante vegetariano destacado de SD. Opciones veganas, sin gluten y de temporada.',trend:false},
-];
+const DB = [];
+
+
 
 let map, allRestaurants = [];
 const markerMap = new Map();
@@ -550,9 +444,6 @@ function initMap(lat, lng) {
       label.textContent = fmtR(RADIUS_M);
       window.radiusCircle.setRadius(RADIUS_M);
       applyFilters();
-      // Debounce OSM reload - only fetch after user stops dragging 600ms
-      clearTimeout(_osmTimer);
-      _osmTimer = setTimeout(() => mergeLoad(userLat, userLng), 600);
     });
   })();
 
@@ -569,68 +460,15 @@ async function reverseGeocode(lat, lng) {
 
 async function mergeLoad(lat, lng) {
   document.getElementById('loadMsg').textContent = 'Cargando restaurantes...';
-
-  // DB siempre se carga completa — nunca cambia
-  if (allRestaurants.filter(r => r.isDB).length === 0) {
-    const dbWithDist = DB.map(r => ({...r, dist:haversine(lat,lng,r.lat,r.lng), isDB:true}));
-    dbWithDist.forEach(r => {
-      allRestaurants.push(r);
-      if (!markerMap.has(r.id)) createMarker(r);
+  if (allRestaurants.length === 0) {
+    DB.forEach(r => {
+      const entry = {...r, dist:haversine(lat,lng,r.lat,r.lng), isDB:true};
+      allRestaurants.push(entry);
+      createMarker(entry);
     });
   }
-
   hideLoading();
   requestAnimationFrame(() => applyFilters());
-
-  // OSM se carga aparte y solo agrega lo que no existe
-  try {
-    const q = `[out:json][timeout:25];(node["amenity"="restaurant"](around:${RADIUS_M},${lat},${lng});node["amenity"="fast_food"](around:${RADIUS_M},${lat},${lng});node["amenity"="cafe"](around:${RADIUS_M},${lat},${lng});node["amenity"="bar"](around:${RADIUS_M},${lat},${lng}););out body;`;
-    const res = await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)});
-    const data = await res.json();
-    const dbNames = new Set(DB.map(r => r.name.toLowerCase()));
-    const existingIds = new Set(allRestaurants.map(r => r.id));
-    const osmNew = data.elements
-      .map(e => parseOSM(e,lat,lng))
-      .filter(e => e && !dbNames.has(e.name.toLowerCase()) && !existingIds.has('osm-'+e.id));
-    if (osmNew.length > 0) {
-      osmNew.forEach(r => {
-        allRestaurants.push(r);
-        if (!markerMap.has(r.id)) createMarker(r);
-      });
-      requestAnimationFrame(() => applyFilters());
-    }
-  } catch(e) {}
-}
-
-function parseOSM(el, lat, lng) {
-  if (!el.lat || !el.lon) return null;
-  const t = el.tags || {};
-  const name = t.name || t['name:es'] || '';
-  if (!name) return null;
-  const cuisine = t.cuisine || '';
-  const amenity = t.amenity || '';
-  return {id:'osm-'+el.id, name, cat:detectCat(cuisine,amenity), gama:'Accesible',
-    addr:[t['addr:street'],t['addr:housenumber']].filter(Boolean).join(' ')||'',
-    phone:t.phone||'', desc:'', trend:false, isDB:false,
-    dist:haversine(lat,lng,el.lat,el.lon), lat:el.lat, lng:el.lon, cuisine};
-}
-
-function detectCat(cuisine, amenity) {
-  const c = (cuisine+' '+amenity).toLowerCase();
-  if (['dominican','caribbean','comida_criolla','local'].some(k=>c.includes(k))) return 'Criolla';
-  if (['seafood','fish','mariscos'].some(k=>c.includes(k))) return 'Mariscos';
-  if (['bbq','grill','steak_house','churrascaria','steak'].some(k=>c.includes(k))) return 'Parrilla';
-  if (['burger'].some(k=>c.includes(k)) && amenity!=='fast_food') return 'Hamburguesas';
-  if (['pizza','italian'].some(k=>c.includes(k))) return 'Pizza';
-  if (['chinese','japanese','sushi','asian','thai','korean'].some(k=>c.includes(k))) return 'Asiatica';
-  if (['mexican','taco'].some(k=>c.includes(k))) return 'Mexicana';
-  if (['coffee_shop','specialty_coffee','coffeehouse'].some(k=>c.includes(k))) return 'Cafe';
-  if (['ice_cream','frozen_yogurt','gelato'].some(k=>c.includes(k))) return 'Helados';
-  if (['dessert','pastry','bakery'].some(k=>c.includes(k))) return 'Postres';
-  if (['bar','pub','lounge','cocktail'].some(k=>c.includes(k))) return 'Bares';
-  if (['vegan','vegetarian'].some(k=>c.includes(k))) return 'Vegetariana';
-  if (amenity === 'fast_food') return 'Fast Food';
-  return 'Internacional';
 }
 
 // Debounce search input
@@ -674,7 +512,7 @@ function renderList(items) {
     const card = document.createElement('div');
     card.className = 'card';
     card.setAttribute('data-gama', r.gama||'');
-    card.style.animationDelay = `${Math.min(i*15,280)}ms`;
+    card.style.animationDelay = `${Math.min(i*10,150)}ms`;
     const gamaHtml = r.gama ? `<span class="gama-tag gt-${r.gama.toLowerCase()}">${GAMA_LABEL[r.gama]}</span>` : '';
     card.innerHTML = `
       <div class="card-top"><div class="card-name">${r.name}</div>${gamaHtml}</div>
@@ -698,8 +536,10 @@ function syncMap(visible) {
   if (!map) return;
   const visibleIds = new Set(visible.map(r => r.id));
   markerMap.forEach((m, id) => {
-    if (visibleIds.has(id)) { if (!map.hasLayer(m)) m.addTo(map); }
-    else { if (map.hasLayer(m)) map.removeLayer(m); }
+    const shouldShow = visibleIds.has(id);
+    const isOnMap = map.hasLayer(m);
+    if (shouldShow && !isOnMap) m.addTo(map);
+    else if (!shouldShow && isOnMap) map.removeLayer(m);
   });
 }
 
@@ -733,6 +573,7 @@ function createMarker(r) {
     _activeMarker = m;
   });
   markerMap.set(r.id, m);
+  if (map && !map.hasLayer(m)) m.addTo(map);
   return m;
 }
 
@@ -744,7 +585,7 @@ function focusRestaurant(r) {
     _activeMarker = null;
   }
   const m = markerMap.get(r.id);
-  if (m && !map.hasLayer(m)) m.addTo(map);
+  if (m) m.setStyle({ fillOpacity: 1, opacity: 1 });
   map.flyTo([r.lat, r.lng], 18, {duration:.7});
   setTimeout(() => {
     if (m) {
