@@ -382,7 +382,36 @@ const CATS = ['Todos','Criolla','Mariscos','Parrilla','Hamburguesas','Pizza',
               'Internacional','Asiatica','Mexicana','Cafe','Postres','Helados',
               'Fast Food','Bares','Vegetariana'];
 
-const DB = [];
+const DB = [
+  // ── PIZZA HUT ─────────────────────────────────────────────────────────────
+  {id:'ph01',name:'Pizza Hut Núñez de Cáceres',cat:'Pizza',gama:'Accesible',addr:'Av. Núñez de Cáceres, Plaza Sonorama',phone:'809-620-2020',lat:18.4801,lng:-69.9530,desc:'',trend:false},
+  {id:'ph02',name:'Pizza Hut Naco',cat:'Pizza',gama:'Accesible',addr:'Av. Tiradentes esq. Calle Salvador Sturla',phone:'809-620-2020',lat:18.4793,lng:-69.9258,desc:'',trend:false},
+  {id:'ph03',name:'Pizza Hut Higüey',cat:'Pizza',gama:'Accesible',addr:'J78H+HJP, Higüey 23000',phone:'809-620-2020',lat:18.8558,lng:-68.7088,desc:'',trend:false},
+  {id:'ph04',name:'Pizza Hut San Juan (Bávaro)',cat:'Pizza',gama:'Accesible',addr:'Av. Barceló, Plaza San Juan Shopping Center, Bávaro',phone:'809-620-2020',lat:18.6835,lng:-68.4472,desc:'',trend:false},
+  {id:'ph05',name:'Pizza Hut Pueblo Bávaro',cat:'Pizza',gama:'Accesible',addr:'Av. Barceló, entrada Pueblo Bávaro, Bávaro City Center',phone:'809-620-2020',lat:18.6920,lng:-68.4380,desc:'',trend:false},
+  {id:'ph06',name:'Pizza Hut San Isidro',cat:'Pizza',gama:'Accesible',addr:'Autopista de San Isidro frente a Coral Mall',phone:'809-620-2020',lat:18.4860,lng:-69.7950,desc:'',trend:false},
+  {id:'ph07',name:'Pizza Hut BlueMall Punta Cana',cat:'Pizza',gama:'Accesible',addr:'Plaza Blue Mall Punta Cana',phone:'809-620-2020',lat:18.5712,lng:-68.3725,desc:'',trend:false},
+  {id:'ph08',name:'Pizza Hut Arroyo Hondo',cat:'Pizza',gama:'Accesible',addr:'Av. Carlos Pérez Ricart, Plaza Báez',phone:'809-620-2020',lat:18.5005,lng:-69.9618,desc:'',trend:false},
+  {id:'ph09',name:'Pizza Hut Bella Vista',cat:'Pizza',gama:'Accesible',addr:'Av. Rómulo Betancourt casi esq. Núñez de Cáceres',phone:'809-620-2020',lat:18.4576,lng:-69.9408,desc:'',trend:false},
+  {id:'ph10',name:'Pizza Hut Rep. de Colombia',cat:'Pizza',gama:'Accesible',addr:'Av. República de Colombia casi esq. Calle Principal',phone:'809-620-2020',lat:18.4850,lng:-69.8718,desc:'',trend:false},
+  {id:'ph11',name:'Pizza Hut Colina Centro',cat:'Pizza',gama:'Accesible',addr:'Av. Jacobo Majluta Azar, Santo Domingo',phone:'809-620-2020',lat:18.5318,lng:-69.9850,desc:'',trend:false},
+  {id:'ph12',name:'Pizza Hut Venezuela',cat:'Pizza',gama:'Accesible',addr:'Av. Venezuela casi esq. Calle Club de Leones',phone:'809-620-2020',lat:18.4820,lng:-69.8652,desc:'',trend:false},
+  {id:'ph13',name:'Pizza Hut Gazcue',cat:'Pizza',gama:'Accesible',addr:'Av. Pasteur, Plaza Jardines de Gazcue',phone:'809-620-2020',lat:18.4698,lng:-69.9035,desc:'',trend:false},
+  {id:'ph14',name:'Pizza Hut El Portal',cat:'Pizza',gama:'Accesible',addr:'Plaza El Portal, Av. Independencia Km. 6',phone:'809-620-2020',lat:18.4651,lng:-69.9620,desc:'',trend:false},
+  {id:'ph15',name:'Pizza Hut Lope de Vega',cat:'Pizza',gama:'Accesible',addr:'Av. Lope de Vega casi esq. Rafael Augusto Sánchez',phone:'809-620-2020',lat:18.4762,lng:-69.9270,desc:'',trend:false},
+  {id:'ph16',name:'Pizza Hut Independencia',cat:'Pizza',gama:'Accesible',addr:'Av. Independencia esq. Calle Primera',phone:'809-620-2020',lat:18.4681,lng:-69.9282,desc:'',trend:false},
+  {id:'ph17',name:'Pizza Hut Rómulo',cat:'Pizza',gama:'Accesible',addr:'Av. Rómulo Betancourt, Santo Domingo',phone:'809-620-2020',lat:18.4600,lng:-69.9350,desc:'',trend:false},
+  {id:'ph18',name:'Pizza Hut Zona Rosa (Santiago)',cat:'Pizza',gama:'Accesible',addr:'Av. Juan Pablo Duarte, Zona Rosa Plaza, Santiago',phone:'809-620-2020',lat:19.4488,lng:-70.6917,desc:'',trend:false},
+  {id:'ph19',name:'Pizza Hut Juan Pablo Duarte (Santiago)',cat:'Pizza',gama:'Accesible',addr:'Estación Esso El Embrujo, Av. Juan Pablo Duarte, Santiago',phone:'809-620-2020',lat:19.4520,lng:-70.6850,desc:'',trend:false},
+  {id:'ph20',name:'Pizza Hut Unicentro',cat:'Pizza',gama:'Accesible',addr:'Av. 27 de Febrero, Unicentro Plaza',phone:'809-620-2020',lat:18.4780,lng:-69.9510,desc:'',trend:false},
+  {id:'ph21',name:'Pizza Hut Carol (Santiago)',cat:'Pizza',gama:'Accesible',addr:'Av. Salvador Estrella Sadhalá, Santiago',phone:'809-620-2020',lat:19.4380,lng:-70.7120,desc:'',trend:false},
+  {id:'ph22',name:'Pizza Hut San Cristóbal',cat:'Pizza',gama:'Accesible',addr:'Av. Constitución 177, San Cristóbal',phone:'809-620-2020',lat:18.4158,lng:-70.1062,desc:'',trend:false},
+  {id:'ph23',name:'Pizza Hut San Pedro de Macorís',cat:'Pizza',gama:'Accesible',addr:'Av. Francisco Alberto Caamaño Deñó 10, San Pedro de Macorís',phone:'809-620-2020',lat:18.4602,lng:-69.2985,desc:'',trend:false},
+  {id:'ph24',name:'Pizza Hut Calle El Sol (Santiago)',cat:'Pizza',gama:'Accesible',addr:'Calle del Sol esq. Calle Sánchez, Santiago',phone:'809-620-2020',lat:19.4512,lng:-70.6968,desc:'',trend:false},
+  {id:'ph25',name:'Pizza Hut San Francisco de Macorís',cat:'Pizza',gama:'Accesible',addr:'Av. Pte. Antonio Guzmán Fernández, Urb. El Tejar, SFM',phone:'809-620-2020',lat:19.3008,lng:-70.2502,desc:'',trend:false},
+  {id:'ph26',name:'Pizza Hut Puerto Plata',cat:'Pizza',gama:'Accesible',addr:'Av. Luis Ginebra, Puerto Plata',phone:'809-620-2020',lat:19.7968,lng:-70.6892,desc:'',trend:false},
+  {id:'ph27',name:'Pizza Hut La Romana',cat:'Pizza',gama:'Accesible',addr:'Multiplaza La Romana',phone:'809-620-2020',lat:18.4275,lng:-68.9718,desc:'',trend:false},
+];
 
 
 
