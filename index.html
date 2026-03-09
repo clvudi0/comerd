@@ -53,8 +53,9 @@ html.dark{
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;height:100vh;overflow:hidden;}
 button{font-family:'Outfit',sans-serif;cursor:pointer}
 input{font-family:'Outfit',sans-serif}
-#loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2rem;z-index:9999;transition:opacity .6s,visibility .6s}
-#loading.hidden{opacity:0;visibility:hidden;pointer-events:none}
+#loading{background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;gap:1.2rem;flex:1;z-index:10}
+#loading.active{display:flex}
+#loading.hidden{display:none}
 .ld-brand{font-family:'Cormorant Garamond',serif;font-size:4rem;color:var(--red);line-height:1}
 .ld-brand b{color:var(--ink);font-weight:700}
 .ld-sub{font-size:.75rem;text-transform:uppercase;letter-spacing:.18em;color:var(--ink3)}
@@ -68,7 +69,8 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
 .loc-pill{display:flex;align-items:center;gap:.45rem;background:var(--s2);border:1px solid var(--border);border-radius:100px;padding:.38rem .9rem;font-size:.78rem;color:var(--gold);font-weight:500}
 .loc-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:blink 2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
-.layout{display:grid;grid-template-columns:var(--sidebar-w,360px) 5px 1fr;flex:1;overflow:hidden;min-height:0}
+.layout{grid-template-columns:var(--sidebar-w,360px) 5px 1fr;flex:1;overflow:hidden;min-height:0;display:none}
+.layout.ready{display:grid}
 .resize-handle{width:5px;background:transparent;cursor:col-resize;flex-shrink:0;position:relative;z-index:100;transition:background .15s}
 .resize-handle:hover,.resize-handle.dragging{background:var(--red)}
 .sidebar{display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--surface);overflow:hidden;min-height:0}
@@ -161,7 +163,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
   .brand{font-size:1.4rem}
   .brand-sub{display:none}
   .loc-pill{padding:.26rem .65rem;font-size:.68rem;white-space:nowrap;flex-shrink:0}
-  .layout{display:block;overflow:visible}
+  .layout,.layout.ready{display:block;overflow:visible}
   .sidebar{display:flex;flex-direction:column;width:100%;overflow:visible;border-right:none;min-height:0}
   #map-wrap{display:none!important}
   .search-wrap{padding:.52rem .75rem}
@@ -206,14 +208,12 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
 .view-btn:hover{color:var(--red);border-color:var(--red)}
 .view-btn.is-app{color:var(--red);border-color:var(--red);background:rgba(181,40,40,.07)}
 /* ── VIEW SYSTEM ── */
-#view-landing{
-  flex:1;overflow-y:auto;overflow-x:hidden;min-height:0
-}
-body.show-landing{overflow:hidden}
-body.show-landing #view-landing{display:flex;flex-direction:column}
-body.show-landing #view-app{display:none}
-body.show-app #view-landing{display:none}
-body.show-app #view-app{display:flex;flex-direction:column;flex:1;overflow:hidden;min-height:0}
+#view-landing{flex:1;overflow-y:auto;overflow-x:hidden;min-height:0;flex-direction:column}
+#view-app{flex:1;overflow:hidden;min-height:0;flex-direction:column;display:none}
+body.show-landing #view-landing{display:flex}
+body.show-landing #view-app{display:none!important}
+body.show-app #view-landing{display:none!important}
+body.show-app #view-app{display:flex}
 /* ── LANDING PAGE ── */
 .lp-marquee-wrap{
   overflow:hidden;border-bottom:1px solid var(--border);
@@ -384,14 +384,7 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
 </head>
 <body>
 
-<div id="loading" style="display:none">
-  <div class="ld-brand">Come<b>RD</b></div>
-  <div class="ld-sub">Descubre lo mejor de Republica Dominicana</div>
-  <div class="ld-bar"><div class="ld-fill"></div></div>
-  <div style="font-size:.74rem;color:var(--ink3)" id="loadMsg">Obteniendo tu ubicacion...</div>
-</div>
 
-<header>
   <div>
     <div class="brand">Come<em>RD</em></div>
     <div class="brand-sub">Descubre lo mejor · Republica Dominicana</div>
@@ -488,6 +481,12 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
 </div>
 
 <div id="view-app">
+<div id="loading">
+  <div class="ld-brand">Come<b>RD</b></div>
+  <div class="ld-sub">Descubre lo mejor de Republica Dominicana</div>
+  <div class="ld-bar"><div class="ld-fill"></div></div>
+  <div style="font-size:.74rem;color:var(--ink3)" id="loadMsg">Obteniendo tu ubicacion...</div>
+</div>
 <div class="layout">
   <aside class="sidebar" id="sidebar">
 
@@ -883,10 +882,9 @@ function requestMapBoot() {
   if (_mapBooted) return;
   _mapBooted = true;
 
-  // Show loading overlay inside the app view
+  // Show loading, layout stays hidden until hideLoading() adds .ready
   const ld = document.getElementById('loading');
-  ld.style.display = 'flex';
-  ld.classList.remove('hidden');
+  ld.classList.add('active');
 
   buildCategories();
   window._sortBtns = Array.from(document.querySelectorAll('#sortRow .sort-btn'));
@@ -1289,7 +1287,13 @@ function haversine(la1,lo1,la2,lo2){
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 function formatDist(m){return m<1000?`${Math.round(m)} m`:`${(m/1000).toFixed(1)} km`}
-function hideLoading(){document.getElementById('loading').classList.add('hidden')}
+function hideLoading(){
+  const ld = document.getElementById('loading');
+  const layout = document.querySelector('.layout');
+  ld.classList.remove('active');
+  ld.classList.add('hidden');
+  if(layout) layout.classList.add('ready');
+}
 
 
 (function(){
