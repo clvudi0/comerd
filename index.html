@@ -241,11 +241,11 @@ header{
 .card:hover{background:var(--bg)}
 .card:hover::before{background:var(--red)!important;opacity:1}
 @keyframes fadeUp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.45rem;margin-bottom:.2rem}
+.card-top{display:flex;flex-direction:column;gap:.28rem;margin-bottom:.2rem}
 .card-name{
   font-family:'Cormorant Garamond',serif;
   font-weight:700;font-size:1.05rem;line-height:1.2;
-  flex:1;min-width:0;word-break:break-word;color:var(--ink);
+  color:var(--ink);word-break:break-word;
 }
 .gama-tag{
   font-size:.56rem;font-weight:600;padding:.1rem .42rem;
