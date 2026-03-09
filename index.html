@@ -147,7 +147,7 @@ header{
 .layout{display:grid;grid-template-columns:var(--sidebar-w,360px) 5px 1fr;flex:1;overflow:hidden;min-height:0}
 .resize-handle{width:5px;background:transparent;cursor:col-resize;flex-shrink:0;position:relative;z-index:100;transition:background .15s}
 .resize-handle:hover,.resize-handle.dragging{background:var(--red)}
-.sidebar{display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--surface);overflow:hidden;min-height:0}
+.sidebar{display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--surface);overflow-x:hidden;overflow-y:hidden;min-height:0}
 
 /* Search */
 .search-wrap{padding:.7rem .8rem;border-bottom:1px solid var(--border);position:relative;flex-shrink:0}
@@ -228,7 +228,7 @@ header{
 .card{
   background:var(--surface);border:none;border-radius:0;
   padding:.75rem 1rem .75rem 1.1rem;
-  cursor:pointer;position:relative;overflow:hidden;
+  cursor:pointer;position:relative;
   animation:fadeUp .25s ease both;
 }
 .card::before{
