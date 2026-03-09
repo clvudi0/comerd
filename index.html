@@ -301,14 +301,39 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
   .map-ctrl-left svg{flex-shrink:0}
   .map-ctrl-right{display:flex;gap:.26rem;align-items:center}
   .map-state-btn{
-    background:var(--surface);border:1.5px solid var(--border);border-radius:100px;
-    padding:.22rem .6rem;font-size:.67rem;font-weight:500;color:var(--ink2);
-    transition:background .15s,border-color .15s,color .15s;white-space:nowrap;line-height:1.3;
+    background:var(--surface);border:1.5px solid var(--border);border-radius:8px;
+    width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+    color:var(--ink2);transition:background .15s,border-color .15s,color .15s;
+    flex-shrink:0;
   }
   .map-state-btn:hover{border-color:var(--red);color:var(--red)}
   .map-state-btn[data-state="normal"].is-active{background:var(--red);border-color:var(--red);color:#fff}
   .map-state-btn[data-state="fullscreen"].is-active{background:var(--gold);border-color:var(--gold);color:#fff}
-  .map-state-btn[data-state="closed"].is-active{background:var(--ink2);border-color:var(--ink2);color:#fff}
+  .map-state-btn[data-state="closed"].is-active{background:var(--s2);border-color:var(--border);color:var(--ink3)}
+
+  /* Floating controls inside fullscreen map */
+  .map-fs-controls{
+    display:none;
+    position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+    z-index:600;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:100px;
+    box-shadow:var(--shadow-lg);
+    overflow:hidden;
+    flex-direction:row;
+  }
+  .map-fs-btn{
+    display:flex;align-items:center;gap:.45rem;
+    padding:.6rem 1.2rem;font-family:'Outfit',sans-serif;
+    font-size:.75rem;font-weight:500;color:var(--ink2);
+    background:transparent;border:none;cursor:pointer;
+    transition:background .15s,color .15s;white-space:nowrap;
+  }
+  .map-fs-btn:hover{background:var(--s2);color:var(--ink)}
+  .map-fs-btn + .map-fs-btn{border-left:1px solid var(--border)}
+  .map-fs-close:hover{color:var(--red)}
+  #mob-map-widget.is-fullscreen .map-fs-controls{display:flex}
   .map-box{overflow:hidden;height:0;transition:height var(--map-transition);position:relative;flex-shrink:0}
   .map-box #map{position:absolute;inset:0;width:100%;height:100%}
   .map-box .map-legend{display:block;position:absolute;bottom:8px;right:8px;top:auto;font-size:.58rem;padding:.26rem .48rem;z-index:500}
@@ -517,9 +542,26 @@ html.dark #view-landing{
               Mapa
             </div>
             <div class="map-ctrl-right">
-              <button class="map-state-btn" data-state="normal" onclick="setMapState('normal')">&#9974; Normal</button>
-              <button class="map-state-btn" data-state="fullscreen" onclick="setMapState('fullscreen')">&#x26F6; Expandir</button>
-              <button class="map-state-btn" data-state="closed" onclick="setMapState('closed')">&#x2715; Cerrar</button>
+              <!-- Normal: collapse to 220px -->
+              <button class="map-state-btn" data-state="normal" onclick="setMapState('normal')" title="Normal" aria-label="Vista normal">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/>
+                  <line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/>
+                </svg>
+              </button>
+              <!-- Fullscreen: expand -->
+              <button class="map-state-btn" data-state="fullscreen" onclick="setMapState('fullscreen')" title="Expandir" aria-label="Expandir mapa">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+                  <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+                </svg>
+              </button>
+              <!-- Close: hide map -->
+              <button class="map-state-btn" data-state="closed" onclick="setMapState('closed')" title="Cerrar" aria-label="Cerrar mapa">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
             </div>
           </div>
           <div class="map-box" id="mapBox">
@@ -528,6 +570,22 @@ html.dark #view-landing{
               <div class="leg-row"><div class="leg-dot" style="background:#9a7418"></div>Gama Alta</div>
               <div class="leg-row"><div class="leg-dot" style="background:#b52828"></div>Gama Media</div>
               <div class="leg-row"><div class="leg-dot" style="background:#246e42"></div>Accesible</div>
+            </div>
+            <!-- Floating controls shown only in fullscreen -->
+            <div class="map-fs-controls" id="mapFsControls">
+              <button class="map-fs-btn" onclick="setMapState('normal')" title="Vista normal" aria-label="Vista normal">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/>
+                  <line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/>
+                </svg>
+                <span>Normal</span>
+              </button>
+              <button class="map-fs-btn map-fs-close" onclick="setMapState('closed')" title="Cerrar" aria-label="Cerrar mapa">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+                <span>Cerrar</span>
+              </button>
             </div>
           </div>
         </div>
