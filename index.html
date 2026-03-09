@@ -6,15 +6,15 @@
 <title>ComeRD — Descubre lo mejor de RD</title>
 <script>
   (function(){
-    var saved = localStorage.getItem('theme');
-    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const saved = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     if(saved === 'dark' || (!saved && prefersDark)){
       document.documentElement.classList.add('dark');
     }
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e){
       if(!localStorage.getItem('theme')){
         document.documentElement.classList.toggle('dark', e.matches);
-        var cb = document.getElementById('themeToggle');
+        const cb = document.getElementById('themeToggle');
         if(cb) cb.checked = e.matches;
       }
     });
@@ -217,7 +217,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.7r
 .range-val{font-size:.68rem;font-weight:600;color:var(--red);white-space:nowrap;min-width:52px;text-align:right}
 #radiusSlider{flex:1;-webkit-appearance:none;appearance:none;height:3px;border-radius:2px;background:var(--border);outline:none;cursor:pointer}
 #radiusSlider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;border-radius:50%;background:var(--red);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.25);cursor:pointer}
-#radiusSlider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--red);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.25);cursor:pointer;border:none}
+#radiusSlider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--red);box-shadow:0 1px 4px rgba(0,0,0,.25);cursor:pointer;border:none}
 html.dark #loading{background:var(--bg)}
 html.dark #searchInput{color:var(--ink)}
 html.dark .list{scrollbar-color:var(--border) transparent}
@@ -295,7 +295,7 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
           <div class="leg-row"><div class="leg-dot" style="background:#9a7418"></div>Gama Alta</div>
           <div class="leg-row"><div class="leg-dot" style="background:#b52828"></div>Gama Media</div>
           <div class="leg-row"><div class="leg-dot" style="background:#246e42"></div>Accesible</div>
-          </div>
+        </div>
       </div>
     </div>
 
@@ -367,12 +367,13 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
       <div class="leg-row"><div class="leg-dot" style="background:#9a7418"></div>Gama Alta</div>
       <div class="leg-row"><div class="leg-dot" style="background:#b52828"></div>Gama Media</div>
       <div class="leg-row"><div class="leg-dot" style="background:#246e42"></div>Accesible</div>
-      </div>
+    </div>
   </div>
 </div>
 
 <script>
 let RADIUS_M = 2000;
+let _sortBtns, _gamaChips, _catBtns;
 const GAMA_ORDER  = {Alta:0,Media:1,Accesible:2};
 const GAMA_LABEL  = {Alta:'Gama Alta',Media:'Gama Media',Accesible:'Accesible'};
 const GAMA_COLOR  = {Alta:'#9a7418',Media:'#b52828',Accesible:'#246e42'};
@@ -392,9 +393,9 @@ window.onGoogleMapsReady = function() { _mapsReady = true; _tryBoot(); };
 
 window.addEventListener('DOMContentLoaded', () => {
   buildCategories();
-  window._sortBtns = Array.from(document.querySelectorAll('#sortRow .sort-btn'));
-  window._gamaChips = Array.from(document.querySelectorAll('#gamaChips .chip'));
-  window._catBtns = Array.from(document.querySelectorAll('.cat-btn'));
+  _sortBtns = Array.from(document.querySelectorAll('#sortRow .sort-btn'));
+  _gamaChips = Array.from(document.querySelectorAll('#gamaChips .chip'));
+  _catBtns = Array.from(document.querySelectorAll('.cat-btn'));
   if (!navigator.geolocation) {
     _pendingBoot = () => startDefault();
   } else {
@@ -470,16 +471,16 @@ function initMap(lat, lng) {
 }
 
 async function reverseGeocode(lat, lng) {
+  const cityEl = document.getElementById('cityName');
   try {
     const geocoder = new google.maps.Geocoder();
     geocoder.geocode({ location:{lat,lng}, language:'es' }, (results, status) => {
       if (status === 'OK' && results[0]) {
-        const comp = results[0].address_components;
-        const city = comp.find(c => c.types.includes('locality') || c.types.includes('administrative_area_level_2'));
-        document.getElementById('cityName').textContent = city ? city.long_name : 'RD';
-      } else { document.getElementById('cityName').textContent = 'RD'; }
+        const city = results[0].address_components.find(c => c.types.includes('locality') || c.types.includes('administrative_area_level_2'));
+        cityEl.textContent = city ? city.long_name : 'RD';
+      } else { cityEl.textContent = 'RD'; }
     });
-  } catch { document.getElementById('cityName').textContent = 'RD'; }
+  } catch { cityEl.textContent = 'RD'; }
 }
 
 // Cache de coordenadas geocodificadas (persiste en sessionStorage)
@@ -513,7 +514,8 @@ async function geocodeRestaurant(r, geocoder, cache) {
 }
 
 async function mergeLoad(lat, lng) {
-  document.getElementById('loadMsg').textContent = 'Localizando lugares...';
+  const loadMsg = document.getElementById('loadMsg');
+  loadMsg.textContent = 'Localizando lugares...';
 
   if (allRestaurants.length === 0) {
     const cache = loadGeoCache();
@@ -532,7 +534,7 @@ async function mergeLoad(lat, lng) {
         createMarker(entry);
         done++;
       });
-      document.getElementById('loadMsg').textContent = `Localizando... ${done}/${total}`;
+      loadMsg.textContent = `Localizando... ${done}/${total}`;
       requestAnimationFrame(() => applyFilters());
       // Pausa breve entre lotes para respetar rate limit
       if (i + BATCH < DB.length) await new Promise(res => setTimeout(res, 200));
@@ -615,11 +617,6 @@ function syncMap(visible) {
   markerMap.forEach((m, id) => { m.setVisible(visibleIds.has(id)); });
 }
 
-function dotRadiusForZoom(z) {
-  if (z <= 11) return 5; if (z >= 17) return 10;
-  return 5 + Math.round((z - 11) * (5 / 6));
-}
-
 function markerIcon(color, active) {
   return { path: google.maps.SymbolPath.CIRCLE, scale: active ? 10 : 7,
     fillColor: color, fillOpacity: 1,
@@ -628,10 +625,15 @@ function markerIcon(color, active) {
 
 let _activeInfoWindow = null;
 
-function createMarker(r) {
+function buildPopupContent(r) {
   const color = GAMA_COLOR[r.gama] || GAMA_COLOR['Accesible'];
   const gamaLine = r.gama ? `<div class="pop-gama" style="color:${color}">${GAMA_LABEL[r.gama]}</div>` : '';
-  const content = `<div class="pop-name">${r.name}</div><div class="pop-cat">${r.cat}</div>${gamaLine}${r.addr?`<div class="pop-addr">${r.addr}</div>`:''}`;
+  return `<div class="pop-name">${r.name}</div><div class="pop-cat">${r.cat}</div>${gamaLine}${r.addr ? `<div class="pop-addr">${r.addr}</div>` : ''}`;
+}
+
+function createMarker(r) {
+  const color = GAMA_COLOR[r.gama] || GAMA_COLOR['Accesible'];
+  const content = buildPopupContent(r);
   const m = new google.maps.Marker({
     position: {lat:r.lat, lng:r.lng}, map,
     icon: markerIcon(color, false), title: r.name
@@ -660,10 +662,7 @@ function focusRestaurant(r) {
   map.setZoom(18);
   setTimeout(() => {
     const color = GAMA_COLOR[r.gama] || GAMA_COLOR['Accesible'];
-    const gamaLine = r.gama ? `<div class="pop-gama" style="color:${color}">${GAMA_LABEL[r.gama]}</div>` : '';
-    const iw = new google.maps.InfoWindow({
-      content:`<div class="pop-name">${r.name}</div><div class="pop-cat">${r.cat}</div>${gamaLine}${r.addr?`<div class="pop-addr">${r.addr}</div>`:''}`
-    });
+    const iw = new google.maps.InfoWindow({ content: buildPopupContent(r) });
     m.setIcon(markerIcon(color, true));
     iw.open(map, m);
     _activeMarker = m; _activeInfoWindow = iw;
@@ -803,7 +802,7 @@ function hideLoading(){document.getElementById('loading').classList.add('hidden'
       localStorage.setItem('theme',checkbox.checked?'dark':'light');
       if(typeof map!=='undefined'&&map)setTimeout(()=>google.maps.event.trigger(map, "resize"),50);
     }
-    // Hide map during transition to prevent freeze (Leaflet is heavy)
+    // Ocultar el mapa durante la transición para evitar congelamiento
     const mapEl = document.getElementById('map-wrap');
     const mobMap = document.getElementById('mapBox');
     if(mapEl) mapEl.style.visibility='hidden';
