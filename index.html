@@ -335,7 +335,7 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
   transition:background .3s,color .3s;
 }
 html.dark #view-landing{
-  --lp-bg:#080808;--lp-ink:#f0ebe0;--lp-ink2:#888070;--lp-ink3:#444038;
+  --lp-bg:#080808;--lp-ink:#f0ebe0;--lp-ink2:#b0a898;--lp-ink3:#7a7268;
   --lp-border-h:#f0ebe0;--lp-border-s:#1e1e1e;
 }
 
@@ -450,12 +450,12 @@ html.dark #view-landing{
   <div class="lp-hero4">
     <div class="lp-h4-left">
       <h1>Come<em>RD</em></h1>
-      <p class="lp-h4-sub">Directorio gastronómico.<br/>Santo Domingo, RD.<br/>29 restaurantes. Sin filtros de más.</p>
+      <p class="lp-h4-sub">Directorio gastronómico.<br/>Santo Domingo, RD.<br/><span id="lpTotalCount">—</span> restaurantes. Sin filtros de más.</p>
       <button class="lp-btn4" onclick="switchToApp()">Explorar →</button>
     </div>
     <div class="lp-h4-right">
       <ul class="lp-count-list">
-        <li><span class="lp-cli-label">Restaurantes</span><span class="lp-cli-val">29</span></li>
+        <li><span class="lp-cli-label">Restaurantes</span><span class="lp-cli-val" id="c4total">—</span></li>
         <li><span class="lp-cli-label">Gama Alta</span><span class="lp-cli-val" id="c4alta">—</span></li>
         <li><span class="lp-cli-label">Gama Media</span><span class="lp-cli-val" id="c4media">—</span></li>
         <li><span class="lp-cli-label">Accesible</span><span class="lp-cli-val" id="c4acc">—</span></li>
@@ -629,6 +629,20 @@ const DB = [
   {id:27,name:"El Camion",cat:"Street Food",cuisine:"Internacional",gama:"Media",lat:18.444889583758577,lng:-69.96429178518962},
   {id:28,name:"SBG Sophia's Bar & Grill",cat:"Internacional",cuisine:"Bar & Grill",gama:"Media",lat:18.467064312228427,lng:-69.93414552480337},
   {id:29,name:"LARIMAR",cat:"Internacional",cuisine:"Fusión",gama:"Alta",lat:18.467438835091098,lng:-69.9353961062093},
+  {id:30,name:"O.Livia",cat:"Italiana",cuisine:"Italiana · Internacional",gama:"Alta",lat:18.474150756302844,lng:-69.93162308095673},
+  {id:31,name:"La Catrina Taquería",cat:"Mexicana",cuisine:"Mexicana · Taquería",gama:"Media",lat:18.474613065192866,lng:-69.93161928773984},
+  {id:32,name:"Ajuala",cat:"Criolla",cuisine:"Criolla Dominicana · Fusión",gama:"Alta",lat:18.473793766439922,lng:-69.9322037894501},
+  {id:33,name:"Matcha Choco",cat:"Café",cuisine:"Café · Postres · Matcha",gama:"Media",lat:18.473706915663787,lng:-69.9355726533727},
+  {id:34,name:"La Campagna",cat:"Italiana",cuisine:"Italiana",gama:"Alta",lat:18.47321162014727,lng:-69.9244025889545},
+  {id:35,name:"La Forchetta",cat:"Italiana",cuisine:"Italiana",gama:"Alta",lat:18.4706638071783,lng:-69.92299980700174},
+  {id:36,name:"El Atelier Bar/Cocina",cat:"Internacional",cuisine:"Internacional · Fusión",gama:"Alta",lat:18.47327144739343,lng:-69.92380177440747},
+  {id:37,name:"Mesón De Bari",cat:"Criolla",cuisine:"Criolla Dominicana",gama:"Alta",lat:18.47322258798669,lng:-69.92413180669895},
+  {id:38,name:"Il Caminetto",cat:"Italiana",cuisine:"Italiana",gama:"Alta",lat:18.471655035611995,lng:-69.92377815280169},
+  {id:39,name:"Peperoni",cat:"Italiana",cuisine:"Italiana · Pizza · Pasta",gama:"Media",lat:18.469080800136336,lng:-69.9349086441157},
+  {id:40,name:"Loretta Café Bistro",cat:"Café",cuisine:"Café · Bistro · Brunch",gama:"Media",lat:18.468936886246727,lng:-69.93519692856867},
+  {id:41,name:"Nocciola · Bella Vista",cat:"Café",cuisine:"Café · Pastelería · Brunch",gama:"Media",lat:18.454072323815254,lng:-69.94186426312729},
+  {id:42,name:"Nocciola Coffee Bar And Bakery",cat:"Café",cuisine:"Café · Bakery · Brunch",gama:"Media",lat:18.480876557016774,lng:-69.92760594281152},
+  {id:43,name:"Nocciola · Piantini",cat:"Café",cuisine:"Café · Pastelería · Brunch",gama:"Media",lat:18.46751122185009,lng:-69.93310601041883},
 ];
 
 /* ══════════════════════════════════════
@@ -666,6 +680,19 @@ window.onGoogleMapsReady = function() {
   if (_pendingBoot) { _pendingBoot(); _pendingBoot = null; }
 };
 
+// Si Maps API no carga en 10s, mostrar mensaje de error en lugar de loading infinito
+setTimeout(() => {
+  if (!_mapsApiReady && _mapBooted) {
+    const msg = document.getElementById('loadMsg');
+    const loading = document.getElementById('loading');
+    if (msg) msg.textContent = 'Error cargando el mapa. Recarga la página.';
+    if (loading) {
+      const bar = loading.querySelector('.ld-fill');
+      if (bar) bar.style.background = 'var(--ink3)';
+    }
+  }
+}, 10000);
+
 function bootMap() {
   buildCategories();
   window._sortBtns  = Array.from(document.querySelectorAll('#sortRow .sort-btn'));
@@ -675,12 +702,23 @@ function bootMap() {
   function doGeo() {
     if (!navigator.geolocation) { startDefault(); return; }
     let _booted = false;
+
+    // Safety net: if geo takes more than 5s, start with default coords
+    const geoTimeout = setTimeout(() => {
+      if (!_booted) {
+        _booted = true;
+        document.getElementById('cityName').textContent = 'Santo Domingo';
+        startDefault();
+      }
+    }, 5000);
+
     navigator.geolocation.watchPosition(
       pos => {
         userLat = pos.coords.latitude;
         userLng = pos.coords.longitude;
         if (!_booted) {
           _booted = true;
+          clearTimeout(geoTimeout);
           ensurePlaced(); initMap(userLat, userLng);
           reverseGeocode(userLat, userLng);
           mergeLoad(userLat, userLng);
@@ -693,11 +731,12 @@ function bootMap() {
       () => {
         if (!_booted) {
           _booted = true;
+          clearTimeout(geoTimeout);
           document.getElementById('cityName').textContent = 'Santo Domingo';
           startDefault();
         }
       },
-      {enableHighAccuracy:true, timeout:12000, maximumAge:0}
+      {enableHighAccuracy:true, timeout:8000, maximumAge:30000}
     );
   }
 
@@ -1039,10 +1078,13 @@ function hideLoading(){document.getElementById('loading').classList.add('hidden'
   const media = DB.filter(r=>r.gama==='Media').length;
   const acc   = DB.filter(r=>r.gama==='Accesible').length;
   const cats  = new Set(DB.map(r=>r.cat)).size;
+  document.getElementById('c4total').textContent = DB.length;
   document.getElementById('c4alta').textContent  = alta;
   document.getElementById('c4media').textContent = media;
   document.getElementById('c4acc').textContent   = acc;
   document.getElementById('c4cats').textContent  = cats;
+  const lpTotal = document.getElementById('lpTotalCount');
+  if (lpTotal) lpTotal.textContent = DB.length;
 
   // Restaurant grid — rows of 4
   const container = document.getElementById('lpGrid4');
