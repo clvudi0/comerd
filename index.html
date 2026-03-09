@@ -8,21 +8,11 @@
   (function(){
     var saved = localStorage.getItem('theme');
     var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if(saved === 'dark' || (!saved && prefersDark)){
-      document.documentElement.classList.add('dark');
-    }
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e){
-      if(!localStorage.getItem('theme')){
-        document.documentElement.classList.toggle('dark', e.matches);
-        var cb = document.getElementById('themeToggle');
-        if(cb) cb.checked = e.matches;
-      }
-    });
+    if(saved === 'dark' || (!saved && prefersDark)) document.documentElement.classList.add('dark');
   })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,700;1,600&family=Outfit:wght@300;400;500;600;700&display=swap&display=optional" rel="stylesheet"/>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC72Kg80Wth1tQazzOeIP9JZE81HyFMgwA&callback=onGoogleMapsReady&loading=async" async defer></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,700;1,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
 :root{
   --bg:#f6f1e9;--surface:#fffdf8;--s2:#ede7d8;
@@ -32,7 +22,6 @@
   --shadow-sm:0 1px 4px rgba(0,0,0,.06);
   --shadow-md:0 4px 20px rgba(0,0,0,.1);
   --shadow-lg:0 8px 40px rgba(0,0,0,.14);
-  --map-transition:.3s cubic-bezier(.4,0,.2,1);
 }
 html.dark{
   --bg:#0f0d0a;--surface:#1a1612;--s2:#211d18;
@@ -42,1467 +31,317 @@ html.dark{
   --shadow-md:0 4px 20px rgba(0,0,0,.5);
   --shadow-lg:0 8px 40px rgba(0,0,0,.6);
 }
-
-.sort-btn,.ftoggle-btn{transition:color .17s,border-color .17s,background .17s}
-.cat-btn{transition:all .17s}
-.chip{transition:all .16s}
-.card{transition:border-color .2s,box-shadow .2s,transform .2s}
-.card::before{transition:opacity .2s,background .2s}
-
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+html{scroll-behavior:smooth}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);overflow-x:hidden;transition:background .3s,color .3s}
 button{font-family:'Outfit',sans-serif;cursor:pointer}
-input{font-family:'Outfit',sans-serif}
-#loading{background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;gap:1.2rem;flex:1;z-index:10}
-#loading.active{display:flex}
-#loading.hidden{display:none}
-.ld-brand{font-family:'Cormorant Garamond',serif;font-size:4rem;color:var(--red);line-height:1}
-.ld-brand b{color:var(--ink);font-weight:700}
-.ld-sub{font-size:.75rem;text-transform:uppercase;letter-spacing:.18em;color:var(--ink3)}
-.ld-bar{width:160px;height:2px;background:var(--border);border-radius:2px;overflow:hidden}
-.ld-fill{height:100%;width:0;background:var(--red);animation:ldbar 2.5s ease forwards}
-@keyframes ldbar{to{width:100%}}
-header{display:flex;align-items:center;justify-content:space-between;padding:.7rem 1.2rem;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;box-shadow:var(--shadow-sm);z-index:200;gap:1rem;flex-wrap:wrap}
+
+/* MAP OVERLAY */
+#map-overlay{
+  position:fixed;inset:0;z-index:9999;
+  display:none;
+  background:#0f0d0a;
+}
+#map-overlay.open{display:block}
+#map-overlay iframe{
+  position:absolute;inset:0;width:100%;height:100%;border:none;display:block;
+}
+#back-btn{
+  position:fixed;top:12px;left:12px;z-index:10000;
+  background:var(--surface);color:var(--ink);
+  border:1.5px solid var(--border);border-radius:100px;
+  padding:.35rem 1rem;font-family:'Outfit',sans-serif;
+  font-size:.75rem;font-weight:500;cursor:pointer;
+  box-shadow:0 2px 10px rgba(0,0,0,.18);
+  transition:color .15s,border-color .15s,background .15s;
+  display:none;letter-spacing:.03em;
+}
+#back-btn.open{display:block}
+#back-btn:hover{color:var(--red);border-color:var(--red)}
+
+/* HEADER */
+header{
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.7rem 1.4rem;background:var(--surface);
+  border-bottom:1px solid var(--border);
+  box-shadow:var(--shadow-sm);gap:1rem;
+  transition:background .3s,border-color .3s
+}
 .brand{font-family:'Cormorant Garamond',serif;font-size:1.75rem;font-weight:700;line-height:1;color:var(--ink)}
 .brand em{color:var(--red);font-style:normal}
 .brand-sub{font-size:.65rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-top:1px}
-.loc-pill{display:flex;align-items:center;gap:.45rem;background:var(--s2);border:1px solid var(--border);border-radius:100px;padding:.38rem .9rem;font-size:.78rem;color:var(--gold);font-weight:500}
-.loc-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:blink 2s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
-.layout{grid-template-columns:var(--sidebar-w,360px) 5px 1fr;flex:1;overflow:hidden;min-height:0;display:none}
-.layout.ready{display:grid}
-.resize-handle{width:5px;background:transparent;cursor:col-resize;flex-shrink:0;position:relative;z-index:100;transition:background .15s}
-.resize-handle:hover,.resize-handle.dragging{background:var(--red)}
-.sidebar{display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--surface);overflow:hidden;min-height:0}
-.search-wrap{padding:.7rem;border-bottom:1px solid var(--border);position:relative;flex-shrink:0}
-.s-icon{position:absolute;left:1.55rem;top:50%;transform:translateY(-50%);color:var(--ink3);font-size:.85rem;pointer-events:none}
-#searchInput{width:100%;background:var(--s2);border:1.5px solid var(--border);border-radius:var(--r);padding:.55rem 1rem .55rem 2.2rem;font-size:.86rem;color:var(--ink);outline:none;transition:border-color .2s}
-#searchInput:focus{border-color:var(--red);background:var(--surface)}
-.featured{flex-shrink:0;margin:.65rem;border-radius:var(--r);overflow:hidden;position:relative;cursor:pointer;box-shadow:var(--shadow-md);transition:transform .2s;background:#1a0a05}
-.featured:hover{transform:translateY(-1px);box-shadow:var(--shadow-lg)}
-.feat-body{position:relative;z-index:1;padding:.85rem 1rem}
-.feat-label{font-size:.58rem;text-transform:uppercase;letter-spacing:.16em;color:rgba(255,255,255,.55);margin-bottom:.22rem}
-.feat-name{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:700;color:#fff;line-height:1.2;margin-bottom:.28rem}
-.feat-desc{font-size:.7rem;color:rgba(255,255,255,.72);line-height:1.4;margin-bottom:.45rem}
-.feat-tags{display:flex;gap:.4rem;flex-wrap:wrap}
-.feat-tag{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:100px;padding:.16rem .55rem;font-size:.62rem;color:#fff}
-.feat-tag.g{background:rgba(154,116,24,.4);border-color:rgba(200,170,60,.5);color:#fdd060}
-.cat-scroll{flex-shrink:0;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);padding:.55rem .65rem;display:flex;gap:.3rem}
-.cat-scroll::-webkit-scrollbar{display:none}
-.cat-btn{background:var(--s2);border:1.5px solid var(--border);border-radius:100px;padding:.25rem .72rem;font-size:.7rem;color:var(--ink2);white-space:nowrap;transition:all .17s;font-weight:400}
-.cat-btn:hover{border-color:var(--red);color:var(--red)}
-.cat-btn.active{background:var(--red);border-color:var(--red);color:#fff;font-weight:600}
-.filter-bar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:.42rem .65rem;border-bottom:1px solid var(--border);background:var(--s2);gap:.4rem;flex-wrap:wrap}
-.fb-left{display:flex;align-items:center;gap:.4rem;font-size:.68rem;color:var(--ink2)}
-.active-ct{background:var(--red);color:#fff;border-radius:100px;padding:.08rem .42rem;font-size:.62rem;font-weight:600;display:none}
-.active-ct.on{display:inline}
-.sort-row{display:flex;gap:.28rem}
-.sort-btn,.ftoggle-btn{background:transparent;border:1px solid var(--border);border-radius:100px;padding:.2rem .62rem;font-size:.68rem;color:var(--ink2);transition:all .17s}
-.sort-btn:hover,.ftoggle-btn:hover{border-color:var(--red);color:var(--red)}
-.sort-btn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
-.adv{overflow:hidden;transition:max-height .3s ease;border-bottom:1px solid var(--border);flex-shrink:0}
-.adv.open{max-height:90px}.adv.closed{max-height:0}
-.adv-inner{padding:.55rem .65rem;display:flex;flex-direction:column;gap:.45rem}
-.frow{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
-.fl{font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);min-width:44px}
-.chips{display:flex;gap:.26rem;flex-wrap:wrap}
-.chip{background:var(--s2);border:1px solid var(--border);border-radius:100px;padding:.19rem .6rem;font-size:.68rem;color:var(--ink2);transition:all .16s}
-.chip:hover{border-color:var(--red);color:var(--red)}
-.chip.active{background:var(--red);border-color:var(--red);color:#fff;font-weight:500}
-.chip.ga.active{background:var(--gold);border-color:var(--gold);color:#fff}
-.chip.gr.active{background:var(--green);border-color:var(--green);color:#fff}
-.results-bar{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:.38rem .65rem;border-bottom:1px solid var(--border)}
-.rb-label{font-size:.65rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em}
-#resultsCount{color:var(--red);font-weight:700}
-#filterSummary{font-size:.62rem;color:var(--ink3)}
-.list{flex:1;overflow-y:auto;padding:.6rem;display:flex;flex-direction:column;gap:.42rem;scrollbar-width:thin;scrollbar-color:var(--border) transparent;min-height:0}
-.card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:.72rem .9rem .72rem 1rem;cursor:pointer;transition:all .2s;animation:fadeUp .3s ease both;position:relative}
-.card::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:3px;border-radius:0 2px 2px 0;background:var(--gold);opacity:0;transition:opacity .2s}
-.card[data-gama="Alta"]::before{opacity:1;background:var(--gold)}
-.card:hover{border-color:var(--red);box-shadow:0 3px 18px rgba(181,40,40,.11);transform:translateY(-1px)}
-.card:hover::before{opacity:1;background:var(--red)!important}
-@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.45rem;margin-bottom:.22rem}
-.card-name{font-weight:600;font-size:.9rem;line-height:1.25;flex:1;min-width:0;word-break:break-word}
-.gama-tag{font-size:.58rem;font-weight:700;padding:.14rem .46rem;border-radius:100px;white-space:nowrap;letter-spacing:.04em;flex-shrink:0}
-.gt-alta{background:#fdf3d0;color:var(--gold);border:1px solid #e5cc70}
-.gt-media{background:#fde8e8;color:var(--red);border:1px solid #f0aaaa}
-.gt-accesible{background:#e6f4ed;color:var(--green);border:1px solid #98d4b0}
-.card-meta{display:flex;align-items:center;gap:.26rem;flex-wrap:wrap;margin-bottom:.18rem}
-.tag{font-size:.63rem;padding:.12rem .43rem;border-radius:100px;background:var(--s2);border:1px solid var(--border);color:var(--ink2)}
-.card-dist{font-size:.66rem;color:var(--ink3);margin-left:auto;white-space:nowrap}
-.card-addr,.card-phone{margin-top:.16rem;font-size:.7rem;color:var(--ink3);line-height:1.4}
-.card-desc{margin-top:.32rem;font-size:.7rem;color:var(--ink2);line-height:1.45;font-style:italic;border-top:1px solid var(--s2);padding-top:.32rem}
-.trend{display:inline-flex;align-items:center;gap:.18rem;background:#fff4e0;border:1px solid #f0d080;border-radius:100px;padding:.1rem .48rem;font-size:.58rem;color:#9a6010;margin-top:.22rem}
-.msg{padding:2rem 1rem;text-align:center;color:var(--ink3)}
-.msg .ico{font-size:2rem;margin-bottom:.6rem}
-.msg h3{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--ink);margin-bottom:.3rem}
-.msg p{font-size:.77rem;line-height:1.6}
-#map-wrap{position:relative;flex:1;min-height:0;overflow:hidden}
-#map{width:100%;height:100%;will-change:transform}
-#map-wrap .map-legend{display:block}
-/* Google Maps popup styles */
-.gm-style .gm-style-iw-c{border-radius:10px!important;box-shadow:var(--shadow-lg)!important;border:1px solid var(--border)!important;padding:0!important}
-.gm-style .gm-style-iw-d{font-family:'Outfit',sans-serif!important;font-size:.82rem!important;line-height:1.5!important;overflow:hidden!important;padding:10px 12px!important}
-.gm-style .gm-style-iw-t::after{display:none}
-.gm-ui-hover-effect{top:2px!important;right:2px!important}
-.pop-name{font-weight:700;color:var(--ink);margin-bottom:.1rem}
-.pop-cat{font-size:.68rem;color:var(--ink3)}
-.pop-gama{font-size:.66rem;font-weight:600;margin-top:.1rem}
-.pop-addr{font-size:.66rem;color:var(--ink3);margin-top:.08rem}
-.map-legend{position:absolute;bottom:26px;right:10px;z-index:500;background:rgba(255,253,248,.94);border:1px solid var(--border);border-radius:8px;padding:.48rem .68rem;font-size:.63rem;color:var(--ink2);backdrop-filter:blur(4px);box-shadow:var(--shadow-sm)}
-.leg-row{display:flex;align-items:center;gap:.38rem;margin-bottom:.18rem}
-.leg-row:last-child{margin-bottom:0}
-.leg-dot{width:10px;height:10px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3);flex-shrink:0}
-#mob-map-widget{display:none}
-.map-legend{display:none}
-@media(max-width:700px){
-  html{height:100%}
-  body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto}
-  header{position:sticky;top:0;z-index:300;padding:.48rem 1rem;flex-wrap:nowrap;gap:.5rem}
-  .brand{font-size:1.4rem}
-  .brand-sub{display:none}
-  .loc-pill{padding:.26rem .65rem;font-size:.68rem;white-space:nowrap;flex-shrink:0}
-  .layout,.layout.ready{display:block;overflow:visible}
-  .sidebar{display:flex;flex-direction:column;width:100%;overflow:visible;border-right:none;min-height:0}
-  #map-wrap{display:none!important}
-  .search-wrap{padding:.52rem .75rem}
-  #searchInput{font-size:16px;padding:.5rem .9rem .5rem 2.1rem}
-  .featured{margin:.5rem .65rem .3rem;flex-shrink:0}
-  .cat-scroll{flex-shrink:0}
-  .filter-bar{padding:.38rem .75rem;gap:.28rem;flex-wrap:wrap}
-  .results-bar{padding:.3rem .75rem}
-  .adv{flex-shrink:0}
-  .sort-row{flex-wrap:wrap;gap:.22rem}
-  .sort-btn,.ftoggle-btn{padding:.26rem .64rem;font-size:.71rem}
-  .cat-btn{padding:.3rem .78rem;font-size:.74rem}
-  .list{flex:none;overflow-y:visible;padding:.45rem .65rem 3rem;min-height:120px}
-  .card{padding:.7rem .88rem .7rem .98rem;min-width:0}
-  .card-name{white-space:normal;word-break:break-word;overflow:visible;text-overflow:unset;min-width:0;flex:1}
-  .card-desc{display:none}
-  #mob-map-widget{display:block;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border)}
-  .map-ctrl-bar{display:flex;align-items:center;justify-content:space-between;padding:.4rem .75rem;background:var(--s2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);gap:.5rem}
-  .map-ctrl-left{display:flex;align-items:center;gap:.32rem;font-size:.72rem;font-weight:600;color:var(--ink2)}
-  .map-ctrl-left svg{flex-shrink:0}
-  .map-ctrl-right{display:flex;gap:.26rem;align-items:center}
-  .map-state-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:.22rem .6rem;font-size:.67rem;font-weight:500;color:var(--ink2);transition:background .15s,border-color .15s,color .15s;white-space:nowrap;line-height:1.3}
-  .map-state-btn:hover{border-color:var(--red);color:var(--red)}
-  .map-state-btn[data-state="normal"].is-active{background:var(--red);border-color:var(--red);color:#fff}
-  .map-state-btn[data-state="fullscreen"].is-active{background:var(--gold);border-color:var(--gold);color:#fff}
-  .map-state-btn[data-state="closed"].is-active{background:var(--ink2);border-color:var(--ink2);color:#fff}
-  .map-box{overflow:hidden;height:0;transition:height var(--map-transition);position:relative}
-  .map-box #map{position:absolute;inset:0;width:100%;height:100%}
-  .map-box .map-legend{display:block;position:absolute;bottom:8px;right:8px;top:auto;font-size:.58rem;padding:.26rem .48rem;z-index:500}
-  #mob-map-widget.is-fullscreen{position:fixed;inset:0;z-index:800;display:flex;flex-direction:column;border:none}
-  #mob-map-widget.is-fullscreen .map-ctrl-bar{flex-shrink:0;box-shadow:var(--shadow-md);border-top:none}
-  #mob-map-widget.is-fullscreen .map-box{flex:1;height:auto!important;transition:none}
-}
+
+/* theme toggle */
 .themeToggle{color:var(--ink2);width:1.1em;flex-shrink:0}
-/* ── VIEW TOGGLE BUTTON ── */
-.view-btn{
-  font-size:.72rem;color:var(--ink3);background:transparent;
-  letter-spacing:.04em;padding:.28rem .7rem;border:1px solid var(--border);
-  border-radius:100px;white-space:nowrap;transition:color .18s,border-color .18s,background .18s;
-  flex-shrink:0;font-family:'Outfit',sans-serif
-}
-.view-btn:hover{color:var(--red);border-color:var(--red)}
-.view-btn.is-app{color:var(--red);border-color:var(--red);background:rgba(181,40,40,.07)}
-/* ── VIEW SYSTEM ── */
-#view-landing{flex:1;overflow-y:auto;overflow-x:hidden;min-height:0;flex-direction:column}
-#view-app{flex:1;overflow:hidden;min-height:0;flex-direction:column;display:none}
-body.show-landing #view-landing{display:flex}
-body.show-landing #view-app{display:none!important}
-body.show-app #view-landing{display:none!important}
-body.show-app #view-app{display:flex}
-/* ── LANDING PAGE ── */
-.lp-marquee-wrap{
-  overflow:hidden;border-bottom:1px solid var(--border);
-  padding:.7rem 0;background:var(--s2);flex-shrink:0
-}
-.lp-marquee-track{display:flex;gap:2.5rem;width:max-content;animation:lp-mar 32s linear infinite}
-@keyframes lp-mar{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.lp-mitem{
-  font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--ink3);white-space:nowrap;display:flex;align-items:center;gap:.8rem
-}
-.lp-mdot{width:3px;height:3px;border-radius:50%;background:var(--red);flex-shrink:0}
-.lp-hero{
-  min-height:calc(100vh - 120px);display:flex;flex-direction:column;
-  justify-content:center;padding:5rem 8vw 4rem;position:relative;overflow:hidden
-}
-.lp-glow{position:absolute;top:-20%;left:-8%;width:620px;height:620px;
-  background:radial-gradient(circle,rgba(181,40,40,.09) 0%,transparent 65%);
-  pointer-events:none;animation:glowpulse 9s ease-in-out infinite}
-.lp-glow2{position:absolute;bottom:-15%;right:2%;width:480px;height:480px;
-  background:radial-gradient(circle,rgba(154,116,24,.07) 0%,transparent 65%);
-  pointer-events:none;animation:glowpulse 11s ease-in-out infinite reverse}
-@keyframes glowpulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.12);opacity:.7}}
-.lp-eyebrow{
-  font-size:.65rem;letter-spacing:.28em;text-transform:uppercase;
-  color:var(--red);margin-bottom:1.4rem;display:flex;align-items:center;gap:.7rem;font-weight:500
-}
-.lp-eyebrow::before{content:'';width:28px;height:1px;background:var(--red)}
-.lp-h1{
-  font-family:'Cormorant Garamond',serif;
-  font-size:clamp(4rem,11vw,8.5rem);font-weight:700;
-  line-height:.92;letter-spacing:-.01em;margin-bottom:2rem;position:relative;z-index:1;color:var(--ink)
-}
-.lp-h1 em{color:var(--red);font-style:normal;display:block}
-.lp-sub{font-size:1.05rem;color:var(--ink2);max-width:500px;line-height:1.75;margin-bottom:3rem;font-weight:300}
-.lp-cta-row{display:flex;gap:.8rem;align-items:center;flex-wrap:wrap;margin-bottom:5rem}
-.lp-btn-primary{
-  background:var(--red);color:#fff;border:none;
-  padding:.85rem 2.2rem;font-family:'Outfit',sans-serif;font-size:.88rem;
-  font-weight:600;letter-spacing:.04em;cursor:pointer;
-  transition:background .2s,transform .2s,box-shadow .2s;
-  box-shadow:0 4px 16px rgba(181,40,40,.25)
-}
-.lp-btn-primary:hover{background:#9a1f1f;transform:translateY(-2px);box-shadow:0 8px 24px rgba(181,40,40,.35)}
-.lp-btn-ghost{
-  background:transparent;color:var(--ink2);
-  border:1.5px solid var(--border);padding:.85rem 2.2rem;
-  font-family:'Outfit',sans-serif;font-size:.88rem;font-weight:500;
-  cursor:pointer;transition:border-color .2s,color .2s
-}
-.lp-btn-ghost:hover{border-color:var(--ink2);color:var(--ink)}
-.lp-stats{
-  display:flex;gap:3.5rem;padding-top:2.5rem;
-  border-top:1px solid var(--border);flex-wrap:wrap
-}
-.lp-stat-n{
-  font-family:'Cormorant Garamond',serif;font-size:3rem;
-  font-weight:700;line-height:1;color:var(--ink)
-}
-.lp-stat-n span{color:var(--red)}
-.lp-stat-l{font-size:.65rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.12em;margin-top:.25rem}
-.lp-benefits-section{
-  padding:5rem 8vw;border-top:1px solid var(--border)
-}
-.lp-section-label{
-  font-size:.65rem;letter-spacing:.24em;text-transform:uppercase;
-  color:var(--red);margin-bottom:.6rem;font-weight:500
-}
-.lp-section-title{
-  font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,3.2rem);
-  font-weight:700;line-height:1.1;margin-bottom:3.5rem;color:var(--ink)
-}
-.lp-benefits-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border)}
-.lp-benefit{
-  background:var(--surface);padding:2.5rem;
-  transition:background .2s;position:relative;overflow:hidden
-}
-.lp-benefit::before{
-  content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
-  background:var(--gold);transform:scaleY(0);transform-origin:bottom;
-  transition:transform .35s cubic-bezier(.4,0,.2,1)
-}
-.lp-benefit:hover::before{transform:scaleY(1)}
-.lp-benefit:hover{background:var(--bg)}
-.lp-bn{
-  font-family:'Cormorant Garamond',serif;font-size:3.5rem;font-weight:700;
-  color:var(--red);line-height:1;margin-bottom:.8rem;opacity:.5
-}
-.lp-bt{font-size:1rem;font-weight:600;margin-bottom:.6rem;color:var(--ink)}
-.lp-bd{font-size:.82rem;color:var(--ink2);line-height:1.7;font-weight:300}
-.lp-rest-section{
-  padding:5rem 8vw;background:var(--s2);border-top:1px solid var(--border)
-}
-.lp-rest-header{
-  display:flex;justify-content:space-between;align-items:flex-end;
-  margin-bottom:2.5rem;padding-bottom:1.2rem;
-  border-bottom:1px solid var(--border);flex-wrap:wrap;gap:1rem
-}
-.lp-rest-count{font-size:.72rem;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase}
-.lp-rest-grid{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
-  gap:1px;background:var(--border)
-}
-.lp-rcard{
-  background:var(--surface);padding:1.4rem 1.6rem;
-  cursor:pointer;transition:background .18s;position:relative
-}
-.lp-rcard:hover{background:var(--bg)}
-.lp-rcard::after{
-  content:'↗';position:absolute;bottom:1rem;right:1.2rem;
-  font-size:.9rem;color:var(--border);transition:color .18s,transform .18s
-}
-.lp-rcard:hover::after{color:var(--red);transform:translate(2px,-2px)}
-.lp-rc-gama{font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;margin-bottom:.6rem;font-weight:600}
-.rc-ga2{color:var(--gold)}.rc-gm2{color:var(--red)}.rc-gac2{color:var(--green)}
-.lp-rc-name{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:700;margin-bottom:.3rem;line-height:1.2;color:var(--ink)}
-.lp-rc-cat{font-size:.75rem;color:var(--ink3)}
-.lp-cta-bottom{
-  padding:5rem 8vw;text-align:center;border-top:1px solid var(--border)
-}
-.lp-cta-bottom h2{
-  font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,5vw,3.5rem);
-  font-weight:700;margin-bottom:.8rem;color:var(--ink);line-height:1.15
-}
-.lp-cta-bottom p{font-size:.92rem;color:var(--ink2);margin-bottom:2.5rem;font-weight:300}
-.lp-footer{
-  padding:2rem 1.4rem;background:var(--surface);
-  border-top:1px solid var(--border);
-  display:flex;justify-content:space-between;align-items:center;
-  flex-wrap:wrap;gap:.8rem
-}
-.lp-foot-note{font-size:.7rem;color:var(--ink3);letter-spacing:.06em}
-@media(max-width:860px){.lp-benefits-grid{grid-template-columns:1fr}}
-@media(max-width:640px){
-  .lp-hero{padding:4rem 6vw 3rem}
-  .lp-stats{gap:2rem}
-  .lp-benefits-section,.lp-rest-section,.lp-cta-bottom{padding:3.5rem 6vw}
-}
 .st-sunMoonThemeToggleBtn{position:relative;cursor:pointer}
 .st-sunMoonThemeToggleBtn .themeToggleInput{opacity:0;width:100%;aspect-ratio:1;margin:0;cursor:pointer}
 .st-sunMoonThemeToggleBtn svg{position:absolute;left:0;top:0;width:100%;height:100%;transition:transform .4s ease;transform:rotate(40deg)}
 .st-sunMoonThemeToggleBtn svg .sunMoon{transform-origin:center center;transition:inherit;transform:scale(1)}
 .st-sunMoonThemeToggleBtn svg .sunRay{transform-origin:center center;transform:scale(0)}
 .st-sunMoonThemeToggleBtn svg mask>circle{transition:transform .64s cubic-bezier(.41,.64,.32,1.575);transform:translate(0px,0px)}
-.st-sunMoonThemeToggleBtn svg .sunRay2{animation-delay:.05s!important}
-.st-sunMoonThemeToggleBtn svg .sunRay3{animation-delay:.1s!important}
-.st-sunMoonThemeToggleBtn svg .sunRay4{animation-delay:.17s!important}
-.st-sunMoonThemeToggleBtn svg .sunRay5{animation-delay:.25s!important}
 .st-sunMoonThemeToggleBtn .themeToggleInput:checked+svg{transform:rotate(90deg)}
 .st-sunMoonThemeToggleBtn .themeToggleInput:checked+svg mask>circle{transform:translate(16px,-3px)}
 .st-sunMoonThemeToggleBtn .themeToggleInput:checked+svg .sunMoon{transform:scale(.55)}
-.st-sunMoonThemeToggleBtn .themeToggleInput:checked+svg .sunRay{animation:showRay1832 .4s ease 0s 1 forwards}
-@keyframes showRay1832{0%{transform:scale(0)}100%{transform:scale(1)}}
-/* ─── RANGE SLIDER ───────────────────────────────────── */
-.range-wrap{display:flex;align-items:center;gap:.5rem;padding:.42rem .65rem;border-bottom:1px solid var(--border);background:var(--s2);flex-shrink:0}
-.range-label{font-size:.68rem;color:var(--ink2);white-space:nowrap}
-.range-val{font-size:.68rem;font-weight:600;color:var(--red);white-space:nowrap;min-width:52px;text-align:right}
-#radiusSlider{flex:1;-webkit-appearance:none;appearance:none;height:3px;border-radius:2px;background:var(--border);outline:none;cursor:pointer}
-#radiusSlider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;border-radius:50%;background:var(--red);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.25);cursor:pointer}
-#radiusSlider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--red);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.25);cursor:pointer;border:none}
-html.dark #loading{background:var(--bg)}
-html.dark #searchInput{color:var(--ink)}
-html.dark .list{scrollbar-color:var(--border) transparent}
-html.dark .sort-btn.active{background:transparent;color:var(--red);border-color:var(--red)}
-html.dark .ftoggle-btn{color:var(--ink2)}
-html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
+.st-sunMoonThemeToggleBtn .themeToggleInput:checked+svg .sunRay{animation:showRay .4s ease 0s 1 forwards}
+@keyframes showRay{0%{transform:scale(0)}100%{transform:scale(1)}}
+
+/* MARQUEE */
+.marquee-wrap{overflow:hidden;border-bottom:1px solid var(--border);padding:.7rem 0;background:var(--s2);transition:background .3s,border-color .3s}
+.marquee-track{display:flex;gap:2.5rem;width:max-content;animation:marquee 32s linear infinite}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.mitem{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);white-space:nowrap;display:flex;align-items:center;gap:.8rem}
+.mdot{width:3px;height:3px;border-radius:50%;background:var(--red);flex-shrink:0}
+
+/* HERO */
+.hero{min-height:calc(100vh - 100px);display:flex;flex-direction:column;justify-content:center;padding:5rem 8vw 4rem;position:relative;overflow:hidden}
+.glow{position:absolute;top:-20%;left:-8%;width:620px;height:620px;background:radial-gradient(circle,rgba(181,40,40,.09) 0%,transparent 65%);pointer-events:none;animation:glowpulse 9s ease-in-out infinite}
+.glow2{position:absolute;bottom:-15%;right:2%;width:480px;height:480px;background:radial-gradient(circle,rgba(154,116,24,.07) 0%,transparent 65%);pointer-events:none;animation:glowpulse 11s ease-in-out infinite reverse}
+@keyframes glowpulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.12);opacity:.7}}
+.eyebrow{font-size:.65rem;letter-spacing:.28em;text-transform:uppercase;color:var(--red);margin-bottom:1.4rem;display:flex;align-items:center;gap:.7rem;font-weight:500}
+.eyebrow::before{content:'';width:28px;height:1px;background:var(--red)}
+.hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(4rem,11vw,8.5rem);font-weight:700;line-height:.92;letter-spacing:-.01em;margin-bottom:2rem;position:relative;z-index:1;color:var(--ink)}
+.hero h1 em{color:var(--red);font-style:normal;display:block}
+.hero-sub{font-size:1.05rem;color:var(--ink2);max-width:500px;line-height:1.75;margin-bottom:3rem;font-weight:300}
+.cta-row{display:flex;gap:.8rem;align-items:center;flex-wrap:wrap;margin-bottom:5rem}
+.btn-primary{background:var(--red);color:#fff;border:none;padding:.85rem 2.2rem;font-size:.88rem;font-weight:600;letter-spacing:.04em;cursor:pointer;transition:background .2s,transform .2s,box-shadow .2s;box-shadow:0 4px 16px rgba(181,40,40,.25)}
+.btn-primary:hover{background:#9a1f1f;transform:translateY(-2px);box-shadow:0 8px 24px rgba(181,40,40,.35)}
+.btn-ghost{background:transparent;color:var(--ink2);border:1.5px solid var(--border);padding:.85rem 2.2rem;font-size:.88rem;font-weight:500;cursor:pointer;transition:border-color .2s,color .2s;text-decoration:none;display:inline-block}
+.btn-ghost:hover{border-color:var(--ink2);color:var(--ink)}
+.stats{display:flex;gap:3.5rem;padding-top:2.5rem;border-top:1px solid var(--border);flex-wrap:wrap}
+.stat-n{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:700;line-height:1;color:var(--ink)}
+.stat-n span{color:var(--red)}
+.stat-l{font-size:.65rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.12em;margin-top:.25rem}
+
+/* BENEFITS */
+.benefits-section{padding:5rem 8vw;border-top:1px solid var(--border)}
+.section-label{font-size:.65rem;letter-spacing:.24em;text-transform:uppercase;color:var(--red);margin-bottom:.6rem;font-weight:500}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,3.2rem);font-weight:700;line-height:1.1;margin-bottom:3.5rem;color:var(--ink)}
+.benefits-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border)}
+.benefit{background:var(--surface);padding:2.5rem;position:relative;overflow:hidden;transition:background .2s}
+.benefit::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--gold);transform:scaleY(0);transform-origin:bottom;transition:transform .35s cubic-bezier(.4,0,.2,1)}
+.benefit:hover::before{transform:scaleY(1)}
+.benefit:hover{background:var(--bg)}
+.benefit-num{font-family:'Cormorant Garamond',serif;font-size:3.5rem;font-weight:700;color:var(--red);line-height:1;margin-bottom:.8rem;opacity:.5}
+.benefit-title{font-size:1rem;font-weight:600;margin-bottom:.6rem;color:var(--ink)}
+.benefit-text{font-size:.82rem;color:var(--ink2);line-height:1.7;font-weight:300}
+
+/* RESTAURANT LIST */
+.rest-section{padding:5rem 8vw;background:var(--s2);border-top:1px solid var(--border);transition:background .3s}
+.rest-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:2.5rem;padding-bottom:1.2rem;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:1rem}
+.rest-count{font-size:.72rem;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase}
+.rest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:var(--border)}
+.rest-card{background:var(--surface);padding:1.4rem 1.6rem;cursor:pointer;transition:background .18s;position:relative}
+.rest-card:hover{background:var(--bg)}
+.rest-card::after{content:'↗';position:absolute;bottom:1rem;right:1.2rem;font-size:.9rem;color:var(--border);transition:color .18s,transform .18s}
+.rest-card:hover::after{color:var(--red);transform:translate(2px,-2px)}
+.rc-gama{font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;margin-bottom:.6rem;font-weight:600}
+.rc-ga{color:var(--gold)}.rc-gm{color:var(--red)}.rc-gac{color:var(--green)}
+.rc-name{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:700;margin-bottom:.3rem;line-height:1.2;color:var(--ink)}
+.rc-cat{font-size:.75rem;color:var(--ink3)}
+
+/* CTA BOTTOM */
+.cta-bottom{padding:5rem 8vw;text-align:center;border-top:1px solid var(--border)}
+.cta-bottom h2{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:700;margin-bottom:.8rem;color:var(--ink);line-height:1.15}
+.cta-bottom p{font-size:.92rem;color:var(--ink2);margin-bottom:2.5rem;font-weight:300}
+
+/* FOOTER */
+footer{padding:2rem 1.4rem;background:var(--surface);border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.8rem;transition:background .3s}
+.foot-note{font-size:.7rem;color:var(--ink3);letter-spacing:.06em}
+
+/* RESPONSIVE */
+@media(max-width:860px){.benefits-grid{grid-template-columns:1fr}}
+@media(max-width:640px){
+  .hero{padding:4rem 6vw 3rem}
+  .stats{gap:2rem}
+  .benefits-section,.rest-section,.cta-bottom{padding:3.5rem 6vw}
+}
 </style>
 </head>
 <body>
 
+<!-- MAP OVERLAY -->
+<div id="map-overlay">
+  <iframe id="map-iframe" src="" allowfullscreen allow="geolocation"></iframe>
+</div>
+<button id="back-btn" onclick="closeMap()">← Inicio</button>
 
+<header>
   <div>
     <div class="brand">Come<em>RD</em></div>
-    <div class="brand-sub">Descubre lo mejor · Republica Dominicana</div>
+    <div class="brand-sub">Descubre lo mejor · República Dominicana</div>
   </div>
-  <div style="display:flex;align-items:center;gap:.6rem;flex-shrink:0">
-    <button class="view-btn" id="viewBtn" onclick="switchView()">← Inicio</button>
-    <div class="loc-pill" id="locPill">
-      <div class="loc-dot"></div>
-      <span id="cityName">Detectando...</span>
-    </div>
-    <label for="themeToggle" class="themeToggle st-sunMoonThemeToggleBtn">
-      <input type="checkbox" id="themeToggle" class="themeToggleInput"/>
-      <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" stroke="none">
-        <mask id="moon-mask">
-          <rect x="0" y="0" width="20" height="20" fill="white"></rect>
-          <circle cx="11" cy="3" r="8" fill="black"></circle>
-        </mask>
-        <circle class="sunMoon" cx="10" cy="10" r="8" mask="url(#moon-mask)"></circle>
-        <g>
-          <circle class="sunRay sunRay1" cx="18" cy="10" r="1.5"></circle>
-          <circle class="sunRay sunRay2" cx="14" cy="16.928" r="1.5"></circle>
-          <circle class="sunRay sunRay3" cx="6" cy="16.928" r="1.5"></circle>
-          <circle class="sunRay sunRay4" cx="2" cy="10" r="1.5"></circle>
-          <circle class="sunRay sunRay5" cx="6" cy="3.1718" r="1.5"></circle>
-          <circle class="sunRay sunRay6" cx="14" cy="3.1718" r="1.5"></circle>
-        </g>
-      </svg>
-    </label>
-  </div>
+  <label for="themeToggle" class="themeToggle st-sunMoonThemeToggleBtn">
+    <input type="checkbox" id="themeToggle" class="themeToggleInput"/>
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" stroke="none">
+      <mask id="moon-mask">
+        <rect x="0" y="0" width="20" height="20" fill="white"></rect>
+        <circle cx="11" cy="3" r="8" fill="black"></circle>
+      </mask>
+      <circle class="sunMoon" cx="10" cy="10" r="8" mask="url(#moon-mask)"></circle>
+      <g>
+        <circle class="sunRay sunRay1" cx="18" cy="10" r="1.5"></circle>
+        <circle class="sunRay sunRay2" cx="14" cy="16.928" r="1.5"></circle>
+        <circle class="sunRay sunRay3" cx="6" cy="16.928" r="1.5"></circle>
+        <circle class="sunRay sunRay4" cx="2" cy="10" r="1.5"></circle>
+        <circle class="sunRay sunRay5" cx="6" cy="3.1718" r="1.5"></circle>
+        <circle class="sunRay sunRay6" cx="14" cy="3.1718" r="1.5"></circle>
+      </g>
+    </svg>
+  </label>
 </header>
 
-<div id="view-landing">
-  <!-- MARQUEE -->
-  <div class="lp-marquee-wrap"><div class="lp-marquee-track" id="lpMarquee"></div></div>
-
-  <!-- HERO -->
-  <section class="lp-hero">
-    <div class="lp-glow"></div><div class="lp-glow2"></div>
-    <div class="lp-eyebrow">República Dominicana</div>
-    <h1 class="lp-h1">Come<em>RD</em></h1>
-    <p class="lp-sub">Los mejores restaurantes de Santo Domingo, ordenados por calidad, a la distancia exacta en que estás. Sin ruido. Sin publicidad. Solo lo bueno.</p>
-    <div class="lp-cta-row">
-      <button class="lp-btn-primary" onclick="switchView()">Explorar en el mapa →</button>
-      <a href="#lp-restaurantes" class="lp-btn-ghost">Ver restaurantes</a>
-    </div>
-    <div class="lp-stats">
-      <div><div class="lp-stat-n" id="lpTotal">29</div><div class="lp-stat-l">Restaurantes</div></div>
-      <div><div class="lp-stat-n">3</div><div class="lp-stat-l">Gamas de precio</div></div>
-      <div><div class="lp-stat-n" id="lpCats">—</div><div class="lp-stat-l">Categorías</div></div>
-      <div><div class="lp-stat-n">1</div><div class="lp-stat-l">Ciudad, la tuya</div></div>
-    </div>
-  </section>
-
-  <!-- BENEFITS -->
-  <section class="lp-benefits-section">
-    <div class="lp-section-label">¿Por qué ComeRD?</div>
-    <div class="lp-section-title">Todo lo que necesitas<br/>para comer bien hoy</div>
-    <div class="lp-benefits-grid">
-      <div class="lp-benefit"><div class="lp-bn">01</div><div class="lp-bt">Encuentra por gama</div><div class="lp-bd">Desde opciones accesibles hasta experiencias gourmet de alta gama. Filtra exactamente lo que buscas sin complicaciones ni sorpresas de precio.</div></div>
-      <div class="lp-benefit"><div class="lp-bn">02</div><div class="lp-bt">Mapa en tiempo real</div><div class="lp-bd">Ve exactamente dónde están los restaurantes respecto a donde estás tú ahora mismo. Ajusta el radio de búsqueda desde 500m hasta 15km.</div></div>
-      <div class="lp-benefit"><div class="lp-bn">03</div><div class="lp-bt">Sin cuenta, sin app</div><div class="lp-bd">Abre, permite tu ubicación y empieza a explorar. Nada de registros, descargas ni suscripciones. Gratis, siempre.</div></div>
-      <div class="lp-benefit"><div class="lp-bn">04</div><div class="lp-bt">Sin publicidad</div><div class="lp-bd">Ningún restaurante paga para aparecer primero. El orden lo decide la calidad y la distancia a ti, nada más.</div></div>
-      <div class="lp-benefit"><div class="lp-bn">05</div><div class="lp-bt">Búsqueda inteligente</div><div class="lp-bd">Por nombre, tipo de cocina o zona. Encuentra "italiana cerca de mí" o "steakhouse alta gama" en segundos.</div></div>
-      <div class="lp-benefit"><div class="lp-bn">06</div><div class="lp-bt">Modo claro y oscuro</div><div class="lp-bd">La app se adapta a tu preferencia de pantalla automáticamente, o puedes cambiarla tú mismo con un toque.</div></div>
-    </div>
-  </section>
-
-  <!-- RESTAURANT LIST -->
-  <section class="lp-rest-section" id="lp-restaurantes">
-    <div class="lp-rest-header">
-      <div>
-        <div class="lp-section-label">Los lugares</div>
-        <div class="lp-section-title" style="margin-bottom:0">Restaurantes seleccionados</div>
-      </div>
-      <div class="lp-rest-count">29 lugares</div>
-    </div>
-    <div class="lp-rest-grid" id="lpRestGrid"></div>
-  </section>
-
-  <!-- CTA BOTTOM -->
-  <section class="lp-cta-bottom">
-    <h2>¿Listo para encontrar<br/>tu próxima experiencia?</h2>
-    <p>Abre el mapa, activa tu ubicación y descubre qué hay cerca de ti ahora mismo.</p>
-    <button class="lp-btn-primary" onclick="switchView()">Explorar en el mapa →</button>
-  </section>
-
-  <footer class="lp-footer">
-    <div>
-      <div class="brand">Come<em>RD</em></div>
-      <div class="brand-sub">Descubre lo mejor · República Dominicana</div>
-    </div>
-    <span class="lp-foot-note">Sin publicidad · Sin registro · Siempre gratis</span>
-  </footer>
+<div class="marquee-wrap">
+  <div class="marquee-track" id="marqueeTrack"></div>
 </div>
 
-<div id="view-app">
-<div id="loading">
-  <div class="ld-brand">Come<b>RD</b></div>
-  <div class="ld-sub">Descubre lo mejor de Republica Dominicana</div>
-  <div class="ld-bar"><div class="ld-fill"></div></div>
-  <div style="font-size:.74rem;color:var(--ink3)" id="loadMsg">Obteniendo tu ubicacion...</div>
-</div>
-<div class="layout">
-  <aside class="sidebar" id="sidebar">
-
-    <div class="search-wrap">
-      <span class="s-icon">&#9906;</span>
-      <input id="searchInput" type="text" placeholder="Buscar restaurante, cocina, barrio..." oninput="debounceFilter()"/>
-    </div>
-
-    <div id="mob-map-widget">
-      <div class="map-ctrl-bar">
-        <div class="map-ctrl-left">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-            <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/>
-            <circle cx="12" cy="10" r="3"/>
-          </svg>
-          Mapa
-        </div>
-        <div class="map-ctrl-right">
-          <button class="map-state-btn" data-state="normal" onclick="setMapState('normal')">&#9974; Normal</button>
-          <button class="map-state-btn" data-state="fullscreen" onclick="setMapState('fullscreen')">&#x26F6; Expandir</button>
-          <button class="map-state-btn" data-state="closed" onclick="setMapState('closed')">&#x2715; Cerrar</button>
-        </div>
-      </div>
-      <div class="map-box" id="mapBox">
-        <div id="map"></div>
-        <div class="map-legend">
-          <div class="leg-row"><div class="leg-dot" style="background:#9a7418"></div>Gama Alta</div>
-          <div class="leg-row"><div class="leg-dot" style="background:#b52828"></div>Gama Media</div>
-          <div class="leg-row"><div class="leg-dot" style="background:#246e42"></div>Accesible</div>
-          </div>
-      </div>
-    </div>
-
-    <div class="featured" id="featCard" onclick="focusFeatured()" style="display:none">
-    <div class="feat-body">
-        <div class="feat-label">Destacado esta semana</div>
-        <div class="feat-name"></div>
-        <div class="feat-desc"></div>
-        <div class="feat-tags">
-        </div>
-      </div>
-    </div>
-
-    <div class="cat-scroll" id="catsEl"></div>
-
-    <div class="filter-bar">
-      <div class="fb-left">
-        <span>Filtros</span>
-        <span class="active-ct" id="activeCt">0</span>
-      </div>
-      <div style="display:flex;gap:.3rem;align-items:center;flex-wrap:wrap">
-        <div class="sort-row" id="sortRow">
-          <button class="sort-btn active" data-sort="gama" onclick="setSort(this)">Mejor calidad</button>
-          <button class="sort-btn" data-sort="dist" onclick="setSort(this)">Cercanos</button>
-          <button class="sort-btn" data-sort="az" onclick="setSort(this)">A-Z</button>
-        </div>
-        <button class="ftoggle-btn" id="ftoggleBtn" onclick="toggleAdv()">+ Filtrar</button>
-      </div>
-    </div>
-
-    <div class="range-wrap">
-      <span class="range-label">&#128205; Radio</span>
-      <input type="range" id="radiusSlider" min="500" max="15000" step="500" value="2000"/>
-      <span class="range-val" id="radiusVal">2 km</span>
-    </div>
-
-    <div class="adv closed" id="advFilters">
-      <div class="adv-inner">
-        <div class="frow">
-          <span class="fl">Gama</span>
-          <div class="chips" id="gamaChips">
-            <button class="chip active" data-val="Todos" onclick="setFilter('gama',this)">Todas</button>
-            <button class="chip ga" data-val="Alta" onclick="setFilter('gama',this)">Alta</button>
-            <button class="chip" data-val="Media" onclick="setFilter('gama',this)">Media</button>
-            <button class="chip gr" data-val="Accesible" onclick="setFilter('gama',this)">Accesible</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="results-bar">
-      <span class="rb-label"><span id="resultsCount">—</span> lugares</span>
-      <span id="filterSummary"></span>
-    </div>
-
-    <div class="list" id="listEl">
-      <div class="msg">
-        <div class="ico">&#128205;</div>
-        <h3>Sin lugares aun</h3>
-        <p>Acepta el permiso de geolocalizacion para ver los mejores lugares cerca de ti.</p>
-      </div>
-    </div>
-
-  </aside>
-
-  <div class="resize-handle" id="resizeHandle"></div>
-  <div id="map-wrap">
-    <div class="map-legend">
-      <div class="leg-row"><div class="leg-dot" style="background:#9a7418"></div>Gama Alta</div>
-      <div class="leg-row"><div class="leg-dot" style="background:#b52828"></div>Gama Media</div>
-      <div class="leg-row"><div class="leg-dot" style="background:#246e42"></div>Accesible</div>
-      </div>
+<section class="hero">
+  <div class="glow"></div><div class="glow2"></div>
+  <div class="eyebrow">República Dominicana</div>
+  <h1>Come<em>RD</em></h1>
+  <p class="hero-sub">Los mejores restaurantes de Santo Domingo, ordenados por calidad, a la distancia exacta en que estás. Sin ruido. Sin publicidad. Solo lo bueno.</p>
+  <div class="cta-row">
+    <button class="btn-primary" onclick="openMap()">Explorar en el mapa →</button>
+    <a href="#restaurantes" class="btn-ghost">Ver restaurantes</a>
   </div>
-</div><!-- /.layout -->
-</div><!-- /#view-app -->
+  <div class="stats">
+    <div><div class="stat-n">29</div><div class="stat-l">Restaurantes</div></div>
+    <div><div class="stat-n">3</div><div class="stat-l">Gamas de precio</div></div>
+    <div><div class="stat-n" id="catsCount">—</div><div class="stat-l">Categorías</div></div>
+    <div><div class="stat-n">1</div><div class="stat-l">Ciudad, la tuya</div></div>
+  </div>
+</section>
+
+<section class="benefits-section">
+  <div class="section-label">¿Por qué ComeRD?</div>
+  <div class="section-title">Todo lo que necesitas<br/>para comer bien hoy</div>
+  <div class="benefits-grid">
+    <div class="benefit"><div class="benefit-num">01</div><div class="benefit-title">Encuentra por gama</div><div class="benefit-text">Desde opciones accesibles hasta experiencias gourmet de alta gama. Filtra exactamente lo que buscas sin complicaciones ni sorpresas de precio.</div></div>
+    <div class="benefit"><div class="benefit-num">02</div><div class="benefit-title">Mapa en tiempo real</div><div class="benefit-text">Ve exactamente dónde están los restaurantes respecto a donde estás tú ahora mismo. Ajusta el radio de búsqueda desde 500m hasta 15km.</div></div>
+    <div class="benefit"><div class="benefit-num">03</div><div class="benefit-title">Sin cuenta, sin app</div><div class="benefit-text">Abre, permite tu ubicación y empieza a explorar. Nada de registros, descargas ni suscripciones. Gratis, siempre.</div></div>
+    <div class="benefit"><div class="benefit-num">04</div><div class="benefit-title">Sin publicidad</div><div class="benefit-text">Ningún restaurante paga para aparecer primero. El orden lo decide la calidad y la distancia a ti, nada más.</div></div>
+    <div class="benefit"><div class="benefit-num">05</div><div class="benefit-title">Búsqueda inteligente</div><div class="benefit-text">Por nombre, tipo de cocina o zona. Encuentra "italiana" o "steakhouse alta gama" en segundos.</div></div>
+    <div class="benefit"><div class="benefit-num">06</div><div class="benefit-title">Modo claro y oscuro</div><div class="benefit-text">La app se adapta a tu preferencia de pantalla automáticamente, o puedes cambiarla con un toque.</div></div>
+  </div>
+</section>
+
+<section class="rest-section" id="restaurantes">
+  <div class="rest-header">
+    <div>
+      <div class="section-label">Los lugares</div>
+      <div class="section-title" style="margin-bottom:0">Restaurantes seleccionados</div>
+    </div>
+    <div class="rest-count">29 lugares</div>
+  </div>
+  <div class="rest-grid" id="restGrid"></div>
+</section>
+
+<section class="cta-bottom">
+  <h2>¿Listo para encontrar<br/>tu próxima experiencia?</h2>
+  <p>Abre el mapa, activa tu ubicación y descubre qué hay cerca de ti ahora mismo.</p>
+  <button class="btn-primary" onclick="openMap()">Explorar en el mapa →</button>
+</section>
+
+<footer>
+  <div>
+    <div class="brand">Come<em>RD</em></div>
+    <div class="brand-sub">Descubre lo mejor · República Dominicana</div>
+  </div>
+  <span class="foot-note">Sin publicidad · Sin registro · Siempre gratis</span>
+</footer>
 
 <script>
-const GAMA_ORDER  = {Alta:0,Media:1,Accesible:2};
-const GAMA_LABEL  = {Alta:'Gama Alta',Media:'Gama Media',Accesible:'Accesible'};
-const GAMA_COLOR  = {Alta:'#9a7418',Media:'#b52828',Accesible:'#246e42'};
-const CATS = ['Todos'];
-
 const DB = [
-  {
-    id: 1,
-    name: "Turo",
-    cat: "Internacional",
-    cuisine: "Fusión",
-    gama: "Alta",
-    lat: 18.47213837259487,
-    lng: -69.93581600379562,
-  },
-  {
-    id: 2,
-    name: "Laurel",
-    cat: "Internacional",
-    cuisine: "Fusión · Italiana · Sushi",
-    gama: "Alta",
-    lat: 18.47225379611973,
-    lng: -69.93509577007256,
-  },
-  {
-    id: 3,
-    name: "El Cortijo",
-    cat: "Mexicana",
-    cuisine: "Tex-Mex · Sushi",
-    gama: "Media",
-    lat: 18.473211248956794,
-    lng: -69.93326025482487,
-  },
-  {
-    id: 4,
-    name: "Creme Brulee",
-    cat: "Café",
-    cuisine: "Pastelería · Postres",
-    gama: "Media",
-    lat: 18.473383521510872,
-    lng: -69.9334145120722,
-  },
-  {
-    id: 5,
-    name: "Carne & Co.",
-    cat: "Steakhouse",
-    cuisine: "Carnes",
-    gama: "Alta",
-    lat: 18.472930189647776,
-    lng: -69.93305614579543,
-  },
-  {
-    id: 6,
-    name: "La Vecindad",
-    cat: "Mexicana",
-    cuisine: "Mexicana",
-    gama: "Media",
-    lat: 18.47287293949783,
-    lng: -69.93272764646697,
-  },
-  {
-    id: 7,
-    name: "Leyla Modern Libanese",
-    cat: "Libanesa",
-    cuisine: "Medio Oriente",
-    gama: "Alta",
-    lat: 18.47298964170512,
-    lng: -69.93371778754432,
-  },
-  {
-    id: 8,
-    name: "ODETTE",
-    cat: "Internacional",
-    cuisine: "Gourmet · Fusión",
-    gama: "Alta",
-    lat: 18.475209253513665,
-    lng: -69.93531742725035,
-  },
-  {
-    id: 9,
-    name: "Elizondo Prime",
-    cat: "Steakhouse",
-    cuisine: "Parrilla",
-    gama: "Alta",
-    lat: 18.47543566672777,
-    lng: -69.9342311325459,
-  },
-  {
-    id: 10,
-    name: "Curcio Pizza al Taglio · Piantini",
-    cat: "Italiana",
-    cuisine: "Pizza al Taglio",
-    gama: "Media",
-    lat: 18.473789425028542,
-    lng: -69.93728568473738,
-  },
-  {
-    id: 11,
-    name: "Curcio Pizza al Taglio · Zona Colonial",
-    cat: "Italiana",
-    cuisine: "Pizza al Taglio",
-    gama: "Media",
-    lat: 18.474826243940843,
-    lng: -69.88372831485498,
-  },
-  {
-    id: 12,
-    name: "Nacho Libre Cantina Mexicana",
-    cat: "Mexicana",
-    cuisine: "Cantina",
-    gama: "Media",
-    lat: 18.474744336673368,
-    lng: -69.88383329067175,
-  },
-  {
-    id: 13,
-    name: "Paletas Bajo Cero",
-    cat: "Heladería",
-    cuisine: "Paletas artesanales",
-    gama: "Accesible",
-    lat: 18.474983774855577,
-    lng: -69.88375012166506,
-  },
-  {
-    id: 14,
-    name: "Restaurante Don Pepe",
-    cat: "Española",
-    cuisine: "Mediterránea",
-    gama: "Alta",
-    lat: 18.469133359753652,
-    lng: -69.93712095480267,
-  },
-  {
-    id: 15,
-    name: "Rancho Steak House",
-    cat: "Steakhouse",
-    cuisine: "Parrilla",
-    gama: "Alta",
-    lat: 18.438635868708445,
-    lng: -69.9425309776446,
-  },
-  {
-    id: 16,
-    name: "Casa Luca",
-    cat: "Italiana",
-    cuisine: "Internacional",
-    gama: "Alta",
-    lat: 18.465346244342328,
-    lng: -69.93710333019172,
-  },
-  {
-    id: 17,
-    name: "Los Argentinos",
-    cat: "Argentina",
-    cuisine: "Parrilla",
-    gama: "Media",
-    lat: 18.45588513599072,
-    lng: -69.93410366836422,
-  },
-  {
-    id: 18,
-    name: "Maraca",
-    cat: "Caribeña",
-    cuisine: "Internacional · Fusión",
-    gama: "Alta",
-    lat: 18.471904335006318,
-    lng: -69.8874892224645,
-  },
-  {
-    id: 19,
-    name: "Central Gastronómica",
-    cat: "Internacional",
-    cuisine: "Fusión",
-    gama: "Alta",
-    lat: 18.47378168557843,
-    lng: -69.92584619506358,
-  },
-  {
-    id: 20,
-    name: "Casa Vera",
-    cat: "Mediterránea",
-    cuisine: "Internacional",
-    gama: "Alta",
-    lat: 18.456918404096697,
-    lng: -69.93672683650547,
-  },
-  {
-    id: 21,
-    name: "La Cassina",
-    cat: "Italiana",
-    cuisine: "Italiana",
-    gama: "Alta",
-    lat: 18.46570942245551,
-    lng: -69.9385396134166,
-  },
-  {
-    id: 22,
-    name: "Flor de Café",
-    cat: "Café",
-    cuisine: "Brunch · Pastelería",
-    gama: "Media",
-    lat: 18.44672714906352,
-    lng: -69.96223790478024,
-  },
-  {
-    id: 23,
-    name: "El Mesón de la Cava",
-    cat: "Criolla",
-    cuisine: "Internacional",
-    gama: "Alta",
-    lat: 18.453204578375363,
-    lng: -69.93333682119146,
-  },
-  {
-    id: 24,
-    name: "El Taquito Norteño",
-    cat: "Mexicana",
-    cuisine: "Mexicana",
-    gama: "Media",
-    lat: 18.459053969202024,
-    lng: -69.93117365136092,
-  },
-  {
-    id: 25,
-    name: "Viralata",
-    cat: "Brasileña",
-    cuisine: "Parrilla",
-    gama: "Media",
-    lat: 18.45771188907838,
-    lng: -69.93390856043354,
-  },
-  {
-    id: 26,
-    name: "La Vyuda",
-    cat: "Criolla",
-    cuisine: "Parrilla",
-    gama: "Media",
-    lat: 18.458437503033856,
-    lng: -69.95633994184523,
-  },
-  {
-    id: 27,
-    name: "El Camion",
-    cat: "Street Food",
-    cuisine: "Internacional",
-    gama: "Media",
-    lat: 18.444889583758577,
-    lng: -69.96429178518962,
-  },
-  {
-    id: 28,
-    name: "SBG Sophia's Bar & Grill",
-    cat: "Internacional",
-    cuisine: "Bar & Grill",
-    gama: "Media",
-    lat: 18.467064312228427,
-    lng: -69.93414552480337,
-  },
-  {
-    id: 29,
-    name: "LARIMAR",
-    cat: "Internacional",
-    cuisine: "Fusión",
-    gama: "Alta",
-    lat: 18.467438835091098,
-    lng: -69.9353961062093,
-  },
+  {id:1,name:"Turo",cat:"Internacional",cuisine:"Fusión",gama:"Alta"},
+  {id:2,name:"Laurel",cat:"Internacional",cuisine:"Fusión · Italiana · Sushi",gama:"Alta"},
+  {id:3,name:"El Cortijo",cat:"Mexicana",cuisine:"Tex-Mex · Sushi",gama:"Media"},
+  {id:4,name:"Creme Brulee",cat:"Café",cuisine:"Pastelería · Postres",gama:"Media"},
+  {id:5,name:"Carne & Co.",cat:"Steakhouse",cuisine:"Carnes",gama:"Alta"},
+  {id:6,name:"La Vecindad",cat:"Mexicana",cuisine:"Mexicana",gama:"Media"},
+  {id:7,name:"Leyla Modern Libanese",cat:"Libanesa",cuisine:"Medio Oriente",gama:"Alta"},
+  {id:8,name:"ODETTE",cat:"Internacional",cuisine:"Gourmet · Fusión",gama:"Alta"},
+  {id:9,name:"Elizondo Prime",cat:"Steakhouse",cuisine:"Parrilla",gama:"Alta"},
+  {id:10,name:"Curcio Pizza al Taglio · Piantini",cat:"Italiana",cuisine:"Pizza al Taglio",gama:"Media"},
+  {id:11,name:"Curcio Pizza al Taglio · Zona Colonial",cat:"Italiana",cuisine:"Pizza al Taglio",gama:"Media"},
+  {id:12,name:"Nacho Libre Cantina Mexicana",cat:"Mexicana",cuisine:"Cantina",gama:"Media"},
+  {id:13,name:"Paletas Bajo Cero",cat:"Heladería",cuisine:"Paletas artesanales",gama:"Accesible"},
+  {id:14,name:"Restaurante Don Pepe",cat:"Española",cuisine:"Mediterránea",gama:"Alta"},
+  {id:15,name:"Rancho Steak House",cat:"Steakhouse",cuisine:"Parrilla",gama:"Alta"},
+  {id:16,name:"Casa Luca",cat:"Italiana",cuisine:"Internacional",gama:"Alta"},
+  {id:17,name:"Los Argentinos",cat:"Argentina",cuisine:"Parrilla",gama:"Media"},
+  {id:18,name:"Maraca",cat:"Caribeña",cuisine:"Internacional · Fusión",gama:"Alta"},
+  {id:19,name:"Central Gastronómica",cat:"Internacional",cuisine:"Fusión",gama:"Alta"},
+  {id:20,name:"Casa Vera",cat:"Mediterránea",cuisine:"Internacional",gama:"Alta"},
+  {id:21,name:"La Cassina",cat:"Italiana",cuisine:"Italiana",gama:"Alta"},
+  {id:22,name:"Flor de Café",cat:"Café",cuisine:"Brunch · Pastelería",gama:"Media"},
+  {id:23,name:"El Mesón de la Cava",cat:"Criolla",cuisine:"Internacional",gama:"Alta"},
+  {id:24,name:"El Taquito Norteño",cat:"Mexicana",cuisine:"Mexicana",gama:"Media"},
+  {id:25,name:"Viralata",cat:"Brasileña",cuisine:"Parrilla",gama:"Media"},
+  {id:26,name:"La Vyuda",cat:"Criolla",cuisine:"Parrilla",gama:"Media"},
+  {id:27,name:"El Camion",cat:"Street Food",cuisine:"Internacional",gama:"Media"},
+  {id:28,name:"SBG Sophia's Bar & Grill",cat:"Internacional",cuisine:"Bar & Grill",gama:"Media"},
+  {id:29,name:"LARIMAR",cat:"Internacional",cuisine:"Fusión",gama:"Alta"},
 ];
 
-let map, allRestaurants = [];
-const markerMap = new Map();
-let userLat = 18.4741, userLng = -69.9307;
-let activeFilters = {cat:'Todos', gama:'Todos', sort:'gama'};
+const GAMA_CLASS = {Alta:'rc-ga',Media:'rc-gm',Accesible:'rc-gac'};
+const GAMA_LABEL = {Alta:'Gama Alta',Media:'Gama Media',Accesible:'Accesible'};
+document.getElementById('catsCount').textContent = new Set(DB.map(r=>r.cat)).size;
 
-let _mapBooted = false;
-let _mapsApiReady = false;
-let _bootRequested = false;
-let _bootCallback = null;
+// Marquee
+(()=>{
+  const track = document.getElementById('marqueeTrack');
+  const names = DB.map(r=>r.name);
+  [...names,...names].forEach(n=>{
+    const d = document.createElement('div');
+    d.className = 'mitem';
+    d.innerHTML = '<span class="mdot"></span>'+n;
+    track.appendChild(d);
+  });
+})();
 
-window.onGoogleMapsReady = function() {
-  _mapsApiReady = true;
-  if (_bootCallback) { _bootCallback(); _bootCallback = null; }
-};
+// Restaurant grid
+(()=>{
+  const grid = document.getElementById('restGrid');
+  const order = {Alta:0,Media:1,Accesible:2};
+  [...DB].sort((a,b)=>order[a.gama]-order[b.gama]).forEach(r=>{
+    const c = document.createElement('div');
+    c.className = 'rest-card';
+    c.innerHTML =
+      '<div class="rc-gama '+GAMA_CLASS[r.gama]+'">'+GAMA_LABEL[r.gama]+'</div>'+
+      '<div class="rc-name">'+r.name+'</div>'+
+      '<div class="rc-cat">'+r.cat+' · '+r.cuisine+'</div>';
+    c.addEventListener('click', openMap);
+    grid.appendChild(c);
+  });
+})();
 
-function requestMapBoot() {
-  if (_mapBooted) return;
-  _mapBooted = true;
-
-  // Show loading, layout stays hidden until hideLoading() adds .ready
-  const ld = document.getElementById('loading');
-  ld.classList.add('active');
-
-  buildCategories();
-  window._sortBtns = Array.from(document.querySelectorAll('#sortRow .sort-btn'));
-  window._gamaChips = Array.from(document.querySelectorAll('#gamaChips .chip'));
-  window._catBtns = Array.from(document.querySelectorAll('.cat-btn'));
-
-  function doGeo() {
-    if (!navigator.geolocation) {
-      ensurePlaced(); initMap(userLat, userLng); mergeLoad(userLat, userLng);
-      return;
-    }
-    let _booted = false;
-    navigator.geolocation.watchPosition(
-      pos => {
-        userLat = pos.coords.latitude;
-        userLng = pos.coords.longitude;
-        if (!_booted) {
-          _booted = true;
-          ensurePlaced(); initMap(userLat, userLng);
-          reverseGeocode(userLat, userLng);
-          mergeLoad(userLat, userLng);
-        } else if (window._userMarker) {
-          const p = { lat: userLat, lng: userLng };
-          window._userMarker.setPosition(p);
-          window.radiusCircle.setCenter(p);
-        }
-      },
-      () => {
-        if (!_booted) {
-          _booted = true;
-          document.getElementById('cityName').textContent = 'Santo Domingo';
-          ensurePlaced(); initMap(userLat, userLng); mergeLoad(userLat, userLng);
-        }
-      },
-      { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
-    );
+// Map overlay
+let _loaded = false;
+function openMap(){
+  if(!_loaded){
+    document.getElementById('map-iframe').src = 'comerd_funcional.html';
+    _loaded = true;
   }
-
-  if (_mapsApiReady) {
-    doGeo();
-  } else {
-    _bootCallback = doGeo;
-  }
+  document.getElementById('map-overlay').classList.add('open');
+  document.getElementById('back-btn').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeMap(){
+  document.getElementById('map-overlay').classList.remove('open');
+  document.getElementById('back-btn').classList.remove('open');
+  document.body.style.overflow = '';
 }
 
-function initMap(lat, lng) {
-  map = new google.maps.Map(document.getElementById('map'), {
-    center: { lat, lng },
-    zoom: 14,
-    minZoom: 8,
-    maxZoom: 19,
-    restriction: {
-      latLngBounds: { north:20.10, south:17.36, west:-72.10, east:-68.10 },
-      strictBounds: true
-    },
-    mapTypeControl: false,
-    streetViewControl: false,
-    fullscreenControl: false,
-    zoomControl: false,
-    gestureHandling: 'greedy',
-    clickableIcons: false,
-    isFractionalZoomEnabled: true,
-    styles: [
-      { featureType:'poi', elementType:'labels', stylers:[{visibility:'off'}] },
-      { featureType:'transit', elementType:'labels', stylers:[{visibility:'off'}] }
-    ]
-  });
-
-  // Marker "Tu estás aquí"
-  window._userMarker = new google.maps.Marker({
-    position: { lat, lng }, map,
-    icon: { path: google.maps.SymbolPath.CIRCLE, scale:8, fillColor:'#b52828', fillOpacity:1, strokeColor:'#fff', strokeWeight:3 },
-    title:'Tu estás aquí', zIndex:999
-  });
-
-  // Radio circle
-  window.radiusCircle = new google.maps.Circle({
-    map, center:{lat,lng}, radius:RADIUS_M,
-    strokeColor:'#b52828', strokeOpacity:0.6, strokeWeight:1,
-    fillColor:'#b52828', fillOpacity:0.04
-  });
-
-  // Reset active marker on map click
-  map.addListener('click', function() {
-    if (_activeMarker) { _activeMarker.setIcon(markerIcon(_activeMarker._color, false)); _activeMarker = null; }
-    if (_activeInfoWindow) { _activeInfoWindow.close(); _activeInfoWindow = null; }
-  });
-
-  // Update marker sizes on zoom
-  map.addListener('zoom_changed', function() {
-    const z = map.getZoom();
-    const userScale = dotRadiusForZoom(z);
-    if (window._userMarker) {
-      window._userMarker.setIcon({ path: google.maps.SymbolPath.CIRCLE, scale: userScale + 1,
-        fillColor:'#b52828', fillOpacity:1, strokeColor:'#fff', strokeWeight:3 });
-    }
-    markerMap.forEach((m) => {
-      if (m === _activeMarker) {
-        m.setIcon(markerIcon(m._color, true));
-      } else {
-        m.setIcon(markerIcon(m._color, false));
-      }
-    });
-  });
-
-  // Init radius slider
-  (function(){
-    const slider = document.getElementById('radiusSlider');
-    const label  = document.getElementById('radiusVal');
-    function fmtR(m){ return m>=1000?(m/1000).toFixed(1).replace('.0','')+' km':m+' m'; }
-    let _reloadTimer;
-    slider.addEventListener('input', function(){
-      RADIUS_M = parseInt(this.value);
-      label.textContent = fmtR(RADIUS_M);
-      window.radiusCircle.setRadius(RADIUS_M);
-      applyFilters();
-      clearTimeout(_reloadTimer);
-      _reloadTimer = setTimeout(() => mergeLoad(userLat, userLng), 600);
-    });
-  })();
-
-  if (typeof initMobileWidget === 'function') initMobileWidget();
-}
-
-async function reverseGeocode(lat, lng) {
-  try {
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ location:{lat,lng}, language:'es' }, (results, status) => {
-      if (status === 'OK' && results[0]) {
-        const comp = results[0].address_components;
-        const city = comp.find(c => c.types.includes('locality') || c.types.includes('administrative_area_level_2'));
-        document.getElementById('cityName').textContent = city ? city.long_name : 'RD';
-      } else { document.getElementById('cityName').textContent = 'RD'; }
-    });
-  } catch { document.getElementById('cityName').textContent = 'RD'; }
-}
-
-// Cache de coordenadas geocodificadas (persiste en sessionStorage)
-const GEO_CACHE_KEY = 'comeRD_geoCache_v1';
-function loadGeoCache() {
-  try { return JSON.parse(sessionStorage.getItem(GEO_CACHE_KEY) || '{}'); } catch { return {}; }
-}
-function saveGeoCache(cache) {
-  try { sessionStorage.setItem(GEO_CACHE_KEY, JSON.stringify(cache)); } catch {}
-}
-
-async function geocodeRestaurant(r, geocoder, cache) {
-  if (cache[r.id]) {
-    return {...r, lat: cache[r.id].lat, lng: cache[r.id].lng};
-  }
-  const query = r.addr ? `${r.name}, ${r.addr}, Santo Domingo, Dominican Republic`
-                        : `${r.name}, Santo Domingo, Dominican Republic`;
-  return new Promise(resolve => {
-    geocoder.geocode({address: query, region: 'do'}, (results, status) => {
-      if (status === 'OK' && results[0]) {
-        const loc = results[0].geometry.location;
-        const coords = {lat: loc.lat(), lng: loc.lng()};
-        cache[r.id] = coords;
-        resolve({...r, lat: coords.lat, lng: coords.lng});
-      } else {
-        // Fallback a coordenadas originales si falla
-        resolve(r);
-      }
-    });
-  });
-}
-
-async function mergeLoad(lat, lng) {
-  document.getElementById('loadMsg').textContent = 'Localizando lugares...';
-
-  if (allRestaurants.length === 0) {
-    const cache = loadGeoCache();
-    const geocoder = new google.maps.Geocoder();
-    const total = DB.length;
-    let done = 0;
-
-    // Geocodifica en lotes de 5 para no saturar la API
-    const BATCH = 5;
-    for (let i = 0; i < DB.length; i += BATCH) {
-      const batch = DB.slice(i, i + BATCH);
-      const geocoded = await Promise.all(batch.map(r => geocodeRestaurant(r, geocoder, cache)));
-      geocoded.forEach(r => {
-        const entry = {...r, dist: haversine(lat, lng, r.lat, r.lng)};
-        allRestaurants.push(entry);
-        createMarker(entry);
-        done++;
-      });
-      document.getElementById('loadMsg').textContent = `Localizando... ${done}/${total}`;
-      requestAnimationFrame(() => applyFilters());
-      // Pausa breve entre lotes para respetar rate limit
-      if (i + BATCH < DB.length) await new Promise(res => setTimeout(res, 200));
-    }
-    saveGeoCache(cache);
-  } else {
-    allRestaurants.forEach(r => { r.dist = haversine(lat, lng, r.lat, r.lng); });
-  }
-
-  hideLoading();
-  requestAnimationFrame(() => applyFilters());
-}
-
-
-
-// Debounce search input
-let _filterTimer;
-function debounceFilter(){ clearTimeout(_filterTimer); _filterTimer = setTimeout(applyFilters, 120); }
-
-
-function applyFilters() {
-  const query = document.getElementById('searchInput').value.trim().toLowerCase();
-  const {cat, gama, sort} = activeFilters;
-  // Recalcular dist en tiempo real para que el slider refleje posición actual
-  const visible = allRestaurants.filter(r => {
-    const dist = haversine(userLat, userLng, r.lat, r.lng);
-    r.dist = dist;
-    if (dist > RADIUS_M) return false;
-    if (cat !== 'Todos' && r.cat !== cat) return false;
-    if (gama !== 'Todos' && r.gama !== null && r.gama !== gama) return false;
-    if (query && !r.name.toLowerCase().includes(query) &&
-        !(r.cat||'').toLowerCase().includes(query) &&
-        !(r.desc||'').toLowerCase().includes(query)) return false;
-    return true;
-  });
-  if (sort === 'gama') visible.sort((a,b) => (a.gama!=null?GAMA_ORDER[a.gama]:3)-(b.gama!=null?GAMA_ORDER[b.gama]:3));
-  else if (sort === 'dist') visible.sort((a,b) => a.dist-b.dist);
-  else if (sort === 'az') visible.sort((a,b) => a.name.localeCompare(b.name));
-  renderList(visible);
-  syncMap(visible);
-  updateBadges(cat, gama);
-}
-
-function renderList(items) {
-  const list = document.getElementById('listEl');
-  document.getElementById('resultsCount').textContent = items.length;
-  if (!items.length) {
-    list.innerHTML = `<div class="msg"><div class="ico">&#128269;</div><h3>Sin resultados</h3><p>Prueba con otra combinacion de filtros.</p></div>`;
-    return;
-  }
-  list.innerHTML = '';
-  const frag = document.createDocumentFragment();
-  items.forEach((r,i) => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.setAttribute('data-gama', r.gama||'');
-    card.style.animationDelay = `${Math.min(i*15,280)}ms`;
-    const gamaHtml = r.gama ? `<span class="gama-tag gt-${r.gama.toLowerCase()}">${GAMA_LABEL[r.gama]}</span>` : '';
-    card.innerHTML = `
-      <div class="card-top"><div class="card-name">${r.name}</div>${gamaHtml}</div>
-      <div class="card-meta">
-        <span class="tag">${r.cat}</span>
-        ${r.cuisine ? `<span class="tag">${r.cuisine}</span>` : ''}
-        <span class="card-dist">${formatDist(r.dist)}</span>
-      </div>
-      ${r.addr ? `<div class="card-addr">${r.addr}</div>` : ''}
-      ${r.phone ? `<div class="card-phone">${r.phone}</div>` : ''}
-      ${r.desc ? `<div class="card-desc">${r.desc}</div>` : ''}
-      ${r.trend ? `<div class="trend">&#9733; Tendencia</div>` : ''}
-    `;
-    card.addEventListener('click', () => focusRestaurant(r));
-    frag.appendChild(card);
-  });
-  list.appendChild(frag);
-}
-
-function syncMap(visible) {
-  if (!map) return;
-  const visibleIds = new Set(visible.map(r => r.id));
-  markerMap.forEach((m, id) => { m.setVisible(visibleIds.has(id)); });
-}
-
-function dotRadiusForZoom(z) {
-  if (z <= 11) return 2; if (z >= 17) return 10;
-  return 2 + Math.round((z - 11) * (8 / 6));
-}
-
-function markerIcon(color, active) {
-  const z = (map && map.getZoom()) ? map.getZoom() : 14;
-  const base = dotRadiusForZoom(z);
-  return { path: google.maps.SymbolPath.CIRCLE, scale: active ? base + 3 : base,
-    fillColor: color, fillOpacity: 1,
-    strokeColor: 'rgba(255,255,255,0.9)', strokeWeight: active ? 2.5 : 1.5 };
-}
-
-let _activeInfoWindow = null;
-
-function createMarker(r) {
-  const color = GAMA_COLOR[r.gama] || GAMA_COLOR['Accesible'];
-  const gamaLine = r.gama ? `<div class="pop-gama" style="color:${color}">${GAMA_LABEL[r.gama]}</div>` : '';
-  const content = `<div class="pop-name">${r.name}</div><div class="pop-cat">${r.cat}</div>${gamaLine}${r.addr?`<div class="pop-addr">${r.addr}</div>`:''}`;
-  const m = new google.maps.Marker({
-    position: {lat:r.lat, lng:r.lng}, map,
-    icon: markerIcon(color, false), title: r.name
-  });
-  m._color = color; m._rid = r.id;
-  const infoWindow = new google.maps.InfoWindow({ content });
-  m.addListener('click', function() {
-    if (_activeMarker && _activeMarker !== m) _activeMarker.setIcon(markerIcon(_activeMarker._color, false));
-    if (_activeInfoWindow) _activeInfoWindow.close();
-    m.setIcon(markerIcon(color, true));
-    infoWindow.open(map, m);
-    _activeMarker = m; _activeInfoWindow = infoWindow;
-  });
-  markerMap.set(r.id, m);
-  return m;
-}
-
-let _activeMarker = null;
-function focusRestaurant(r) {
-  if (_activeMarker) { _activeMarker.setIcon(markerIcon(_activeMarker._color, false)); _activeMarker = null; }
-  if (_activeInfoWindow) { _activeInfoWindow.close(); _activeInfoWindow = null; }
-  const m = markerMap.get(r.id);
-  if (!m) return;
-  m.setVisible(true);
-  map.panTo({lat:r.lat, lng:r.lng});
-  map.setZoom(18);
-  setTimeout(() => {
-    const color = GAMA_COLOR[r.gama] || GAMA_COLOR['Accesible'];
-    const gamaLine = r.gama ? `<div class="pop-gama" style="color:${color}">${GAMA_LABEL[r.gama]}</div>` : '';
-    const iw = new google.maps.InfoWindow({
-      content:`<div class="pop-name">${r.name}</div><div class="pop-cat">${r.cat}</div>${gamaLine}${r.addr?`<div class="pop-addr">${r.addr}</div>`:''}`
-    });
-    m.setIcon(markerIcon(color, true));
-    iw.open(map, m);
-    _activeMarker = m; _activeInfoWindow = iw;
-  }, 400);
-}
-
-function focusFeatured() {
-  const feat = DB.find(r => r.id === 'ma01');
-  if (!feat) return;
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat==='Todos'));
-  activeFilters.cat = 'Todos';
-  applyFilters();
-  setTimeout(() => focusRestaurant(feat), 400);
-}
-
-function buildCategories() {
-  const el = document.getElementById('catsEl');
-  // Scroll horizontal con rueda del mouse
-  el.addEventListener('wheel', function(e) {
-    if (e.deltaY !== 0) {
-      e.preventDefault();
-      el.scrollLeft += e.deltaY * 1.5;
-    }
-  }, {passive: false});
-  CATS.forEach(cat => {
-    const btn = document.createElement('button');
-    btn.className = 'cat-btn' + (cat==='Todos' ? ' active' : '');
-    btn.dataset.cat = cat;
-    btn.textContent = cat;
-    btn.addEventListener('click', () => {
-      _catBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      activeFilters.cat = cat;
-      applyFilters();
-    });
-    el.appendChild(btn);
-  });
-}
-
-function setFilter(type, btn) {
-  _gamaChips.forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  activeFilters[type] = btn.dataset.val;
-  applyFilters();
-}
-
-function setSort(btn) {
-  _sortBtns.forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  activeFilters.sort = btn.dataset.sort;
-  applyFilters();
-}
-
-function toggleAdv() {
-  const el = document.getElementById('advFilters');
-  const btn = document.getElementById('ftoggleBtn');
-  const open = el.classList.contains('open');
-  el.classList.toggle('open', !open);
-  el.classList.toggle('closed', open);
-  btn.textContent = open ? '+ Filtrar' : '- Cerrar';
-  btn.classList.toggle('is-open', !open);
-}
-
-function updateBadges(cat, gama) {
-  let n = 0;
-  if (cat !== 'Todos') n++;
-  if (gama !== 'Todos') n++;
-  const el = document.getElementById('activeCt');
-  el.textContent = n; el.classList.toggle('on', n>0);
-  const parts = [];
-  if (cat !== 'Todos') parts.push(cat);
-  if (gama !== 'Todos') parts.push(GAMA_LABEL[gama]);
-  document.getElementById('filterSummary').textContent = parts.join(' · ');
-}
-
-function haversine(la1,lo1,la2,lo2){
-  const R=6371000,r=Math.PI/180,dLat=(la2-la1)*r,dLon=(lo2-lo1)*r;
-  const a=Math.sin(dLat/2)**2+Math.cos(la1*r)*Math.cos(la2*r)*Math.sin(dLon/2)**2;
-  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-}
-function formatDist(m){return m<1000?`${Math.round(m)} m`:`${(m/1000).toFixed(1)} km`}
-function hideLoading(){
-  const ld = document.getElementById('loading');
-  const layout = document.querySelector('.layout');
-  ld.classList.remove('active');
-  ld.classList.add('hidden');
-  if(layout) layout.classList.add('ready');
-}
-
-
+// Theme toggle
 (function(){
-  const BREAKPOINT=700, MAP_NORMAL_H=220, TRANSITION=300;
-  const mapWrap=document.getElementById('map-wrap');
-  const widget=document.getElementById('mob-map-widget');
-  const mapBox=document.getElementById('mapBox');
-  const mapEl=document.getElementById('map');
-  let currentState='normal', mapReady=false;
-  function isMobile(){return window.innerWidth<=BREAKPOINT}
-  window.ensurePlaced=function(){
-    if(isMobile()){if(mapEl.parentElement!==mapBox)mapBox.insertBefore(mapEl,mapBox.firstChild);}
-    else{if(mapEl.parentElement!==mapWrap)mapWrap.insertBefore(mapEl,mapWrap.firstChild);}
-  };
-  function applyMapState(state,animate){
-    currentState=state;
-    if(!animate)mapBox.style.transition='none';
-    if(state==='closed'){widget.classList.remove('is-fullscreen');mapBox.style.height='0px';}
-    else if(state==='normal'){widget.classList.remove('is-fullscreen');mapBox.style.height=MAP_NORMAL_H+'px';}
-    else if(state==='fullscreen'){widget.classList.add('is-fullscreen');mapBox.style.height=window.innerHeight+'px';}
-    if(!animate){mapBox.offsetHeight;mapBox.style.transition='';}
-    document.querySelectorAll('.map-state-btn').forEach(btn=>btn.classList.toggle('is-active',btn.dataset.state===state));
-    if(mapReady){setTimeout(()=>{
-      google.maps.event.trigger(map, "resize");
-      if(window._userMarker) map.setCenter(window._userMarker.getPosition());
-    },TRANSITION+20);}
-  }
-  window.setMapState=function(state){if(!isMobile())return;applyMapState(state,true);};
-  window.initMobileWidget=function(){
-    mapReady=true;
-    if(isMobile())applyMapState('normal',false);
-    else if(map)google.maps.event.trigger(map, "resize");
-  };
-  let resizeTimer;
-  window.addEventListener('resize',()=>{
-    clearTimeout(resizeTimer);
-    resizeTimer=setTimeout(()=>{
-      if(isMobile()){
-        if(currentState==='fullscreen')mapBox.style.height=window.innerHeight+'px';
-        else if(currentState==='normal')mapBox.style.height=MAP_NORMAL_H+'px';
-      }
-      if(mapReady){
-        google.maps.event.trigger(map, "resize");
-        if(window._userMarker) map.setCenter(window._userMarker.getPosition());
-      }
-    },80);
+  const cb = document.getElementById('themeToggle');
+  const html = document.documentElement;
+  if(html.classList.contains('dark')) cb.checked = true;
+  cb.addEventListener('change', function(){
+    html.classList.toggle('dark', cb.checked);
+    localStorage.setItem('theme', cb.checked ? 'dark' : 'light');
   });
 })();
-
-(function(){
-  const checkbox=document.getElementById('themeToggle');
-  const html=document.documentElement;
-  if(!checkbox)return;
-  if(html.classList.contains('dark')) checkbox.checked=true;
-  checkbox.addEventListener('change',async function(){
-    const rect=checkbox.getBoundingClientRect();
-    const x=rect.left+rect.width/2,y=rect.top+rect.height/2;
-    const maxR=Math.hypot(Math.max(x,window.innerWidth-x),Math.max(y,window.innerHeight-y));
-    function applyTheme(){
-      html.classList.toggle('dark',checkbox.checked);
-      localStorage.setItem('theme',checkbox.checked?'dark':'light');
-      if(typeof map!=='undefined'&&map)setTimeout(()=>google.maps.event.trigger(map, "resize"),50);
-    }
-    // Hide map during transition to prevent freeze (Leaflet is heavy)
-    const mapEl = document.getElementById('map-wrap');
-    const mobMap = document.getElementById('mapBox');
-    if(mapEl) mapEl.style.visibility='hidden';
-    if(mobMap) mobMap.style.visibility='hidden';
-
-    applyTheme();
-
-    // Horizontal slide overlay
-    const isDark = checkbox.checked;
-    const overlay = document.createElement('div');
-    overlay.style.cssText = [
-      'position:fixed;inset:0;z-index:99999;pointer-events:none',
-      'background:'+(isDark?'#0f0d0a':'#f6f1e9'),
-      'transform:translateX(-100%)',
-      'transition:transform 380ms cubic-bezier(0.4,0,0.2,1)'
-    ].join(';');
-    document.body.appendChild(overlay);
-
-    // Slide in
-    requestAnimationFrame(()=>{
-      requestAnimationFrame(()=>{
-        overlay.style.transform = 'translateX(0%)';
-        overlay.addEventListener('transitionend', ()=>{
-          // Slide out the other side
-          overlay.style.transition = 'transform 320ms cubic-bezier(0.4,0,0.2,1)';
-          overlay.style.transform = 'translateX(100%)';
-          overlay.addEventListener('transitionend', ()=>{
-            document.body.removeChild(overlay);
-            if(mapEl) mapEl.style.visibility='';
-            if(mobMap) mobMap.style.visibility='';
-            if(typeof map!=='undefined'&&map) google.maps.event.trigger(map, "resize");
-          }, {once:true});
-        }, {once:true});
-      });
-    });
-  });
-})();
-
-// ── SIDEBAR RESIZE ──
-(function(){
-  const handle = document.getElementById('resizeHandle');
-  const layout = document.querySelector('.layout');
-  if(!handle || !layout) return;
-  let dragging = false, startX = 0, startW = 0;
-
-  handle.addEventListener('mousedown', function(e){
-    dragging = true;
-    startX = e.clientX;
-    startW = document.querySelector('.sidebar').offsetWidth;
-    handle.classList.add('dragging');
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
-  });
-
-  document.addEventListener('mousemove', function(e){
-    if(!dragging) return;
-    const diff = e.clientX - startX;
-    const newW = Math.min(Math.max(startW + diff, 220), window.innerWidth * 0.6);
-    layout.style.gridTemplateColumns = newW + 'px 5px 1fr';
-    if(typeof map !== 'undefined' && map) google.maps.event.trigger(map, "resize");
-  });
-
-  document.addEventListener('mouseup', function(){
-    if(!dragging) return;
-    dragging = false;
-    handle.classList.remove('dragging');
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
-  });
-})();
-
-// ── VIEW SWITCHER ──
-let _currentView = 'landing'; // start on landing
-
-(function initViewSystem(){
-  // Set initial state
-  document.body.classList.add('show-landing');
-  document.getElementById('locPill').style.display = 'none';
-
-  // Build landing marquee
-  const track = document.getElementById('lpMarquee');
-  if(track){
-    const names = DB.map(r => r.name);
-    [...names,...names].forEach(n => {
-      const d = document.createElement('div');
-      d.className = 'lp-mitem';
-      d.innerHTML = '<span class="lp-mdot"></span>' + n;
-      track.appendChild(d);
-    });
-  }
-
-  // Build landing restaurant grid
-  const grid = document.getElementById('lpRestGrid');
-  if(grid){
-    const GAMA_CLASS2 = {Alta:'rc-ga2',Media:'rc-gm2',Accesible:'rc-gac2'};
-    const GAMA_LABEL2 = {Alta:'Gama Alta',Media:'Gama Media',Accesible:'Accesible'};
-    const order = {Alta:0,Media:1,Accesible:2};
-    [...DB].sort((a,b) => order[a.gama]-order[b.gama]).forEach(r => {
-      const c = document.createElement('div');
-      c.className = 'lp-rcard';
-      c.innerHTML = '<div class="lp-rc-gama ' + (GAMA_CLASS2[r.gama]||'') + '">' + (GAMA_LABEL2[r.gama]||r.gama) + '</div>'
-        + '<div class="lp-rc-name">' + r.name + '</div>'
-        + '<div class="lp-rc-cat">' + r.cat + ' · ' + r.cuisine + '</div>';
-      c.addEventListener('click', () => switchView());
-      grid.appendChild(c);
-    });
-  }
-
-  // Cat count
-  const cats = [...new Set(DB.map(r => r.cat))];
-  const lpCats = document.getElementById('lpCats');
-  if(lpCats) lpCats.textContent = cats.length;
-})();
-
-function switchView(){
-  const btn = document.getElementById('viewBtn');
-  const locPill = document.getElementById('locPill');
-  if(_currentView === 'landing'){
-    // → go to app
-    _currentView = 'app';
-    document.body.classList.remove('show-landing');
-    document.body.classList.add('show-app');
-    btn.textContent = '← Inicio';
-    btn.classList.add('is-app');
-    locPill.style.display = '';
-    window.scrollTo(0,0);
-    // Boot the map the first time
-    requestMapBoot();
-    // Trigger map resize if already booted
-    if(map){
-      setTimeout(() => {
-        google.maps.event.trigger(map, 'resize');
-        if(window._userMarker) map.setCenter(window._userMarker.getPosition());
-      }, 50);
-    }
-  } else {
-    // → go to landing
-    _currentView = 'landing';
-    document.body.classList.remove('show-app');
-    document.body.classList.add('show-landing');
-    btn.textContent = 'Explorar →';
-    btn.classList.remove('is-app');
-    locPill.style.display = 'none';
-    window.scrollTo(0,0);
-  }
-}
 </script>
 </body>
+</html>
