@@ -44,29 +44,30 @@ html.dark{
 
 /* ── RESET ── */
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+html{scroll-behavior:smooth;height:100%}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);
+  height:100%;min-height:100dvh;overflow:hidden;display:flex;flex-direction:column;position:relative}
 button{font-family:'Outfit',sans-serif;cursor:pointer}
 input{font-family:'Outfit',sans-serif}
 
 /* ── VIEW SYSTEM ──
-   Ambas vistas están en el DOM todo el tiempo.
-   El mapa puede inicializarse aunque #view-app esté "oculto"
-   porque usa visibility/position, no display:none.
-   Esto es la clave para que Google Maps no se rompa.
+   Ambas vistas en el DOM todo el tiempo.
+   visibility+opacity (no display:none) = Google Maps siempre
+   tiene dimensiones reales aunque no sea visible.
 ── */
 #view-landing{
   position:absolute;inset:0;
   overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
   background:var(--bg);
-  transition:opacity .35s ease, visibility .35s ease;
+  transition:opacity .3s ease, visibility .3s ease;
   z-index:10;
 }
 #view-app{
   position:absolute;inset:0;
   display:flex;flex-direction:column;
   opacity:0;visibility:hidden;
-  transition:opacity .35s ease, visibility .35s ease;
+  transition:opacity .3s ease, visibility .3s ease;
   z-index:5;
 }
 body.show-app #view-landing{opacity:0;visibility:hidden;pointer-events:none}
@@ -90,7 +91,8 @@ body.show-landing #view-landing{opacity:1;visibility:visible}
 
 /* ── SHARED HEADER ── */
 header{
-  position:relative;z-index:200;
+  position:sticky;top:0;
+  z-index:200;
   display:flex;align-items:center;justify-content:space-between;
   padding:.7rem 1.2rem;background:var(--surface);
   border-bottom:1px solid var(--border);
@@ -129,8 +131,7 @@ header{
 @keyframes showRay{0%{transform:scale(0)}100%{transform:scale(1)}}
 
 /* ── APP LAYOUT ── */
-.app-body{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;position:relative}
-.sort-btn,.ftoggle-btn{transition:color .17s,border-color .17s,background .17s}
+.app-body{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;position:relative}.sort-btn,.ftoggle-btn{transition:color .17s,border-color .17s,background .17s}
 .cat-btn{transition:all .17s}
 .chip{transition:all .16s}
 .card{transition:border-color .2s,box-shadow .2s,transform .2s}
@@ -239,47 +240,89 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
 
 /* ── MOBILE ── */
 @media(max-width:700px){
-  html{height:100%}
-  body{height:auto;min-height:100dvh;overflow:hidden}
-  #view-landing{overflow-y:auto}
-  #view-app{overflow-y:auto}
-  header{position:sticky;top:0;z-index:300;padding:.48rem 1rem;flex-wrap:nowrap;gap:.5rem}
-  .brand{font-size:1.4rem}
+  /* App view on mobile: full height, flex column, no overflow clip on outer container */
+  #view-app{display:flex;flex-direction:column}
+  .app-body{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0}
+
+  /* Header compact */
+  header{padding:.48rem .9rem;flex-wrap:nowrap;gap:.4rem}
+  .brand{font-size:1.35rem}
   .brand-sub{display:none}
-  .loc-pill{padding:.26rem .65rem;font-size:.68rem;white-space:nowrap;flex-shrink:0}
-  .layout{display:block;overflow:visible}
-  .sidebar{display:flex;flex-direction:column;width:100%;overflow:visible;border-right:none;min-height:0}
+  .loc-pill{padding:.24rem .6rem;font-size:.66rem;white-space:nowrap;flex-shrink:0}
+  .view-btn{padding:.24rem .6rem;font-size:.68rem}
+
+  /* Desktop map column hidden — mobile uses the widget */
   #map-wrap{display:none!important}
+  .resize-handle{display:none}
+
+  /* Layout becomes a single scrollable column */
+  .layout{
+    display:flex;flex-direction:column;
+    flex:1;overflow-y:auto;overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+  }
+  .sidebar{
+    display:flex;flex-direction:column;
+    width:100%;overflow:visible;
+    border-right:none;min-height:0;flex-shrink:0;
+  }
+
+  /* Inputs */
   .search-wrap{padding:.52rem .75rem}
   #searchInput{font-size:16px;padding:.5rem .9rem .5rem 2.1rem}
-  .featured{margin:.5rem .65rem .3rem;flex-shrink:0}
-  .cat-scroll{flex-shrink:0}
+
+  /* Filter bar */
   .filter-bar{padding:.38rem .75rem;gap:.28rem;flex-wrap:wrap}
   .results-bar{padding:.3rem .75rem}
-  .adv{flex-shrink:0}
   .sort-row{flex-wrap:wrap;gap:.22rem}
   .sort-btn,.ftoggle-btn{padding:.26rem .64rem;font-size:.71rem}
   .cat-btn{padding:.3rem .78rem;font-size:.74rem}
-  .list{flex:none;overflow-y:visible;padding:.45rem .65rem 3rem;min-height:120px}
+
+  /* Card list: natural flow, no inner scroll */
+  .list{
+    flex:none;overflow-y:visible;
+    padding:.45rem .65rem 2rem;min-height:80px;
+  }
   .card{padding:.7rem .88rem .7rem .98rem;min-width:0}
   .card-name{white-space:normal;word-break:break-word;overflow:visible;text-overflow:unset;min-width:0;flex:1}
   .card-desc{display:none}
-  #mob-map-widget{display:block;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border)}
-  .map-ctrl-bar{display:flex;align-items:center;justify-content:space-between;padding:.4rem .75rem;background:var(--s2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);gap:.5rem}
+
+  /* Mobile map widget */
+  #mob-map-widget{
+    display:block;flex-shrink:0;
+    background:var(--surface);border-bottom:1px solid var(--border);
+  }
+  .map-ctrl-bar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:.4rem .75rem;background:var(--s2);
+    border-top:1px solid var(--border);border-bottom:1px solid var(--border);gap:.5rem;
+  }
   .map-ctrl-left{display:flex;align-items:center;gap:.32rem;font-size:.72rem;font-weight:600;color:var(--ink2)}
   .map-ctrl-left svg{flex-shrink:0}
   .map-ctrl-right{display:flex;gap:.26rem;align-items:center}
-  .map-state-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:.22rem .6rem;font-size:.67rem;font-weight:500;color:var(--ink2);transition:background .15s,border-color .15s,color .15s;white-space:nowrap;line-height:1.3}
+  .map-state-btn{
+    background:var(--surface);border:1.5px solid var(--border);border-radius:100px;
+    padding:.22rem .6rem;font-size:.67rem;font-weight:500;color:var(--ink2);
+    transition:background .15s,border-color .15s,color .15s;white-space:nowrap;line-height:1.3;
+  }
   .map-state-btn:hover{border-color:var(--red);color:var(--red)}
   .map-state-btn[data-state="normal"].is-active{background:var(--red);border-color:var(--red);color:#fff}
   .map-state-btn[data-state="fullscreen"].is-active{background:var(--gold);border-color:var(--gold);color:#fff}
   .map-state-btn[data-state="closed"].is-active{background:var(--ink2);border-color:var(--ink2);color:#fff}
-  .map-box{overflow:hidden;height:0;transition:height var(--map-transition);position:relative}
+  .map-box{overflow:hidden;height:0;transition:height var(--map-transition);position:relative;flex-shrink:0}
   .map-box #map{position:absolute;inset:0;width:100%;height:100%}
   .map-box .map-legend{display:block;position:absolute;bottom:8px;right:8px;top:auto;font-size:.58rem;padding:.26rem .48rem;z-index:500}
-  #mob-map-widget.is-fullscreen{position:fixed;inset:0;z-index:800;display:flex;flex-direction:column;border:none}
+
+  /* Fullscreen map on mobile */
+  #mob-map-widget.is-fullscreen{
+    position:fixed;inset:0;z-index:1000;
+    display:flex;flex-direction:column;border:none;
+  }
   #mob-map-widget.is-fullscreen .map-ctrl-bar{flex-shrink:0;box-shadow:var(--shadow-md);border-top:none}
   #mob-map-widget.is-fullscreen .map-box{flex:1;height:auto!important;transition:none}
+
+  /* Loading screen on mobile */
+  #loading{position:fixed;inset:0;z-index:500}
 }
 
 /* ── LANDING PAGE ── */
@@ -589,13 +632,15 @@ let _pendingBoot = null;
 function switchToApp() {
   document.body.classList.remove('show-landing');
   document.body.classList.add('show-app');
-  // Trigger map boot on first switch
   if (!_mapBooted) {
     _mapBooted = true;
     bootMap();
   } else if (typeof map !== 'undefined' && map) {
-    // Already booted — just trigger a resize in case dimensions changed
-    setTimeout(() => google.maps.event.trigger(map, 'resize'), 50);
+    setTimeout(() => {
+      if (typeof ensurePlaced === 'function') ensurePlaced();
+      google.maps.event.trigger(map, 'resize');
+      if (window._userMarker) map.setCenter(window._userMarker.getPosition());
+    }, 350);
   }
 }
 
