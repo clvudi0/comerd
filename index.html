@@ -516,10 +516,30 @@ window.addEventListener('DOMContentLoaded', () => {
   if (!navigator.geolocation) {
     _pendingBoot = () => startDefault();
   } else {
-    navigator.geolocation.getCurrentPosition(
-      pos => { userLat = pos.coords.latitude; userLng = pos.coords.longitude; _pendingBoot = () => boot(); _tryBoot(); },
-      ()   => { _pendingBoot = () => { startDefault(); document.getElementById('cityName').textContent = 'Santo Domingo'; }; _tryBoot(); },
-      {enableHighAccuracy:true, timeout:12000, maximumAge:0}
+    let _booted = false;
+    const _watchId = navigator.geolocation.watchPosition(
+      pos => {
+        userLat = pos.coords.latitude;
+        userLng = pos.coords.longitude;
+        if (!_booted) {
+          _booted = true;
+          _pendingBoot = () => boot();
+          _tryBoot();
+        } else if (window._userMarker) {
+          // Actualiza marcador y círculo en tiempo real
+          const p = { lat: userLat, lng: userLng };
+          window._userMarker.setPosition(p);
+          window.radiusCircle.setCenter(p);
+        }
+      },
+      () => {
+        if (!_booted) {
+          _booted = true;
+          _pendingBoot = () => { startDefault(); document.getElementById('cityName').textContent = 'Santo Domingo'; };
+          _tryBoot();
+        }
+      },
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
     );
   }
   _domReady = true;
@@ -542,6 +562,10 @@ function initMap(lat, lng) {
     mapTypeControl: false,
     streetViewControl: false,
     fullscreenControl: false,
+    zoomControl: false,
+    gestureHandling: 'greedy',
+    clickableIcons: false,
+    isFractionalZoomEnabled: true,
     styles: [
       { featureType:'poi', elementType:'labels', stylers:[{visibility:'off'}] },
       { featureType:'transit', elementType:'labels', stylers:[{visibility:'off'}] }
@@ -566,6 +590,23 @@ function initMap(lat, lng) {
   map.addListener('click', function() {
     if (_activeMarker) { _activeMarker.setIcon(markerIcon(_activeMarker._color, false)); _activeMarker = null; }
     if (_activeInfoWindow) { _activeInfoWindow.close(); _activeInfoWindow = null; }
+  });
+
+  // Update marker sizes on zoom
+  map.addListener('zoom_changed', function() {
+    const z = map.getZoom();
+    const userScale = dotRadiusForZoom(z);
+    if (window._userMarker) {
+      window._userMarker.setIcon({ path: google.maps.SymbolPath.CIRCLE, scale: userScale + 1,
+        fillColor:'#b52828', fillOpacity:1, strokeColor:'#fff', strokeWeight:3 });
+    }
+    markerMap.forEach((m) => {
+      if (m === _activeMarker) {
+        m.setIcon(markerIcon(m._color, true));
+      } else {
+        m.setIcon(markerIcon(m._color, false));
+      }
+    });
   });
 
   // Init radius slider
@@ -739,7 +780,9 @@ function dotRadiusForZoom(z) {
 }
 
 function markerIcon(color, active) {
-  return { path: google.maps.SymbolPath.CIRCLE, scale: active ? 10 : 7,
+  const z = (map && map.getZoom()) ? map.getZoom() : 14;
+  const base = dotRadiusForZoom(z);
+  return { path: google.maps.SymbolPath.CIRCLE, scale: active ? base + 3 : base,
     fillColor: color, fillOpacity: 1,
     strokeColor: 'rgba(255,255,255,0.9)', strokeWeight: active ? 2.5 : 1.5 };
 }
