@@ -835,7 +835,9 @@ const GAMA_COLOR = {Alta:'#9a7418',Media:'#b52828',Accesible:'#246e42'};
 const CATS = ['Todos'];
 
 const DB = [
-  {id:1,name:"Turo",cat:"Internacional",cuisine:"Fusión",gama:"Alta",lat:18.47213837259487,lng:-69.93581600379562},
+  {id:1,name:"Turo",cat:"Internacional",cuisine:"Fusión",gama:"Alta",lat:18.47213837259487,lng:-69.93581600379562,
+    imgs:["https://res.cloudinary.com/dncnqtwno/image/upload/v1773099402/Turo_zgrgwj.jpg","https://res.cloudinary.com/dncnqtwno/image/upload/v1773099410/Turo1_vbkrel.jpg","https://res.cloudinary.com/dncnqtwno/image/upload/v1773099417/Turo2_ft8iv9.jpg","https://res.cloudinary.com/dncnqtwno/image/upload/v1773099422/Turo3_ymmclx.jpg"],
+    ig:"https://www.instagram.com/turo.rd/"},
   {id:2,name:"Laurel",cat:"Internacional",cuisine:"Fusión · Italiana · Sushi",gama:"Alta",lat:18.47225379611973,lng:-69.93509577007256},
   {id:3,name:"El Cortijo",cat:"Mexicana",cuisine:"Tex-Mex · Sushi",gama:"Media",lat:18.473211248956794,lng:-69.93326025482487},
   {id:4,name:"Creme Brulee",cat:"Café",cuisine:"Pastelería · Postres",gama:"Media",lat:18.473383521510872,lng:-69.9334145120722},
@@ -1157,13 +1159,28 @@ function markerIcon(color,active){const z=(map&&map.getZoom())?map.getZoom():14;
 
 let _activeInfoWindow=null, _activeMarker=null;
 
+function buildPopupContent(r){
+  const color=GAMA_COLOR[r.gama]||GAMA_COLOR['Accesible'];
+  const img=r.imgs&&r.imgs.length?`<img src="${r.imgs[0]}" style="width:100%;height:140px;object-fit:cover;display:block;"/>`:'' ;
+  const igBtn=r.ig?`<a href="${r.ig}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:.35rem;margin-top:.55rem;font-size:.7rem;color:#c0392b;text-decoration:none;font-family:'Outfit',sans-serif;font-weight:500;">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+    Instagram</a>`:'';
+  const webBtn=r.web?`<a href="${r.web}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:.35rem;margin-top:.55rem;margin-left:${r.ig?'.7rem':'0'};font-size:.7rem;color:#555;text-decoration:none;font-family:'Outfit',sans-serif;">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    Sitio web</a>`:'';
+  return `<div style="width:220px;font-family:'Outfit',sans-serif;overflow:hidden;">${img}<div style="padding:10px 12px 12px;">
+    <div style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.05rem;color:#111;line-height:1.2;margin-bottom:.25rem;">${r.name}</div>
+    <div style="font-size:.68rem;color:#888;">${r.cat}${r.cuisine?' · '+r.cuisine:''}</div>
+    <div style="font-size:.62rem;font-weight:600;color:${color};text-transform:uppercase;letter-spacing:.06em;margin-top:.2rem;">${GAMA_LABEL[r.gama]||''}</div>
+    ${igBtn||webBtn?`<div style="display:flex;align-items:center;flex-wrap:wrap;border-top:1px solid #eee;margin-top:.55rem;padding-top:.45rem;">${igBtn}${webBtn}</div>`:''}
+  </div></div>`;
+}
+
 function createMarker(r){
   const color=GAMA_COLOR[r.gama]||GAMA_COLOR['Accesible'];
-  const gamaLine=r.gama?`<div class="pop-gama" style="color:${color}">${GAMA_LABEL[r.gama]}</div>`:'';
-  const content=`<div class="pop-name">${r.name}</div><div class="pop-cat">${r.cat}</div>${gamaLine}${r.addr?`<div class="pop-addr">${r.addr}</div>`:''}`;
   const m=new google.maps.Marker({position:{lat:r.lat,lng:r.lng},map,icon:markerIcon(color,false),title:r.name});
   m._color=color; m._rid=r.id;
-  const iw=new google.maps.InfoWindow({content});
+  const iw=new google.maps.InfoWindow({content:buildPopupContent(r),maxWidth:240});
   m.addListener('click',function(){
     if(_activeMarker&&_activeMarker!==m)_activeMarker.setIcon(markerIcon(_activeMarker._color,false));
     if(_activeInfoWindow)_activeInfoWindow.close();
@@ -1180,8 +1197,7 @@ function focusRestaurant(r){
   m.setVisible(true); map.panTo({lat:r.lat,lng:r.lng}); map.setZoom(18);
   setTimeout(()=>{
     const color=GAMA_COLOR[r.gama]||GAMA_COLOR['Accesible'];
-    const gamaLine=r.gama?`<div class="pop-gama" style="color:${color}">${GAMA_LABEL[r.gama]}</div>`:'';
-    const iw=new google.maps.InfoWindow({content:`<div class="pop-name">${r.name}</div><div class="pop-cat">${r.cat}</div>${gamaLine}${r.addr?`<div class="pop-addr">${r.addr}</div>`:''}`});
+    const iw=new google.maps.InfoWindow({content:buildPopupContent(r),maxWidth:240});
     m.setIcon(markerIcon(color,true)); iw.open(map,m);
     _activeMarker=m; _activeInfoWindow=iw;
   },400);
@@ -1311,9 +1327,7 @@ function hideLoading(){document.getElementById('loading').classList.add('hidden'
   document.addEventListener('mouseup',function(){if(!dragging)return;dragging=false;handle.classList.remove('dragging');document.body.style.cursor='';document.body.style.userSelect='';});
 })();
 
-/* ══════════════════════════════════════
-   LANDING PAGE JS
-══════════════════════════════════════ */
+
 (function(){
   const GAMA_CLASS = {Alta:'lp-rc-ga', Media:'lp-rc-gm', Accesible:'lp-rc-gac'};
   const GAMA_LBL   = {Alta:'Gama Alta', Media:'Gama Media', Accesible:'Accesible'};
