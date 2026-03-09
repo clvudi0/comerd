@@ -775,8 +775,8 @@ function syncMap(visible) {
 }
 
 function dotRadiusForZoom(z) {
-  if (z <= 11) return 5; if (z >= 17) return 10;
-  return 5 + Math.round((z - 11) * (5 / 6));
+  if (z <= 11) return 2; if (z >= 17) return 10;
+  return 2 + Math.round((z - 11) * (8 / 6));
 }
 
 function markerIcon(color, active) {
