@@ -836,9 +836,11 @@ const CATS = ['Todos'];
 
 const DB = [
   {id:1,name:"Turo",cat:"Internacional",cuisine:"Fusión",gama:"Alta",lat:18.47213837259487,lng:-69.93581600379562,
-    imgs:["https://res.cloudinary.com/dncnqtwno/image/upload/v1773099402/Turo_zgrgwj.jpg","https://res.cloudinary.com/dncnqtwno/image/upload/v1773099410/Turo1_vbkrel.jpg","https://res.cloudinary.com/dncnqtwno/image/upload/v1773099417/Turo2_ft8iv9.jpg","https://res.cloudinary.com/dncnqtwno/image/upload/v1773099422/Turo3_ymmclx.jpg"],
+    imgs:["https://res.cloudinary.com/dncnqtwno/image/upload/v1773099417/Turo2_ft8iv9.jpg","https://res.cloudinary.com/dncnqtwno/image/upload/v1773099422/Turo3_ymmclx.jpg","https://res.cloudinary.com/dncnqtwno/image/upload/v1773099410/Turo1_vbkrel.jpg","https://res.cloudinary.com/dncnqtwno/image/upload/v1773099402/Turo_zgrgwj.jpg"],
     ig:"https://www.instagram.com/turo.rd/"},
-  {id:2,name:"Laurel",cat:"Internacional",cuisine:"Fusión · Italiana · Sushi",gama:"Alta",lat:18.47225379611973,lng:-69.93509577007256},
+  {id:2,name:"Laurel",cat:"Internacional",cuisine:"Fusión · Italiana · Sushi",gama:"Alta",lat:18.47225379611973,lng:-69.93509577007256,
+    imgs:["https://res.cloudinary.com/dncnqtwno/image/upload/v1773101985/laurel2_fnix2j.jpg","https://res.cloudinary.com/dncnqtwno/image/upload/v1773101985/laurel3_dpa32t.jpg","https://res.cloudinary.com/dncnqtwno/image/upload/v1773101985/laurel1_lcgy4z.jpg","https://res.cloudinary.com/dncnqtwno/image/upload/v1773101986/laurel_ozkifd.jpg"],
+    ig:"https://www.instagram.com/laureldr/"},
   {id:3,name:"El Cortijo",cat:"Mexicana",cuisine:"Tex-Mex · Sushi",gama:"Media",lat:18.473211248956794,lng:-69.93326025482487},
   {id:4,name:"Creme Brulee",cat:"Café",cuisine:"Pastelería · Postres",gama:"Media",lat:18.473383521510872,lng:-69.9334145120722},
   {id:5,name:"Carne & Co.",cat:"Steakhouse",cuisine:"Carnes",gama:"Alta",lat:18.472930189647776,lng:-69.93305614579543},
@@ -1166,12 +1168,12 @@ function buildPopupContent(r, imgIdx){
   const hasMultiple=imgs.length>1;
 
   const imgSection=imgs.length?`
-    <div style="position:relative;">
+    <div style="position:relative;" class="popup-gallery" data-rid="${r.id}">
       <img src="${imgs[i]}" style="width:100%;height:140px;object-fit:cover;display:block;"/>
       ${hasMultiple?`
-        <button onclick="popupPrev(${r.id})" style="position:absolute;left:0;top:0;bottom:0;width:36px;background:rgba(0,0,0,.35);border:none;color:#fff;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;">&#8249;</button>
-        <button onclick="popupNext(${r.id})" style="position:absolute;right:0;top:0;bottom:0;width:36px;background:rgba(0,0,0,.35);border:none;color:#fff;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;">&#8250;</button>
-        <div style="position:absolute;bottom:6px;left:50%;transform:translateX(-50%);display:flex;gap:4px;">
+        <div data-dir="-1" class="popup-arrow" style="position:absolute;left:0;top:0;bottom:0;width:44px;background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.3rem;cursor:pointer;user-select:none;">&#8249;</div>
+        <div data-dir="1" class="popup-arrow" style="position:absolute;right:0;top:0;bottom:0;width:44px;background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.3rem;cursor:pointer;user-select:none;">&#8250;</div>
+        <div style="position:absolute;bottom:6px;left:50%;transform:translateX(-50%);display:flex;gap:4px;pointer-events:none;">
           ${imgs.map((_,j)=>`<span style="width:6px;height:6px;border-radius:50%;background:${j===i?'#fff':'rgba(255,255,255,.45)'};display:inline-block;"></span>`).join('')}
         </div>
       `:''}
@@ -1195,19 +1197,21 @@ function buildPopupContent(r, imgIdx){
 // Estado de foto activa por restaurante
 const _popupImgIdx = {};
 
-function popupPrev(rid) {
-  const r = DB.find(x=>x.id===rid); if(!r||!r.imgs) return;
-  _popupImgIdx[rid] = ((_popupImgIdx[rid]||0) - 1 + r.imgs.length) % r.imgs.length;
-  _refreshPopup(r);
-}
-function popupNext(rid) {
-  const r = DB.find(x=>x.id===rid); if(!r||!r.imgs) return;
-  _popupImgIdx[rid] = ((_popupImgIdx[rid]||0) + 1) % r.imgs.length;
-  _refreshPopup(r);
-}
-function _refreshPopup(r) {
-  if(!_activeInfoWindow) return;
-  _activeInfoWindow.setContent(buildPopupContent(r, _popupImgIdx[r.id]||0));
+function _attachPopupArrows(iw, r) {
+  google.maps.event.addListenerOnce(iw, 'domready', () => {
+    const gallery = document.querySelector('.popup-gallery[data-rid="'+r.id+'"]');
+    if (!gallery) return;
+    gallery.querySelectorAll('.popup-arrow').forEach(arrow => {
+      arrow.addEventListener('click', e => {
+        e.stopPropagation();
+        const dir = parseInt(arrow.dataset.dir);
+        const imgs = r.imgs||[];
+        _popupImgIdx[r.id] = ((_popupImgIdx[r.id]||0) + dir + imgs.length) % imgs.length;
+        iw.setContent(buildPopupContent(r, _popupImgIdx[r.id]));
+        _attachPopupArrows(iw, r);
+      });
+    });
+  });
 }
 
 function createMarker(r){
@@ -1221,6 +1225,7 @@ function createMarker(r){
     const iw=new google.maps.InfoWindow({content:buildPopupContent(r,0),maxWidth:240});
     m.setIcon(markerIcon(color,true)); iw.open(map,m);
     _activeMarker=m; _activeInfoWindow=iw;
+    _attachPopupArrows(iw,r);
   });
   markerMap.set(r.id,m); return m;
 }
@@ -1236,6 +1241,7 @@ function focusRestaurant(r){
     const iw=new google.maps.InfoWindow({content:buildPopupContent(r,0),maxWidth:240});
     m.setIcon(markerIcon(color,true)); iw.open(map,m);
     _activeMarker=m; _activeInfoWindow=iw;
+    _attachPopupArrows(iw,r);
   },400);
 }
 
