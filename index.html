@@ -1411,6 +1411,22 @@ function _attachPopupArrows(iw, r) {
   });
 }
 
+function _openPopup(r, iw, m){
+  const color=GAMA_COLOR[r.gama]||GAMA_COLOR['Accesible'];
+  m.setIcon(markerIcon(color,true));
+  iw.open(map,m);
+  _activeMarker=m; _activeInfoWindow=iw;
+  _attachPopupArrows(iw,r);
+  // On mobile: expand map so popup shows fully
+  if(typeof setMapState==='function' && window.innerWidth<=700){
+    setMapState('fullscreen');
+    // Restore to normal when InfoWindow closes
+    google.maps.event.addListenerOnce(iw,'closeclick',()=>{
+      setMapState('normal');
+    });
+  }
+}
+
 function createMarker(r){
   const color=GAMA_COLOR[r.gama]||GAMA_COLOR['Accesible'];
   const m=new google.maps.Marker({position:{lat:r.lat,lng:r.lng},map,icon:markerIcon(color,false),title:r.name});
@@ -1420,9 +1436,7 @@ function createMarker(r){
     if(_activeInfoWindow)_activeInfoWindow.close();
     _popupImgIdx[r.id]=0;
     const iw=new google.maps.InfoWindow({content:buildPopupContent(r,0),maxWidth:280});
-    m.setIcon(markerIcon(color,true)); iw.open(map,m);
-    _activeMarker=m; _activeInfoWindow=iw;
-    _attachPopupArrows(iw,r);
+    _openPopup(r,iw,m);
   });
   markerMap.set(r.id,m); return m;
 }
@@ -1431,15 +1445,26 @@ function focusRestaurant(r){
   if(_activeMarker){_activeMarker.setIcon(markerIcon(_activeMarker._color,false));_activeMarker=null;}
   if(_activeInfoWindow){_activeInfoWindow.close();_activeInfoWindow=null;}
   const m=markerMap.get(r.id); if(!m)return;
-  m.setVisible(true); map.panTo({lat:r.lat,lng:r.lng}); map.setZoom(18);
-  setTimeout(()=>{
-    const color=GAMA_COLOR[r.gama]||GAMA_COLOR['Accesible'];
-    _popupImgIdx[r.id]=0;
-    const iw=new google.maps.InfoWindow({content:buildPopupContent(r,0),maxWidth:280});
-    m.setIcon(markerIcon(color,true)); iw.open(map,m);
-    _activeMarker=m; _activeInfoWindow=iw;
-    _attachPopupArrows(iw,r);
-  },400);
+  m.setVisible(true);
+  // On mobile expand first so pan/zoom work in the full canvas
+  if(typeof setMapState==='function' && window.innerWidth<=700){
+    setMapState('fullscreen');
+    setTimeout(()=>{
+      map.panTo({lat:r.lat,lng:r.lng}); map.setZoom(18);
+      setTimeout(()=>{
+        _popupImgIdx[r.id]=0;
+        const iw=new google.maps.InfoWindow({content:buildPopupContent(r,0),maxWidth:280});
+        _openPopup(r,iw,m);
+      },350);
+    },320);
+  } else {
+    map.panTo({lat:r.lat,lng:r.lng}); map.setZoom(18);
+    setTimeout(()=>{
+      _popupImgIdx[r.id]=0;
+      const iw=new google.maps.InfoWindow({content:buildPopupContent(r,0),maxWidth:280});
+      _openPopup(r,iw,m);
+    },400);
+  }
 }
 
 function focusFeatured(){
