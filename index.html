@@ -1260,13 +1260,16 @@ function buildPopupContent(r, imgIdx){
   const hasMultiple=imgs.length>1;
 
   const imgSection=imgs.length?`
-    <div style="position:relative;" class="popup-gallery" data-rid="${r.id}">
-      <img src="${imgs[i]}" style="width:100%;height:140px;object-fit:cover;display:block;"/>
+    <div style="position:relative;cursor:zoom-in;" class="popup-gallery" data-rid="${r.id}">
+      <div class="popup-img-wrap" style="width:100%;height:140px;overflow:hidden;position:relative;background:#111;">
+        <img class="popup-img-a" src="${imgs[i]}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:1;transition:opacity .25s;"/>
+        <img class="popup-img-b" src="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .25s;"/>
+      </div>
       ${hasMultiple?`
         <div data-dir="-1" class="popup-arrow" style="position:absolute;left:0;top:0;bottom:0;width:44px;background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.3rem;cursor:pointer;user-select:none;">&#8249;</div>
         <div data-dir="1" class="popup-arrow" style="position:absolute;right:0;top:0;bottom:0;width:44px;background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.3rem;cursor:pointer;user-select:none;">&#8250;</div>
-        <div style="position:absolute;bottom:6px;left:50%;transform:translateX(-50%);display:flex;gap:4px;pointer-events:none;">
-          ${imgs.map((_,j)=>`<span style="width:6px;height:6px;border-radius:50%;background:${j===i?'#fff':'rgba(255,255,255,.45)'};display:inline-block;"></span>`).join('')}
+        <div class="popup-dots" style="position:absolute;bottom:6px;left:50%;transform:translateX(-50%);display:flex;gap:4px;pointer-events:none;">
+          ${imgs.map((_,j)=>`<span style="width:6px;height:6px;border-radius:50%;background:${j===i?'#fff':'rgba(255,255,255,.45)'};display:inline-block;transition:background .2s;"></span>`).join('')}
         </div>
       `:''}
     </div>`:'';
@@ -1286,21 +1289,120 @@ function buildPopupContent(r, imgIdx){
   </div></div>`;
 }
 
-// Estado de foto activa por restaurante
+// ── Estado popup ──
 const _popupImgIdx = {};
+let _popupActive = false; // flag to avoid double crossfade
+
+function _swapPopupImg(gallery, imgs, newIdx) {
+  const imgA = gallery.querySelector('.popup-img-a');
+  const imgB = gallery.querySelector('.popup-img-b');
+  if (!imgA || !imgB) return;
+  // Determine which is currently visible
+  const [front, back] = parseFloat(imgA.style.opacity) > 0.5 ? [imgA, imgB] : [imgB, imgA];
+  back.src = imgs[newIdx];
+  back.onload = () => {
+    back.style.opacity = '1';
+    front.style.opacity = '0';
+  };
+  // If already cached, onload may not fire — force it
+  if (back.complete && back.naturalWidth) {
+    back.style.opacity = '1';
+    front.style.opacity = '0';
+  }
+  // Update dots
+  const dots = gallery.querySelectorAll('.popup-dots span');
+  dots.forEach((d, j) => d.style.background = j === newIdx ? '#fff' : 'rgba(255,255,255,.45)');
+}
+
+// ── Lightbox ──
+function _openLightbox(r, startIdx) {
+  let idx = startIdx;
+  const imgs = r.imgs || [];
+  if (!imgs.length) return;
+
+  const lb = document.createElement('div');
+  lb.id = 'lb-overlay';
+  lb.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;';
+
+  lb.innerHTML = `
+    <button id="lb-close" style="position:absolute;top:1rem;right:1rem;background:none;border:none;color:#fff;font-size:1.8rem;cursor:pointer;line-height:1;z-index:2;">&times;</button>
+    <div style="position:relative;width:min(92vw,700px);display:flex;align-items:center;justify-content:center;">
+      <div style="position:relative;width:100%;background:#000;border-radius:2px;overflow:hidden;">
+        <img id="lb-img-a" src="${imgs[idx]}" style="width:100%;max-height:80vh;object-fit:contain;display:block;opacity:1;transition:opacity .2s;position:relative;z-index:1;"/>
+        <img id="lb-img-b" src="" style="width:100%;max-height:80vh;object-fit:contain;display:block;opacity:0;transition:opacity .2s;position:absolute;inset:0;z-index:0;"/>
+        ${imgs.length>1?`
+        <div id="lb-prev" style="position:absolute;left:0;top:0;bottom:0;width:60px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:2rem;cursor:pointer;background:linear-gradient(to right,rgba(0,0,0,.4),transparent);z-index:2;user-select:none;">&#8249;</div>
+        <div id="lb-next" style="position:absolute;right:0;top:0;bottom:0;width:60px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:2rem;cursor:pointer;background:linear-gradient(to left,rgba(0,0,0,.4),transparent);z-index:2;user-select:none;">&#8250;</div>
+        <div id="lb-dots" style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:2;pointer-events:none;">
+          ${imgs.map((_,j)=>`<span style="width:7px;height:7px;border-radius:50%;background:${j===idx?'#fff':'rgba(255,255,255,.4)'};display:inline-block;transition:background .2s;"></span>`).join('')}
+        </div>`:''}
+      </div>
+    </div>
+    <div style="position:absolute;bottom:1.2rem;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.6);font-size:.75rem;font-family:'Outfit',sans-serif;">${r.name}</div>
+  `;
+  document.body.appendChild(lb);
+
+  function swapLb(newIdx) {
+    const a = document.getElementById('lb-img-a');
+    const b = document.getElementById('lb-img-b');
+    if (!a||!b) return;
+    const [front, back] = parseFloat(a.style.opacity) > 0.5 ? [a, b] : [b, a];
+    back.src = imgs[newIdx];
+    const show = () => { back.style.opacity='1'; front.style.opacity='0'; updateDots(newIdx); };
+    back.onload = show;
+    if (back.complete && back.naturalWidth) show();
+  }
+
+  function updateDots(newIdx) {
+    const dots = document.querySelectorAll('#lb-dots span');
+    dots.forEach((d,j) => d.style.background = j===newIdx ? '#fff' : 'rgba(255,255,255,.4)');
+  }
+
+  function go(dir) {
+    idx = (idx + dir + imgs.length) % imgs.length;
+    swapLb(idx);
+    // Keep popup in sync
+    _popupImgIdx[r.id] = idx;
+    const gallery = document.querySelector('.popup-gallery[data-rid="'+r.id+'"]');
+    if (gallery) _swapPopupImg(gallery, imgs, idx);
+  }
+
+  document.getElementById('lb-close').onclick = () => lb.remove();
+  lb.addEventListener('click', e => { if (e.target === lb) lb.remove(); });
+  document.getElementById('lb-prev')?.addEventListener('click', e => { e.stopPropagation(); go(-1); });
+  document.getElementById('lb-next')?.addEventListener('click', e => { e.stopPropagation(); go(1); });
+
+  // Keyboard
+  function onKey(e) {
+    if (e.key === 'ArrowLeft') go(-1);
+    else if (e.key === 'ArrowRight') go(1);
+    else if (e.key === 'Escape') { lb.remove(); document.removeEventListener('keydown', onKey); }
+  }
+  document.addEventListener('keydown', onKey);
+  lb.addEventListener('remove', () => document.removeEventListener('keydown', onKey));
+}
 
 function _attachPopupArrows(iw, r) {
   google.maps.event.addListenerOnce(iw, 'domready', () => {
     const gallery = document.querySelector('.popup-gallery[data-rid="'+r.id+'"]');
     if (!gallery) return;
+
+    // Click on image → lightbox
+    const wrap = gallery.querySelector('.popup-img-wrap');
+    if (wrap) wrap.addEventListener('click', e => {
+      e.stopPropagation();
+      _openLightbox(r, _popupImgIdx[r.id]||0);
+    });
+
+    // Arrow nav — smooth swap, no setContent
     gallery.querySelectorAll('.popup-arrow').forEach(arrow => {
       arrow.addEventListener('click', e => {
         e.stopPropagation();
-        const dir = parseInt(arrow.dataset.dir);
         const imgs = r.imgs||[];
+        if (!imgs.length) return;
+        const dir = parseInt(arrow.dataset.dir);
         _popupImgIdx[r.id] = ((_popupImgIdx[r.id]||0) + dir + imgs.length) % imgs.length;
-        iw.setContent(buildPopupContent(r, _popupImgIdx[r.id]));
-        _attachPopupArrows(iw, r);
+        _swapPopupImg(gallery, imgs, _popupImgIdx[r.id]);
       });
     });
   });
