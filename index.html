@@ -1522,7 +1522,7 @@ function hideLoading(){document.getElementById('loading').classList.add('hidden'
     else if(state==='fullscreen'){widget.classList.add('is-fullscreen');mapBox.style.height=window.innerHeight+'px';}
     if(!animate){mapBox.offsetHeight;mapBox.style.transition='';}
     document.querySelectorAll('.map-state-btn').forEach(btn=>btn.classList.toggle('is-active',btn.dataset.state===state));
-    if(mapReady){setTimeout(()=>{google.maps.event.trigger(map,'resize');if(window._userMarker)map.setCenter(window._userMarker.getPosition());},TRANSITION+20);}
+    if(mapReady){setTimeout(()=>{google.maps.event.trigger(map,'resize');if(window._userMarker&&!_activeInfoWindow)map.setCenter(window._userMarker.getPosition());},TRANSITION+20);}
   }
   window.setMapState=function(state){if(!isMobile())return;applyMapState(state,true);};
   window.initMobileWidget=function(){mapReady=true;if(isMobile())applyMapState('normal',false);else if(map)google.maps.event.trigger(map,'resize');};
@@ -1531,7 +1531,7 @@ function hideLoading(){document.getElementById('loading').classList.add('hidden'
     clearTimeout(_rt);
     _rt=setTimeout(()=>{
       if(isMobile()){if(currentState==='fullscreen')mapBox.style.height=window.innerHeight+'px';else if(currentState==='normal')mapBox.style.height=MAP_NORMAL_H+'px';}
-      if(mapReady){google.maps.event.trigger(map,'resize');if(window._userMarker)map.setCenter(window._userMarker.getPosition());}
+      if(mapReady){google.maps.event.trigger(map,'resize');if(window._userMarker&&!_activeInfoWindow)map.setCenter(window._userMarker.getPosition());}
     },80);
   });
 })();
