@@ -1446,17 +1446,20 @@ function focusRestaurant(r){
   if(_activeInfoWindow){_activeInfoWindow.close();_activeInfoWindow=null;}
   const m=markerMap.get(r.id); if(!m)return;
   m.setVisible(true);
-  // On mobile expand first so pan/zoom work in the full canvas
+
+  const doOpen=()=>{
+    map.panTo({lat:r.lat,lng:r.lng}); map.setZoom(18);
+    setTimeout(()=>{
+      _popupImgIdx[r.id]=0;
+      const iw=new google.maps.InfoWindow({content:buildPopupContent(r,0),maxWidth:280});
+      _openPopup(r,iw,m);
+    },350);
+  };
+
   if(typeof setMapState==='function' && window.innerWidth<=700){
     setMapState('fullscreen');
-    setTimeout(()=>{
-      map.panTo({lat:r.lat,lng:r.lng}); map.setZoom(18);
-      setTimeout(()=>{
-        _popupImgIdx[r.id]=0;
-        const iw=new google.maps.InfoWindow({content:buildPopupContent(r,0),maxWidth:280});
-        _openPopup(r,iw,m);
-      },350);
-    },320);
+    // Wait for the map resize event that fullscreen triggers, then pan
+    google.maps.event.addListenerOnce(map,'idle',doOpen);
   } else {
     map.panTo({lat:r.lat,lng:r.lng}); map.setZoom(18);
     setTimeout(()=>{
