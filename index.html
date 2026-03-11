@@ -1116,7 +1116,8 @@ function initMap(lat, lng) {
   window.radiusCircle = new google.maps.Circle({
     map, center:{lat,lng}, radius:RADIUS_M,
     strokeColor:'#b52828',strokeOpacity:0.6,strokeWeight:1,
-    fillColor:'#b52828',fillOpacity:0.04
+    fillColor:'#b52828',fillOpacity:0.04,
+    clickable:false
   });
   map.addListener('click', function(){
     if (_activeMarker){_activeMarker.setIcon(markerIcon(_activeMarker._color,false));_activeMarker=null;}
