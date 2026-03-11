@@ -1284,11 +1284,27 @@ function buildPopupContent(r, imgIdx){
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
     Sitio web</a>`:'';
 
+  const gmUrl=`https://www.google.com/maps/dir/?api=1&destination=${r.lat},${r.lng}`;
+  const wazeUrl=`https://waze.com/ul?ll=${r.lat},${r.lng}&navigate=yes`;
+  const navBtn=`<div class="popup-nav-wrap" style="position:relative;display:inline-flex;">
+    <button class="popup-nav-btn" data-rid="${r.id}" style="display:inline-flex;align-items:center;gap:.35rem;font-size:.7rem;color:#555;font-family:'Outfit',sans-serif;font-weight:500;background:none;border:none;cursor:pointer;padding:0;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+      Cómo llegar ▾</button>
+    <div class="popup-nav-dd" data-rid="${r.id}" style="display:none;position:absolute;bottom:calc(100% + 6px);left:0;background:#fff;border:1px solid #e0e0de;box-shadow:0 4px 12px rgba(0,0,0,.12);min-width:150px;z-index:9999;border-radius:2px;overflow:hidden;">
+      <a href="${gmUrl}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:.5rem;padding:.55rem .75rem;font-size:.72rem;color:#333;text-decoration:none;font-family:'Outfit',sans-serif;border-bottom:1px solid #f0f0ee;">
+        <svg width="13" height="13" viewBox="0 0 24 24"><path fill="#4285F4" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+        Google Maps</a>
+      <a href="${wazeUrl}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:.5rem;padding:.55rem .75rem;font-size:.72rem;color:#333;text-decoration:none;font-family:'Outfit',sans-serif;">
+        <svg width="13" height="13" viewBox="0 0 24 24"><circle cx="12" cy="10" r="7" fill="#33CCFF"/><circle cx="9.5" cy="11" r="1.2" fill="#fff"/><circle cx="14.5" cy="11" r="1.2" fill="#fff"/><path d="M9.5 14.5 Q12 16.5 14.5 14.5" stroke="#fff" stroke-width="1.2" fill="none" stroke-linecap="round"/><circle cx="17" cy="18" r="1.5" fill="#333"/><circle cx="9" cy="19" r="1.5" fill="#333"/></svg>
+        Waze</a>
+    </div>
+  </div>`;
+
   return `<div style="width:260px;font-family:'Outfit',sans-serif;overflow:hidden;">${imgSection}<div style="padding:10px 14px 13px;">
     <div style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.05rem;color:#111;line-height:1.2;margin-bottom:.25rem;">${r.name}</div>
     <div style="font-size:.68rem;color:#888;">${r.cat}${r.cuisine?' · '+r.cuisine:''}</div>
     <div style="font-size:.62rem;font-weight:600;color:${color};text-transform:uppercase;letter-spacing:.06em;margin-top:.2rem;">${GAMA_LABEL[r.gama]||''}</div>
-    ${igBtn||webBtn?`<div style="display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;border-top:1px solid #eee;margin-top:.55rem;padding-top:.45rem;">${igBtn}${webBtn}</div>`:''}
+    <div style="display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;border-top:1px solid #eee;margin-top:.55rem;padding-top:.45rem;">${igBtn||webBtn?igBtn+webBtn:''}${navBtn}</div>
   </div></div>`;
 }
 
@@ -1397,7 +1413,23 @@ function _attachPopupArrows(iw, r) {
       _openLightbox(r, _popupImgIdx[r.id]||0);
     });
 
-    // Arrow nav — smooth swap, no setContent
+    // Nav dropdown toggle
+    const navBtn = document.querySelector(`.popup-nav-btn[data-rid="${r.id}"]`);
+    const navDd  = document.querySelector(`.popup-nav-dd[data-rid="${r.id}"]`);
+    if (navBtn && navDd) {
+      navBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        const open = navDd.style.display === 'block';
+        navDd.style.display = open ? 'none' : 'block';
+      });
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function closeDd(e) {
+        if (!navBtn.contains(e.target) && !navDd.contains(e.target)) {
+          navDd.style.display = 'none';
+          document.removeEventListener('click', closeDd);
+        }
+      });
+    }
     gallery.querySelectorAll('.popup-arrow').forEach(arrow => {
       arrow.addEventListener('click', e => {
         e.stopPropagation();
