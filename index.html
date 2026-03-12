@@ -121,6 +121,14 @@ header{
 
 /* theme toggle */
 .themeToggle{color:var(--ink2);width:1.1em;flex-shrink:0}
+.lang-toggle{
+  font-family:'Outfit',sans-serif;font-size:.68rem;font-weight:700;
+  color:var(--ink2);background:none;border:1px solid var(--border);
+  border-radius:2px;padding:.18rem .38rem;cursor:pointer;
+  letter-spacing:.08em;transition:color .18s,border-color .18s;
+  flex-shrink:0;line-height:1.4;
+}
+.lang-toggle:hover{color:var(--red);border-color:var(--red)}
 .st-sunMoonThemeToggleBtn{position:relative;cursor:pointer}
 .st-sunMoonThemeToggleBtn .themeToggleInput{opacity:0;width:100%;aspect-ratio:1;margin:0;cursor:pointer}
 .st-sunMoonThemeToggleBtn svg{position:absolute;left:0;top:0;width:100%;height:100%;transition:transform .4s ease;transform:rotate(40deg)}
@@ -598,10 +606,11 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
   <header>
     <div>
       <div class="brand">Come<em>RD</em></div>
-      <div class="brand-sub">Descubre lo mejor · República Dominicana</div>
+      <div class="brand-sub" data-i18n="tagline">Descubre lo mejor · República Dominicana</div>
     </div>
     <div style="display:flex;align-items:center;gap:.7rem;flex-shrink:0">
-      <button class="view-btn" onclick="switchToApp()">Explorar mapa →</button>
+      <button class="view-btn" onclick="switchToApp()" data-i18n="exploreMap">Explorar mapa →</button>
+      <button class="lang-toggle" id="langToggle1" onclick="toggleLang()" title="Switch language">ES</button>
       <label for="themeToggle" class="themeToggle st-sunMoonThemeToggleBtn">
         <input type="checkbox" id="themeToggle" class="themeToggleInput"/>
         <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" stroke="none">
@@ -615,34 +624,34 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
 
   <section class="lp-hero">
     <div>
-      <div class="lp-eyebrow">Santo Domingo · República Dominicana</div>
+      <div class="lp-eyebrow" data-i18n="eyebrow">Santo Domingo · República Dominicana</div>
       <h1 class="lp-h1">Come<em>RD</em></h1>
-      <p class="lp-sub">Los mejores restaurantes de Santo Domingo, ordenados por calidad y distancia. Sin publicidad, sin comisiones, sin registro.</p>
+      <p class="lp-sub" data-i18n="heroSub">¿Sin saber dónde comer? Problema resuelto.</p>
       <div class="lp-cta-row">
-        <button class="lp-btn-primary" onclick="switchToApp()">Explorar en el mapa →</button>
-        <button class="lp-btn-ghost" onclick="document.getElementById('lp-restaurantes').scrollIntoView({behavior:'smooth'})">Ver restaurantes</button>
+        <button class="lp-btn-primary" onclick="switchToApp()" data-i18n="exploreMap">Explorar en el mapa →</button>
+        <button class="lp-btn-ghost" onclick="document.getElementById('lp-restaurantes').scrollIntoView({behavior:'smooth'})" data-i18n="seeRestaurants">Ver restaurantes</button>
       </div>
     </div>
     <div class="lp-stats-card">
-      <div class="sc-title">Directorio · Actualizado</div>
+      <div class="sc-title" data-i18n="dirTitle">Directorio · Actualizado</div>
       <div class="lp-stat-row">
-        <span class="lp-stat-label">Restaurantes</span>
+        <span class="lp-stat-label" data-i18n="statRests">Restaurantes</span>
         <span class="lp-stat-val" id="c4total">—</span>
       </div>
       <div class="lp-stat-row">
-        <span class="lp-stat-label">Gama Alta</span>
+        <span class="lp-stat-label" data-i18n="statAlta">Gama Alta</span>
         <span class="lp-stat-val alta" id="c4alta">—</span>
       </div>
       <div class="lp-stat-row">
-        <span class="lp-stat-label">Gama Media</span>
+        <span class="lp-stat-label" data-i18n="statMedia">Gama Media</span>
         <span class="lp-stat-val media" id="c4media">—</span>
       </div>
       <div class="lp-stat-row">
-        <span class="lp-stat-label">Accesible</span>
+        <span class="lp-stat-label" data-i18n="statAcc">Accesible</span>
         <span class="lp-stat-val acc" id="c4acc">—</span>
       </div>
       <div class="lp-stat-row">
-        <span class="lp-stat-label">Categorías</span>
+        <span class="lp-stat-label" data-i18n="statCats">Categorías</span>
         <span class="lp-stat-val" id="c4cats">—</span>
       </div>
     </div>
@@ -651,8 +660,8 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
   <section class="lp-grid-section" id="lp-restaurantes">
     <div class="lp-section-head">
       <div>
-        <div class="lp-section-label">Los lugares</div>
-        <div class="lp-section-title">Restaurantes seleccionados</div>
+        <div class="lp-section-label" data-i18n="secLabel">Los lugares</div>
+        <div class="lp-section-title" data-i18n="secTitle">Restaurantes seleccionados</div>
       </div>
       <span class="lp-rest-count" id="lpRestCount">— lugares</span>
     </div>
@@ -660,17 +669,17 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
   </section>
 
   <section class="lp-cta-bottom">
-    <h2>¿Listo para encontrar<br/>tu próxima experiencia?</h2>
-    <p>Activa tu ubicación y descubre qué hay cerca de ti ahora mismo.</p>
-    <button class="lp-btn-primary" onclick="switchToApp()">Explorar en el mapa →</button>
+    <h2 data-i18n="ctaH2">¿Listo para encontrar<br/>tu próxima experiencia?</h2>
+    <p data-i18n="ctaP">Activa tu ubicación y descubre qué hay cerca de ti ahora mismo.</p>
+    <button class="lp-btn-primary" onclick="switchToApp()" data-i18n="exploreMap">Explorar en el mapa →</button>
   </section>
 
   <footer class="lp-footer">
     <div>
       <div class="brand">Come<em>RD</em></div>
-      <div class="brand-sub">Descubre lo mejor · República Dominicana</div>
+      <div class="brand-sub" data-i18n="tagline">Descubre lo mejor · República Dominicana</div>
     </div>
-    <span class="lp-foot-note">Sin publicidad · Sin registro · Siempre gratis</span>
+    <span class="lp-foot-note" data-i18n="footNote">Sin publicidad · Sin registro · Siempre gratis</span>
   </footer>
 
 </div>
@@ -682,11 +691,12 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
   <header>
     <div>
       <div class="brand">Come<em>RD</em></div>
-      <div class="brand-sub">Descubre lo mejor · República Dominicana</div>
+      <div class="brand-sub" data-i18n="tagline">Descubre lo mejor · República Dominicana</div>
     </div>
     <div style="display:flex;align-items:center;gap:.6rem;flex-shrink:0">
-      <button class="view-btn is-app" onclick="switchToLanding()">← Inicio</button>
+      <button class="view-btn is-app" onclick="switchToLanding()" data-i18n="backHome">← Inicio</button>
       <div class="loc-pill"><div class="loc-dot"></div><span id="cityName">Detectando...</span></div>
+      <button class="lang-toggle" id="langToggle2" onclick="toggleLang()" title="Switch language">ES</button>
       <label for="themeToggle2" class="themeToggle st-sunMoonThemeToggleBtn">
         <input type="checkbox" id="themeToggle2" class="themeToggleInput"/>
         <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" stroke="none">
@@ -701,22 +711,22 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
   <div class="app-body">
     <div id="loading">
       <div class="ld-brand">Come<b>RD</b></div>
-      <div class="ld-sub">Descubre lo mejor de República Dominicana</div>
+      <div class="ld-sub" data-i18n="ldSub">Descubre lo mejor de República Dominicana</div>
       <div class="ld-bar"><div class="ld-fill"></div></div>
-      <div style="font-size:.74rem;color:var(--ink3)" id="loadMsg">Obteniendo tu ubicación...</div>
+      <div style="font-size:.74rem;color:var(--ink3)" id="loadMsg" data-i18n="locating">Obteniendo tu ubicación...</div>
     </div>
 
     <div class="layout">
       <aside class="sidebar" id="sidebar">
         <div class="search-wrap">
           <span class="s-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
-          <input id="searchInput" type="text" placeholder="Buscar restaurante, cocina, barrio..." oninput="debounceFilter()"/>
+          <input id="searchInput" type="text" placeholder="Buscar restaurante, cocina, barrio..." data-i18n-placeholder="searchPlaceholder" oninput="debounceFilter()"/>
         </div>
         <div id="mob-map-widget">
           <div class="map-ctrl-bar">
             <div class="map-ctrl-left">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              Mapa
+              <span data-i18n="mapLabel">Mapa</span>
             </div>
             <div class="map-ctrl-right">
               <!-- Normal: collapse to 220px -->
@@ -744,9 +754,9 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
           <div class="map-box" id="mapBox">
             <div id="map"></div>
             <div class="map-legend">
-              <div class="leg-row"><div class="leg-dot" style="background:#9a7418"></div>Gama Alta</div>
-              <div class="leg-row"><div class="leg-dot" style="background:#b52828"></div>Gama Media</div>
-              <div class="leg-row"><div class="leg-dot" style="background:#246e42"></div>Accesible</div>
+              <div class="leg-row"><div class="leg-dot" style="background:#9a7418"></div><span data-i18n="legAlta">Gama Alta</span></div>
+              <div class="leg-row"><div class="leg-dot" style="background:#b52828"></div><span data-i18n="legMedia">Gama Media</span></div>
+              <div class="leg-row"><div class="leg-dot" style="background:#246e42"></div><span data-i18n="legAcc">Accesible</span></div>
             </div>
             <!-- Floating controls shown only in fullscreen -->
             <div class="map-fs-controls" id="mapFsControls">
@@ -755,13 +765,13 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
                   <polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/>
                   <line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/>
                 </svg>
-                <span>Normal</span>
+                <span data-i18n="fsNormal">Normal</span>
               </button>
               <button class="map-fs-btn map-fs-close" onclick="setMapState('closed')" title="Cerrar" aria-label="Cerrar mapa">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                   <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                 </svg>
-                <span>Cerrar</span>
+                <span data-i18n="fsClose">Cerrar</span>
               </button>
             </div>
           </div>
@@ -776,48 +786,48 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
         </div>
         <div class="cat-scroll" id="catsEl"></div>
         <div class="filter-bar">
-          <div class="fb-left"><span>Filtros</span><span class="active-ct" id="activeCt">0</span></div>
+          <div class="fb-left"><span data-i18n="filters">Filtros</span><span class="active-ct" id="activeCt">0</span></div>
           <div style="display:flex;gap:.3rem;align-items:center;flex-wrap:wrap">
             <div class="sort-row" id="sortRow">
-              <button class="sort-btn active" data-sort="gama" onclick="setSort(this)">Mejor calidad</button>
-              <button class="sort-btn" data-sort="dist" onclick="setSort(this)">Cercanos</button>
+              <button class="sort-btn active" data-sort="gama" onclick="setSort(this)" data-i18n="sortBest">Mejor calidad</button>
+              <button class="sort-btn" data-sort="dist" onclick="setSort(this)" data-i18n="sortNear">Cercanos</button>
               <button class="sort-btn" data-sort="az" onclick="setSort(this)">A-Z</button>
             </div>
-            <button class="ftoggle-btn" id="ftoggleBtn" onclick="toggleAdv()">+ Filtrar</button>
+            <button class="ftoggle-btn" id="ftoggleBtn" onclick="toggleAdv()" data-i18n="filterBtn">+ Filtrar</button>
           </div>
         </div>
         <div class="range-wrap">
-          <span class="range-label">&#128205; Radio</span>
+          <span class="range-label" data-i18n="radius">&#128205; Radio</span>
           <input type="range" id="radiusSlider" min="500" max="15000" step="500" value="2000"/>
           <span class="range-val" id="radiusVal">2 km</span>
         </div>
         <div class="adv closed" id="advFilters">
           <div class="adv-inner">
             <div class="frow">
-              <span class="fl">Gama</span>
+              <span class="fl" data-i18n="gamaLabel">Gama</span>
               <div class="chips" id="gamaChips">
-                <button class="chip active" data-val="Todos" onclick="setFilter('gama',this)">Todas</button>
-                <button class="chip ga" data-val="Alta" onclick="setFilter('gama',this)">Alta</button>
-                <button class="chip" data-val="Media" onclick="setFilter('gama',this)">Media</button>
-                <button class="chip gr" data-val="Accesible" onclick="setFilter('gama',this)">Accesible</button>
+                <button class="chip active" data-val="Todos" onclick="setFilter('gama',this)" data-i18n="chipAll">Todas</button>
+                <button class="chip ga" data-val="Alta" onclick="setFilter('gama',this)" data-i18n="chipAlta">Alta</button>
+                <button class="chip" data-val="Media" onclick="setFilter('gama',this)" data-i18n="chipMedia">Media</button>
+                <button class="chip gr" data-val="Accesible" onclick="setFilter('gama',this)" data-i18n="chipAcc">Accesible</button>
               </div>
             </div>
           </div>
         </div>
         <div class="results-bar">
-          <span class="rb-label"><span id="resultsCount">—</span> lugares</span>
+          <span class="rb-label"><span id="resultsCount">—</span> <span data-i18n="places">lugares</span></span>
           <span id="filterSummary"></span>
         </div>
         <div class="list" id="listEl">
-          <div class="msg"><div class="ico">&#128205;</div><h3>Sin lugares aún</h3><p>Acepta el permiso de geolocalización para ver los mejores lugares cerca de ti.</p></div>
+          <div class="msg"><div class="ico">&#128205;</div><h3 data-i18n="noPlaces">Sin lugares aún</h3><p data-i18n="noPlacesSub">Acepta el permiso de geolocalización para ver los mejores lugares cerca de ti.</p></div>
         </div>
       </aside>
       <div class="resize-handle" id="resizeHandle"></div>
       <div id="map-wrap">
         <div class="map-legend">
-          <div class="leg-row"><div class="leg-dot" style="background:#9a7418"></div>Gama Alta</div>
-          <div class="leg-row"><div class="leg-dot" style="background:#b52828"></div>Gama Media</div>
-          <div class="leg-row"><div class="leg-dot" style="background:#246e42"></div>Accesible</div>
+          <div class="leg-row"><div class="leg-dot" style="background:#9a7418"></div><span data-i18n="legAlta">Gama Alta</span></div>
+          <div class="leg-row"><div class="leg-dot" style="background:#b52828"></div><span data-i18n="legMedia">Gama Media</span></div>
+          <div class="leg-row"><div class="leg-dot" style="background:#246e42"></div><span data-i18n="legAcc">Accesible</span></div>
         </div>
       </div>
     </div><!-- /.layout -->
@@ -1193,7 +1203,7 @@ async function mergeLoad(lat, lng) {
         createMarker(entry);
         done++;
       });
-      document.getElementById('loadMsg').textContent=`Localizando... ${done}/${total}`;
+      document.getElementById('loadMsg').textContent=`${(typeof t==='function'?t('localizando'):'Localizando...')} ${done}/${total}`;
       requestAnimationFrame(()=>applyFilters());
       if (i+5<DB.length) await new Promise(res=>setTimeout(res,200));
     }
@@ -1228,7 +1238,8 @@ function applyFilters() {
 function renderList(items) {
   const list = document.getElementById('listEl');
   document.getElementById('resultsCount').textContent = items.length;
-  if(!items.length){list.innerHTML=`<div class="msg"><div class="ico">&#128269;</div><h3>Sin resultados</h3><p>Prueba con otra combinación de filtros.</p></div>`;return;}
+  const _t = (typeof t==='function')?t:k=>k;
+  if(!items.length){list.innerHTML=`<div class="msg"><div class="ico">&#128269;</div><h3>${_t('noResults')}</h3><p>${_t('noResultsSub')}</p></div>`;return;}
   list.innerHTML='';
   const frag=document.createDocumentFragment();
   items.forEach((r,i)=>{
@@ -1236,8 +1247,9 @@ function renderList(items) {
     card.className='card'; card.setAttribute('data-gama',r.gama||'');
     card.style.animationDelay=`${Math.min(i*15,280)}ms`;
     const gamaHtml=r.gama?`<span class="gama-tag gt-${r.gama.toLowerCase()}">${GAMA_LABEL[r.gama]}</span>`:'';
+    const catLabel = _t(r.cat)||r.cat;
     card.innerHTML=`<div class="card-top"><div class="card-name">${r.name}</div>${gamaHtml}</div>
-      <div class="card-meta"><span class="tag">${r.cat}</span>${r.cuisine?`<span class="tag">${r.cuisine}</span>`:''}<span class="card-dist">${formatDist(r.dist)}</span></div>
+      <div class="card-meta"><span class="tag">${catLabel}</span>${r.cuisine?`<span class="tag">${r.cuisine}</span>`:''}<span class="card-dist">${formatDist(r.dist)}</span></div>
       ${r.addr?`<div class="card-addr">${r.addr}</div>`:''}${r.phone?`<div class="card-phone">${r.phone}</div>`:''}
       ${r.desc?`<div class="card-desc">${r.desc}</div>`:''}${r.trend?`<div class="trend">&#9733; Tendencia</div>`:''}`;
     card.addEventListener('click',()=>focusRestaurant(r));
@@ -1278,9 +1290,10 @@ function buildPopupContent(r, imgIdx){
       `:''}
     </div>`:'';
 
+  const _t=(typeof t==='function')?t:k=>k;
   const igBtn=r.ig?`<a href="${r.ig}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:.35rem;font-size:.7rem;color:#c0392b;text-decoration:none;font-family:'Outfit',sans-serif;font-weight:500;">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
-    Instagram</a>`:'';
+    ${_t('instagram')}</a>`:'';
   const webBtn=r.web?`<a href="${r.web}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:.35rem;font-size:.7rem;color:#555;text-decoration:none;font-family:'Outfit',sans-serif;">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
     Sitio web</a>`:'';
@@ -1290,7 +1303,7 @@ function buildPopupContent(r, imgIdx){
   const navBtn=`<div class="popup-nav-wrap" style="position:relative;display:inline-flex;">
     <button class="popup-nav-btn" data-rid="${r.id}" style="display:inline-flex;align-items:center;gap:.35rem;font-size:.7rem;color:#555;font-family:'Outfit',sans-serif;font-weight:500;background:none;border:none;cursor:pointer;padding:0;">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-      Cómo llegar ▾</button>
+      ${_t('howToGet')} ▾</button>
     <div class="popup-nav-dd" data-rid="${r.id}" style="display:none;position:absolute;bottom:calc(100% + 6px);right:0;background:#fff;border:1px solid #e0e0de;box-shadow:0 4px 16px rgba(0,0,0,.13);min-width:160px;z-index:9999;border-radius:2px;overflow:hidden;">
       <a href="${gmUrl}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:.6rem;padding:.6rem .8rem;font-size:.72rem;color:#222;text-decoration:none;font-family:'Outfit',sans-serif;border-bottom:1px solid #f0f0ee;font-weight:500;">
         <svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -1529,23 +1542,26 @@ function focusFeatured(){
 
 function buildCategories(){
   const el=document.getElementById('catsEl');
+  el.innerHTML='';
   el.addEventListener('wheel',function(e){if(e.deltaY!==0){e.preventDefault();el.scrollLeft+=e.deltaY*1.5;}},{passive:false});
+  const _t=(typeof t==='function')?t:k=>k;
   CATS.forEach(cat=>{
     const btn=document.createElement('button');
-    btn.className='cat-btn'+(cat==='Todos'?' active':'');
-    btn.dataset.cat=cat; btn.textContent=cat;
+    btn.className='cat-btn'+(cat===activeFilters.cat?' active':'');
+    btn.dataset.cat=cat; btn.textContent=_t(cat)||cat;
     btn.addEventListener('click',()=>{
       window._catBtns.forEach(b=>b.classList.remove('active'));
       btn.classList.add('active'); activeFilters.cat=cat; applyFilters();
     });
     el.appendChild(btn);
+    window._catBtns=Array.from(el.querySelectorAll('.cat-btn'));
   });
 }
 
 function setFilter(type,btn){window._gamaChips.forEach(b=>b.classList.remove('active'));btn.classList.add('active');activeFilters[type]=btn.dataset.val;applyFilters();}
 function setSort(btn){window._sortBtns.forEach(b=>b.classList.remove('active'));btn.classList.add('active');activeFilters.sort=btn.dataset.sort;applyFilters();}
-function toggleAdv(){const el=document.getElementById('advFilters');const btn=document.getElementById('ftoggleBtn');const open=el.classList.contains('open');el.classList.toggle('open',!open);el.classList.toggle('closed',open);btn.textContent=open?'+ Filtrar':'- Cerrar';btn.classList.toggle('is-open',!open);}
-function updateBadges(cat,gama){let n=0;if(cat!=='Todos')n++;if(gama!=='Todos')n++;const el=document.getElementById('activeCt');el.textContent=n;el.classList.toggle('on',n>0);const parts=[];if(cat!=='Todos')parts.push(cat);if(gama!=='Todos')parts.push(GAMA_LABEL[gama]);document.getElementById('filterSummary').textContent=parts.join(' · ');}
+function toggleAdv(){const _t=(typeof t==='function')?t:k=>k;const el=document.getElementById('advFilters');const btn=document.getElementById('ftoggleBtn');const open=el.classList.contains('open');el.classList.toggle('open',!open);el.classList.toggle('closed',open);btn.textContent=open?_t('filterBtn'):_t('filterBtnOpen');btn.classList.toggle('is-open',!open);}
+function updateBadges(cat,gama){const _t=(typeof t==='function')?t:k=>k;let n=0;if(cat!=='Todos')n++;if(gama!=='Todos')n++;const el=document.getElementById('activeCt');el.textContent=n;el.classList.toggle('on',n>0);const parts=[];if(cat!=='Todos')parts.push(_t(cat)||cat);if(gama!=='Todos')parts.push(GAMA_LABEL[gama]);document.getElementById('filterSummary').textContent=parts.join(' · ');}
 function haversine(la1,lo1,la2,lo2){const R=6371000,r=Math.PI/180,dLat=(la2-la1)*r,dLon=(lo2-lo1)*r;const a=Math.sin(dLat/2)**2+Math.cos(la1*r)*Math.cos(la2*r)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
 function formatDist(m){return m<1000?`${Math.round(m)} m`:`${(m/1000).toFixed(1)} km`;}
 function hideLoading(){document.getElementById('loading').classList.add('hidden');}
@@ -1624,6 +1640,192 @@ function hideLoading(){document.getElementById('loading').classList.add('hidden'
 })();
 
 /* ══════════════════════════════════════
+   I18N — ES / EN
+══════════════════════════════════════ */
+(function(){
+  const T = {
+    es: {
+      tagline:'Descubre lo mejor · República Dominicana',
+      exploreMap:'Explorar en el mapa →',
+      backHome:'← Inicio',
+      seeRestaurants:'Ver restaurantes',
+      eyebrow:'Santo Domingo · República Dominicana',
+      heroSub:'¿Sin saber dónde comer? Problema resuelto.',
+      dirTitle:'Directorio · Actualizado',
+      statRests:'Restaurantes',
+      statAlta:'Gama Alta',
+      statMedia:'Gama Media',
+      statAcc:'Accesible',
+      statCats:'Categorías',
+      secLabel:'Los lugares',
+      secTitle:'Restaurantes seleccionados',
+      lpRestCount:'lugares',
+      ctaH2:'¿Listo para encontrar<br/>tu próxima experiencia?',
+      ctaP:'Activa tu ubicación y descubre qué hay cerca de ti ahora mismo.',
+      footNote:'Sin publicidad · Sin registro · Siempre gratis',
+      ldSub:'Descubre lo mejor de República Dominicana',
+      locating:'Obteniendo tu ubicación...',
+      searchPlaceholder:'Buscar restaurante, cocina, barrio...',
+      mapLabel:'Mapa',
+      legAlta:'Gama Alta',
+      legMedia:'Gama Media',
+      legAcc:'Accesible',
+      fsNormal:'Normal',
+      fsClose:'Cerrar',
+      filters:'Filtros',
+      sortBest:'Mejor calidad',
+      sortNear:'Cercanos',
+      filterBtn:'+ Filtrar',
+      filterBtnOpen:'- Cerrar',
+      radius:'📍 Radio',
+      gamaLabel:'Gama',
+      chipAll:'Todas',
+      chipAlta:'Alta',
+      chipMedia:'Media',
+      chipAcc:'Accesible',
+      places:'lugares',
+      noResults:'Sin resultados',
+      noResultsSub:'Prueba con otra combinación de filtros.',
+      noPlaces:'Sin lugares aún',
+      noPlacesSub:'Acepta el permiso de geolocalización para ver los mejores lugares cerca de ti.',
+      localizando:'Localizando...',
+      detecting:'Detectando...',
+      // popup
+      instagram:'Instagram',
+      howToGet:'Cómo llegar',
+      // categories
+      Todos:'Todos',Internacional:'Internacional',Italiana:'Italiana',Mexicana:'Mexicana',
+      Steakhouse:'Steakhouse',Café:'Café',Criolla:'Criolla',Caribeña:'Caribeña',
+      Española:'Española',Mediterránea:'Mediterránea',Argentina:'Argentina',
+      Brasileña:'Brasileña',Libanesa:'Libanesa','Street Food':'Street Food',
+      Heladería:'Heladería',
+      // gama labels
+      gamaAlta:'Gama Alta',gamaMedia:'Gama Media',gamaAccesible:'Accesible',
+    },
+    en: {
+      tagline:'Discover the best · Dominican Republic',
+      exploreMap:'Explore the map →',
+      backHome:'← Home',
+      seeRestaurants:'See restaurants',
+      eyebrow:'Santo Domingo · Dominican Republic',
+      heroSub:'No more guessing. Just good food.',
+      dirTitle:'Directory · Updated',
+      statRests:'Restaurants',
+      statAlta:'High-end',
+      statMedia:'Mid-range',
+      statAcc:'Budget',
+      statCats:'Categories',
+      secLabel:'The places',
+      secTitle:'Curated restaurants',
+      lpRestCount:'places',
+      ctaH2:'Ready to find your<br/>next great meal?',
+      ctaP:'Enable your location and discover what is near you right now.',
+      footNote:'No ads · No sign-up · Always free',
+      ldSub:'Discover the best of the Dominican Republic',
+      locating:'Getting your location...',
+      searchPlaceholder:'Search restaurant, cuisine, neighborhood...',
+      mapLabel:'Map',
+      legAlta:'High-end',
+      legMedia:'Mid-range',
+      legAcc:'Budget',
+      fsNormal:'Normal',
+      fsClose:'Close',
+      filters:'Filters',
+      sortBest:'Best quality',
+      sortNear:'Nearby',
+      filterBtn:'+ Filter',
+      filterBtnOpen:'- Close',
+      radius:'📍 Radius',
+      gamaLabel:'Tier',
+      chipAll:'All',
+      chipAlta:'High-end',
+      chipMedia:'Mid-range',
+      chipAcc:'Budget',
+      places:'places',
+      noResults:'No results',
+      noResultsSub:'Try a different filter combination.',
+      noPlaces:'No places yet',
+      noPlacesSub:'Allow location access to see the best places near you.',
+      localizando:'Locating...',
+      detecting:'Detecting...',
+      // popup
+      instagram:'Instagram',
+      howToGet:'Directions',
+      // categories
+      Todos:'All',Internacional:'International',Italiana:'Italian',Mexicana:'Mexican',
+      Steakhouse:'Steakhouse',Café:'Café',Criolla:'Dominican',Caribeña:'Caribbean',
+      Española:'Spanish',Mediterránea:'Mediterranean',Argentina:'Argentine',
+      Brasileña:'Brazilian',Libanesa:'Lebanese','Street Food':'Street Food',
+      Heladería:'Ice Cream',
+      // gama labels
+      gamaAlta:'High-end',gamaMedia:'Mid-range',gamaAccesible:'Budget',
+    }
+  };
+
+  let lang = localStorage.getItem('lang') || 'es';
+
+  function t(key){ return T[lang][key] || T['es'][key] || key; }
+  window.t = t;
+  window.getLang = ()=>lang;
+
+  function applyLang(){
+    // Static data-i18n nodes
+    document.querySelectorAll('[data-i18n]').forEach(el=>{
+      const key = el.dataset.i18n;
+      if(key==='ctaH2'){ el.innerHTML = t(key); return; }
+      el.textContent = t(key);
+    });
+    // Placeholders
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{
+      el.placeholder = t(el.dataset.i18nPlaceholder);
+    });
+    // Lang toggle buttons label (show the OTHER language = what you'll switch TO)
+    const nextLang = lang==='es'?'EN':'ES';
+    document.querySelectorAll('.lang-toggle').forEach(b=>b.textContent=nextLang);
+    // GAMA_LABEL sync (used in card rendering and badges)
+    if(lang==='en'){
+      GAMA_LABEL.Alta='High-end'; GAMA_LABEL.Media='Mid-range'; GAMA_LABEL.Accesible='Budget';
+    } else {
+      GAMA_LABEL.Alta='Gama Alta'; GAMA_LABEL.Media='Gama Media'; GAMA_LABEL.Accesible='Accesible';
+    }
+    // Re-render category pills with translated names
+    if(typeof buildCategories==='function' && document.getElementById('catsEl').children.length){
+      buildCategories();
+    }
+    // Re-render list if loaded
+    if(typeof applyFilters==='function' && allRestaurants && allRestaurants.length){
+      applyFilters();
+    }
+    // lpRestCount suffix
+    const lpEl = document.getElementById('lpRestCount');
+    if(lpEl){ const n=lpEl.textContent.split(' ')[0]; lpEl.textContent=`${n} ${t('lpRestCount')}`; }
+    // Re-render landing grid if available
+    if(typeof renderLanding==='function') renderLanding();
+    // Detecting label
+    const city = document.getElementById('cityName');
+    if(city && city.textContent===T['es'].detecting || city && city.textContent===T['en'].detecting){
+      city.textContent = t('detecting');
+    }
+    // loadMsg if still visible
+    const lm = document.getElementById('loadMsg');
+    if(lm && (lm.textContent===T['es'].locating || lm.textContent===T['en'].locating)){
+      lm.textContent = t('locating');
+    }
+  }
+
+  window.toggleLang = function(){
+    lang = lang==='es'?'en':'es';
+    localStorage.setItem('lang',lang);
+    applyLang();
+  };
+
+  // Expose t() early so renderList / buildPopupContent can use it
+  window.addEventListener('DOMContentLoaded', applyLang);
+  // Also apply immediately (script runs after body parse)
+  applyLang();
+})();
+
+/* ══════════════════════════════════════
    SIDEBAR RESIZE
 ══════════════════════════════════════ */
 (function(){
@@ -1639,34 +1841,43 @@ function hideLoading(){document.getElementById('loading').classList.add('hidden'
 
 (function(){
   const GAMA_CLASS = {Alta:'lp-rc-ga', Media:'lp-rc-gm', Accesible:'lp-rc-gac'};
-  const GAMA_LBL   = {Alta:'Gama Alta', Media:'Gama Media', Accesible:'Accesible'};
 
-  // Counters
-  const alta  = DB.filter(r=>r.gama==='Alta').length;
-  const media = DB.filter(r=>r.gama==='Media').length;
-  const acc   = DB.filter(r=>r.gama==='Accesible').length;
-  const cats  = new Set(DB.map(r=>r.cat)).size;
-  document.getElementById('c4total').textContent = DB.length;
-  document.getElementById('c4alta').textContent  = alta;
-  document.getElementById('c4media').textContent = media;
-  document.getElementById('c4acc').textContent   = acc;
-  document.getElementById('c4cats').textContent  = cats;
-  const lpRestCount = document.getElementById('lpRestCount');
-  if (lpRestCount) lpRestCount.textContent = DB.length + ' lugares';
+  function renderLanding(){
+    const _t=(typeof t==='function')?t:k=>k;
+    const GAMA_LBL = {Alta:_t('gamaAlta'), Media:_t('gamaMedia'), Accesible:_t('gamaAccesible')};
 
-  // Restaurant grid
-  const grid = document.getElementById('lpRestGrid');
-  if (!grid) return;
-  const order = {Alta:0, Media:1, Accesible:2};
-  [...DB].sort((a,b) => order[a.gama] - order[b.gama] || a.name.localeCompare(b.name))
-    .forEach(r => {
-      const c = document.createElement('div');
-      c.className = 'lp-rest-card';
-      c.dataset.gama = r.gama;
-      c.innerHTML = `<div class="lp-rc-gama ${GAMA_CLASS[r.gama]}">${GAMA_LBL[r.gama]}</div><div class="lp-rc-name">${r.name}</div><div class="lp-rc-cat">${r.cat} · ${r.cuisine}</div>`;
-      c.addEventListener('click', switchToApp);
-      grid.appendChild(c);
-    });
+    // Counters
+    const alta  = DB.filter(r=>r.gama==='Alta').length;
+    const media = DB.filter(r=>r.gama==='Media').length;
+    const acc   = DB.filter(r=>r.gama==='Accesible').length;
+    const cats  = new Set(DB.map(r=>r.cat)).size;
+    document.getElementById('c4total').textContent = DB.length;
+    document.getElementById('c4alta').textContent  = alta;
+    document.getElementById('c4media').textContent = media;
+    document.getElementById('c4acc').textContent   = acc;
+    document.getElementById('c4cats').textContent  = cats;
+    const lpRestCount = document.getElementById('lpRestCount');
+    if (lpRestCount) lpRestCount.textContent = DB.length + ' ' + _t('lpRestCount');
+
+    // Restaurant grid
+    const grid = document.getElementById('lpRestGrid');
+    if (!grid) return;
+    grid.innerHTML='';
+    const order = {Alta:0, Media:1, Accesible:2};
+    [...DB].sort((a,b) => order[a.gama] - order[b.gama] || a.name.localeCompare(b.name))
+      .forEach(r => {
+        const c = document.createElement('div');
+        c.className = 'lp-rest-card';
+        c.dataset.gama = r.gama;
+        const catLabel = _t(r.cat)||r.cat;
+        c.innerHTML = `<div class="lp-rc-gama ${GAMA_CLASS[r.gama]}">${GAMA_LBL[r.gama]}</div><div class="lp-rc-name">${r.name}</div><div class="lp-rc-cat">${catLabel} · ${r.cuisine}</div>`;
+        c.addEventListener('click', switchToApp);
+        grid.appendChild(c);
+      });
+  }
+
+  renderLanding();
+  window.renderLanding = renderLanding;
 })();
 </script>
 </body>
