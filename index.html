@@ -845,6 +845,10 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
                 <button class="chip gr" data-val="Accesible" onclick="setFilter('gama',this)" data-i18n="chipAcc">Accesible</button>
               </div>
             </div>
+            <div class="frow" style="margin-top:.5rem">
+              <span class="fl" data-i18n="catLabel">Categoría</span>
+              <div class="chips" id="catChips" style="flex-wrap:wrap;gap:.3rem"></div>
+            </div>
           </div>
         </div>
         <div class="results-bar">
@@ -1582,17 +1586,35 @@ function buildCategories(){
   el.innerHTML='';
   el.addEventListener('wheel',function(e){if(e.deltaY!==0){e.preventDefault();el.scrollLeft+=e.deltaY*1.5;}},{passive:false});
   const _t=(typeof t==='function')?t:k=>k;
+  const catChipsEl=document.getElementById('catChips');
+  if(catChipsEl) catChipsEl.innerHTML='';
   CATS.forEach(cat=>{
+    const label=_t(cat)||cat;
+    // Top scroll pill
     const btn=document.createElement('button');
     btn.className='cat-btn'+(cat===activeFilters.cat?' active':'');
-    btn.dataset.cat=cat; btn.textContent=_t(cat)||cat;
-    btn.addEventListener('click',()=>{
-      window._catBtns.forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active'); activeFilters.cat=cat; if(cat!=='Todos')trackEvent('filter_category',{category:cat}); applyFilters();
-    });
+    btn.dataset.cat=cat; btn.textContent=label;
+    btn.addEventListener('click',()=>selectCat(cat));
     el.appendChild(btn);
-    window._catBtns=Array.from(el.querySelectorAll('.cat-btn'));
+    // Chip inside adv filters
+    if(catChipsEl){
+      const chip=document.createElement('button');
+      chip.className='chip'+(cat===activeFilters.cat?' active':'');
+      chip.dataset.cat=cat; chip.textContent=label;
+      chip.addEventListener('click',()=>selectCat(cat));
+      catChipsEl.appendChild(chip);
+    }
   });
+  window._catBtns=Array.from(el.querySelectorAll('.cat-btn'));
+  window._catChipBtns=catChipsEl?Array.from(catChipsEl.querySelectorAll('.chip')):[];
+}
+
+function selectCat(cat){
+  if(window._catBtns) window._catBtns.forEach(b=>b.classList.toggle('active',b.dataset.cat===cat));
+  if(window._catChipBtns) window._catChipBtns.forEach(b=>b.classList.toggle('active',b.dataset.cat===cat));
+  activeFilters.cat=cat;
+  if(cat!=='Todos') trackEvent('filter_category',{category:cat});
+  applyFilters();
 }
 
 function setFilter(type,btn){window._gamaChips.forEach(b=>b.classList.remove('active'));btn.classList.add('active');activeFilters[type]=btn.dataset.val;if(btn.dataset.val!=='Todos')trackEvent('filter_gama',{gama:btn.dataset.val});applyFilters();}
@@ -1716,6 +1738,7 @@ function hideLoading(){document.getElementById('loading').classList.add('hidden'
       filterBtnOpen:'- Cerrar',
       radius:'📍 Radio',
       gamaLabel:'Gama',
+      catLabel:'Categoría',
       chipAll:'Todas',
       chipAlta:'Alta',
       chipMedia:'Media',
@@ -1774,6 +1797,7 @@ function hideLoading(){document.getElementById('loading').classList.add('hidden'
       filterBtnOpen:'- Close',
       radius:'📍 Radius',
       gamaLabel:'Tier',
+      catLabel:'Category',
       chipAll:'All',
       chipAlta:'High-end',
       chipMedia:'Mid-range',
