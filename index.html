@@ -223,6 +223,7 @@ header{
 
 /* Advanced filters */
 .adv{overflow:hidden;transition:max-height .3s ease;border-bottom:1px solid var(--border);flex-shrink:0}
+.adv-inline{padding:.5rem .9rem .6rem;border-bottom:1px solid var(--border);flex-shrink:0}
 .adv.open{max-height:90px}.adv.closed{max-height:0}
 .adv-inner{padding:.55rem .7rem;display:flex;flex-direction:column;gap:.45rem}
 .frow{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
@@ -826,7 +827,6 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
               <button class="sort-btn" data-sort="dist" onclick="setSort(this)" data-i18n="sortNear">Cercanos</button>
               <button class="sort-btn" data-sort="az" onclick="setSort(this)">A-Z</button>
             </div>
-            <button class="ftoggle-btn" id="ftoggleBtn" onclick="toggleAdv()" data-i18n="filterBtn">+ Filtrar</button>
           </div>
         </div>
         <div class="range-wrap">
@@ -834,20 +834,14 @@ html.dark .ftoggle-btn.is-open{color:var(--red);border-color:var(--red)}
           <input type="range" id="radiusSlider" min="500" max="15000" step="500" value="2000"/>
           <span class="range-val" id="radiusVal">2 km</span>
         </div>
-        <div class="adv closed" id="advFilters">
-          <div class="adv-inner">
-            <div class="frow">
-              <span class="fl" data-i18n="gamaLabel">Gama</span>
-              <div class="chips" id="gamaChips">
-                <button class="chip active" data-val="Todos" onclick="setFilter('gama',this)" data-i18n="chipAll">Todas</button>
-                <button class="chip ga" data-val="Alta" onclick="setFilter('gama',this)" data-i18n="chipAlta">Alta</button>
-                <button class="chip" data-val="Media" onclick="setFilter('gama',this)" data-i18n="chipMedia">Media</button>
-                <button class="chip gr" data-val="Accesible" onclick="setFilter('gama',this)" data-i18n="chipAcc">Accesible</button>
-              </div>
-            </div>
-            <div class="frow" style="margin-top:.5rem">
-              <span class="fl" data-i18n="catLabel">Categoría</span>
-              <div class="chips" id="catChips" style="flex-wrap:wrap;gap:.3rem"></div>
+        <div class="adv-inline">
+          <div class="frow">
+            <span class="fl" data-i18n="gamaLabel">Gama</span>
+            <div class="chips" id="gamaChips">
+              <button class="chip active" data-val="Todos" onclick="setFilter('gama',this)" data-i18n="chipAll">Todas</button>
+              <button class="chip ga" data-val="Alta" onclick="setFilter('gama',this)" data-i18n="chipAlta">Alta</button>
+              <button class="chip" data-val="Media" onclick="setFilter('gama',this)" data-i18n="chipMedia">Media</button>
+              <button class="chip gr" data-val="Accesible" onclick="setFilter('gama',this)" data-i18n="chipAcc">Accesible</button>
             </div>
           </div>
         </div>
@@ -1590,32 +1584,20 @@ function buildCategories(){
   el.innerHTML='';
   el.addEventListener('wheel',function(e){if(e.deltaY!==0){e.preventDefault();el.scrollLeft+=e.deltaY*1.5;}},{passive:false});
   const _t=(typeof t==='function')?t:k=>k;
-  const catChipsEl=document.getElementById('catChips');
-  if(catChipsEl) catChipsEl.innerHTML='';
   CATS.forEach(cat=>{
     const label=_t(cat)||cat;
-    // Top scroll pill
     const btn=document.createElement('button');
     btn.className='cat-btn'+(cat===activeFilters.cat?' active':'');
     btn.dataset.cat=cat; btn.textContent=label;
     btn.addEventListener('click',()=>selectCat(cat));
     el.appendChild(btn);
-    // Chip inside adv filters
-    if(catChipsEl){
-      const chip=document.createElement('button');
-      chip.className='chip'+(cat===activeFilters.cat?' active':'');
-      chip.dataset.cat=cat; chip.textContent=label;
-      chip.addEventListener('click',()=>selectCat(cat));
-      catChipsEl.appendChild(chip);
-    }
   });
   window._catBtns=Array.from(el.querySelectorAll('.cat-btn'));
-  window._catChipBtns=catChipsEl?Array.from(catChipsEl.querySelectorAll('.chip')):[];
+  window._catChipBtns=[];
 }
 
 function selectCat(cat){
   if(window._catBtns) window._catBtns.forEach(b=>b.classList.toggle('active',b.dataset.cat===cat));
-  if(window._catChipBtns) window._catChipBtns.forEach(b=>b.classList.toggle('active',b.dataset.cat===cat));
   activeFilters.cat=cat;
   if(cat!=='Todos') trackEvent('filter_category',{category:cat});
   applyFilters();
