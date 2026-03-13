@@ -1085,6 +1085,10 @@ setTimeout(() => {
 }, 10000);
 
 function bootMap() {
+  // Populate CATS from DB
+  const seen = new Set(['Todos']);
+  DB.forEach(r=>{ if(r.cat && !seen.has(r.cat)){ seen.add(r.cat); CATS.push(r.cat); } });
+
   buildCategories();
   window._sortBtns  = Array.from(document.querySelectorAll('#sortRow .sort-btn'));
   window._gamaChips = Array.from(document.querySelectorAll('#gamaChips .chip'));
