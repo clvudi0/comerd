@@ -1089,44 +1089,9 @@ function bootMap() {
   window._catBtns   = Array.from(document.querySelectorAll('.cat-btn'));
 
   function doGeo() {
-    if (!navigator.geolocation) { startDefault(); return; }
-    let _booted = false;
-
-    // Safety net: if geo takes more than 5s, start with default coords
-    const geoTimeout = setTimeout(() => {
-      if (!_booted) {
-        _booted = true;
-        document.getElementById('cityName').textContent = 'Santo Domingo';
-        startDefault();
-      }
-    }, 5000);
-
-    navigator.geolocation.watchPosition(
-      pos => {
-        userLat = pos.coords.latitude;
-        userLng = pos.coords.longitude;
-        if (!_booted) {
-          _booted = true;
-          clearTimeout(geoTimeout);
-          ensurePlaced(); initMap(userLat, userLng);
-          reverseGeocode(userLat, userLng);
-          mergeLoad(userLat, userLng);
-        } else if (window._userMarker) {
-          const p = {lat:userLat, lng:userLng};
-          window._userMarker.setPosition(p);
-          window.radiusCircle.setCenter(p);
-        }
-      },
-      () => {
-        if (!_booted) {
-          _booted = true;
-          clearTimeout(geoTimeout);
-          document.getElementById('cityName').textContent = 'Santo Domingo';
-          startDefault();
-        }
-      },
-      {enableHighAccuracy:true, timeout:8000, maximumAge:30000}
-    );
+    // Posición fija — siempre arranca desde estas coordenadas
+    document.getElementById('cityName').textContent = 'Santo Domingo';
+    startDefault();
   }
 
   if (_mapsApiReady) { doGeo(); }
