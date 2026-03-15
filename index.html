@@ -1198,8 +1198,11 @@ async function reverseGeocode(lat, lng) {
     geocoder.geocode({location:{lat,lng},language:'es'},(results,status)=>{
       if (status==='OK'&&results[0]){
         const comp = results[0].address_components;
-        const city = comp.find(c=>c.types.includes('locality')||c.types.includes('administrative_area_level_2'));
-        document.getElementById('cityName').textContent = city?city.long_name:'RD';
+        const city     = comp.find(c=>c.types.includes('locality')||c.types.includes('administrative_area_level_2'));
+        const province = comp.find(c=>c.types.includes('administrative_area_level_1'));
+        // Show city if available, otherwise province, otherwise RD
+        const label = city ? city.long_name : province ? province.long_name : 'RD';
+        document.getElementById('cityName').textContent = label;
       } else { document.getElementById('cityName').textContent='RD'; }
     });
   } catch { document.getElementById('cityName').textContent='RD'; }
