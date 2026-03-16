@@ -1194,15 +1194,13 @@ function initMap(lat, lng) {
 
 async function reverseGeocode(lat, lng) {
   try {
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({location:{lat,lng},language:'es'},(results,status)=>{
-      if (status==='OK'&&results[0]){
-        const comp = results[0].address_components;
-        const city = comp.find(c=>c.types.includes('locality')||c.types.includes('administrative_area_level_2'));
-        document.getElementById('cityName').textContent = city?city.long_name:'RD';
-      } else { document.getElementById('cityName').textContent='RD'; }
-    });
-  } catch { document.getElementById('cityName').textContent='RD'; }
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`,
+      {headers:{'User-Agent':'ComeRD/1.0'}});
+    const data = await res.json();
+    const a = data.address || {};
+    const label = a.city || a.town || a.village || a.county || a.state || 'RD';
+    document.getElementById('cityName').textContent = label;
+  } catch { document.getElementById('cityName').textContent = 'RD'; }
 }
 
 const GEO_CACHE_KEY = 'comeRD_geoCache_v1';
