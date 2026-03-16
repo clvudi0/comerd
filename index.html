@@ -1089,9 +1089,44 @@ function bootMap() {
   window._catBtns   = Array.from(document.querySelectorAll('.cat-btn'));
 
   function doGeo() {
-    // Posición fija — siempre arranca desde estas coordenadas
-    document.getElementById('cityName').textContent = 'Santo Domingo';
-    startDefault();
+    if (!navigator.geolocation) { startDefault(); return; }
+    let _booted = false;
+
+    // Safety net: if geo takes more than 5s, start with default coords
+    const geoTimeout = setTimeout(() => {
+      if (!_booted) {
+        _booted = true;
+        document.getElementById('cityName').textContent = 'Santo Domingo';
+        startDefault();
+      }
+    }, 5000);
+
+    navigator.geolocation.watchPosition(
+      pos => {
+        userLat = pos.coords.latitude;
+        userLng = pos.coords.longitude;
+        if (!_booted) {
+          _booted = true;
+          clearTimeout(geoTimeout);
+          ensurePlaced(); initMap(userLat, userLng);
+          reverseGeocode(userLat, userLng);
+          mergeLoad(userLat, userLng);
+        } else if (window._userMarker) {
+          const p = {lat:userLat, lng:userLng};
+          window._userMarker.setPosition(p);
+          window.radiusCircle.setCenter(p);
+        }
+      },
+      () => {
+        if (!_booted) {
+          _booted = true;
+          clearTimeout(geoTimeout);
+          document.getElementById('cityName').textContent = 'Santo Domingo';
+          startDefault();
+        }
+      },
+      {enableHighAccuracy:true, timeout:8000, maximumAge:30000}
+    );
   }
 
   if (_mapsApiReady) { doGeo(); }
@@ -1105,7 +1140,7 @@ function startDefault() { ensurePlaced(); initMap(userLat, userLng); mergeLoad(u
 ══════════════════════════════════════ */
 let map, allRestaurants = [];
 const markerMap = new Map();
-let userLat = 18.485965611313738, userLng = -69.94833400434689;
+let userLat = 18.4741, userLng = -69.9307;
 let activeFilters = {cat:'Todos', gama:'Todos', sort:'gama'};
 
 function initMap(lat, lng) {
@@ -1163,11 +1198,8 @@ async function reverseGeocode(lat, lng) {
     geocoder.geocode({location:{lat,lng},language:'es'},(results,status)=>{
       if (status==='OK'&&results[0]){
         const comp = results[0].address_components;
-        const city     = comp.find(c=>c.types.includes('locality')||c.types.includes('administrative_area_level_2'));
-        const province = comp.find(c=>c.types.includes('administrative_area_level_1'));
-        // Show city if available, otherwise province, otherwise RD
-        const label = city ? city.long_name : province ? province.long_name : 'RD';
-        document.getElementById('cityName').textContent = label;
+        const city = comp.find(c=>c.types.includes('locality')||c.types.includes('administrative_area_level_2'));
+        document.getElementById('cityName').textContent = city?city.long_name:'RD';
       } else { document.getElementById('cityName').textContent='RD'; }
     });
   } catch { document.getElementById('cityName').textContent='RD'; }
