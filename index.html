@@ -1174,6 +1174,7 @@ function initMap(lat, lng) {
     const us = dotRadiusForZoom(z);
     if (window._userMarker) window._userMarker.setIcon({path:google.maps.SymbolPath.CIRCLE,scale:us+1,fillColor:'#b52828',fillOpacity:1,strokeColor:'#fff',strokeWeight:3});
     markerMap.forEach(m => m.setIcon(markerIcon(m._color, m===_activeMarker)));
+    updateLabelsVisibility();
   });
   (function(){
     const slider = document.getElementById('radiusSlider');
@@ -1299,6 +1300,12 @@ function syncMap(visible){
   if(!map)return;
   const ids=new Set(visible.map(r=>r.id));
   markerMap.forEach((m,id)=>m.setVisible(ids.has(id)));
+  const z = map.getZoom();
+  const showLabels = z >= LABEL_ZOOM_THRESHOLD;
+  labelMap.forEach((lbl,id)=>{
+    if(!ids.has(id) || !showLabels) lbl.hide();
+    else lbl.show();
+  });
 }
 
 function dotRadiusForZoom(z){if(z<=11)return 2;if(z>=17)return 10;return 2+Math.round((z-11)*(8/6));}
@@ -1528,6 +1535,70 @@ function _openPopup(r, iw, m){
   }
 }
 
+/* ── Restaurant Name Label Overlay ── */
+const labelMap = new Map();
+const LABEL_ZOOM_THRESHOLD = 16;
+
+class RestaurantLabel extends google.maps.OverlayView {
+  constructor(position, name, color, mapInstance) {
+    super();
+    this._position = position;
+    this._name = name;
+    this._color = color;
+    this._div = null;
+    this._visible = false;
+    this.setMap(mapInstance);
+  }
+  onAdd() {
+    const div = document.createElement('div');
+    div.style.cssText = 'position:absolute;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .25s ease;font-family:"Outfit",sans-serif;font-size:11px;font-weight:500;letter-spacing:.02em;line-height:1;padding:4px 8px;border-radius:3px;transform:translate(-50%,-100%);margin-top:-14px;';
+    // Use gama color for background tint
+    const gc = this._color;
+    const isDark = document.documentElement.classList.contains('dark');
+    if (isDark) {
+      div.style.background = 'rgba(30,30,30,.92)';
+      div.style.color = '#f0ebe0';
+      div.style.border = '1px solid ' + gc;
+      div.style.boxShadow = '0 2px 8px rgba(0,0,0,.5)';
+    } else {
+      div.style.background = 'rgba(255,255,255,.95)';
+      div.style.color = '#111';
+      div.style.border = '1px solid ' + gc;
+      div.style.boxShadow = '0 1px 6px rgba(0,0,0,.12)';
+    }
+    // Tiny triangle pointer
+    const arrow = document.createElement('div');
+    arrow.style.cssText = 'position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid ' + gc + ';';
+    div.appendChild(document.createTextNode(this._name));
+    div.appendChild(arrow);
+    this._div = div;
+    this.getPanes().floatPane.appendChild(div);
+  }
+  draw() {
+    if (!this._div) return;
+    const proj = this.getProjection();
+    if (!proj) return;
+    const pos = proj.fromLatLngToDivPixel(this._position);
+    if (pos) {
+      this._div.style.left = pos.x + 'px';
+      this._div.style.top = pos.y + 'px';
+    }
+  }
+  onRemove() {
+    if (this._div) { this._div.parentNode.removeChild(this._div); this._div = null; }
+  }
+  show() { if (this._div && !this._visible) { this._div.style.opacity = '1'; this._visible = true; } }
+  hide() { if (this._div && this._visible) { this._div.style.opacity = '0'; this._visible = false; } }
+  setVisibleIfZoom(visible) { visible ? this.show() : this.hide(); }
+}
+
+function updateLabelsVisibility() {
+  if (!map) return;
+  const z = map.getZoom();
+  const show = z >= LABEL_ZOOM_THRESHOLD;
+  labelMap.forEach(lbl => lbl.setVisibleIfZoom(show));
+}
+
 function createMarker(r){
   const color=GAMA_COLOR[r.gama]||GAMA_COLOR['Accesible'];
   const m=new google.maps.Marker({position:{lat:r.lat,lng:r.lng},map,icon:markerIcon(color,false),title:r.name});
@@ -1539,7 +1610,16 @@ function createMarker(r){
     const iw=new google.maps.InfoWindow({content:buildPopupContent(r,0),maxWidth:280});
     _openPopup(r,iw,m);
   });
-  markerMap.set(r.id,m); return m;
+  markerMap.set(r.id,m);
+  // Create floating name label
+  const lbl = new RestaurantLabel(
+    new google.maps.LatLng(r.lat, r.lng),
+    r.name, color, map
+  );
+  if (map.getZoom() < LABEL_ZOOM_THRESHOLD) lbl.hide();
+  else lbl.show();
+  labelMap.set(r.id, lbl);
+  return m;
 }
 
 function focusRestaurant(r){trackEvent('restaurant_open',{restaurant_name:r.name,restaurant_category:r.cat,restaurant_gama:r.gama||''});
